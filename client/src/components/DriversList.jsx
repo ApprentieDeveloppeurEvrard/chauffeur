@@ -71,6 +71,7 @@ export default function DriversList({ onBackToHome }) {
     const [serviceFilter, setServiceFilter] = useState('');
     const [availabilityFilter, setAvailabilityFilter] = useState('');
     const [ratingFilter, setRatingFilter] = useState('');
+    const [priceFilter, setPriceFilter] = useState('');
     const [filteredDrivers, setFilteredDrivers] = useState(drivers);
     const [showFilters, setShowFilters] = useState(false);
 
@@ -93,20 +94,34 @@ export default function DriversList({ onBackToHome }) {
     // Filter logic
     useEffect(() => {
         let filtered = drivers.filter(driver => {
-            const matchesSearch = driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                driver.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                driver.vehicle.toLowerCase().includes(searchTerm.toLowerCase());
+            // Search in multiple fields
+            const matchesSearch = searchTerm === '' || 
+                driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                driver.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                driver.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                driver.services.some(service => service.toLowerCase().includes(searchTerm.toLowerCase()));
             
             const matchesLocation = locationFilter === '' || driver.location.includes(locationFilter);
             const matchesService = serviceFilter === '' || driver.services.includes(serviceFilter);
             const matchesAvailability = availabilityFilter === '' || driver.availability.includes(availabilityFilter);
             const matchesRating = ratingFilter === '' || driver.rating >= parseFloat(ratingFilter);
             
-            return matchesSearch && matchesLocation && matchesService && matchesAvailability && matchesRating;
+            // Price filter logic
+            const matchesPrice = priceFilter === '' || (() => {
+                const driverPrice = parseInt(driver.price.replace(/[^\d]/g, ''));
+                switch(priceFilter) {
+                    case 'low': return driverPrice <= 15000;
+                    case 'medium': return driverPrice > 15000 && driverPrice <= 20000;
+                    case 'high': return driverPrice > 20000;
+                    default: return true;
+                }
+            })();
+            
+            return matchesSearch && matchesLocation && matchesService && matchesAvailability && matchesRating && matchesPrice;
         });
         
         setFilteredDrivers(filtered);
-    }, [searchTerm, locationFilter, serviceFilter, availabilityFilter, ratingFilter, drivers]);
+    }, [searchTerm, locationFilter, serviceFilter, availabilityFilter, ratingFilter, priceFilter, drivers]);
 
     // Get unique values for filter options
     const uniqueLocations = [...new Set(drivers.map(driver => driver.location))];
@@ -119,12 +134,128 @@ export default function DriversList({ onBackToHome }) {
         setServiceFilter('');
         setAvailabilityFilter('');
         setRatingFilter('');
+        setPriceFilter('');
     };
 
     return (
         <div className="relative z-10 max-w-7xl mx-auto p-6">
-            {/* Header with Logo and Search */}
-            <div className="mb-6">
+            {/* Desktop: Logo and Centered Filters */}
+            <div className="mb-6 hidden lg:flex flex-row gap-4 items-center max-w-6xl mx-auto">
+                {/* Logo à gauche */}
+                <button
+                    onClick={() => onBackToHome && onBackToHome()}
+                    className="hover:opacity-80 transition-opacity flex-shrink-0"
+                >
+                    <svg
+                        width="100"
+                        height="26"
+                        viewBox="0 0 155 40"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="m8.75 11.3 6.75 3.884 6.75-3.885M8.75 34.58v-7.755L2 22.939m27 0-6.75 3.885v7.754"
+                            stroke="#fff"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                    </svg>
+                </button>
+
+                {/* Filtres centrés */}
+                <div className="flex flex-row gap-3 items-center justify-center flex-1">
+                    {/* Search Bar */}
+                    <div className="relative">
+                        <svg className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Rechercher..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-8 pr-3 py-2 w-64 bg-white/10 border border-white/20 rounded-full text-white placeholder-slate-400 focus:outline-none focus:border-white/40 text-sm"
+                        />
+                    </div>
+
+                    {/* Location Filter */}
+                    <div className="dropdown">
+                        <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
+                            {locationFilter ? locationFilter.split(',')[0] : 'Ville'}
+                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
+                            <li><a onClick={() => setLocationFilter('')}>Toutes les villes</a></li>
+                            {uniqueLocations.map((location, index) => (
+                                <li key={index}><a onClick={() => setLocationFilter(location)}>{location.split(',')[0]}</a></li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Service Filter */}
+                    <div className="dropdown">
+                        <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
+                            {serviceFilter || 'Service'}
+                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
+                            <li><a onClick={() => setServiceFilter('')}>Tous les services</a></li>
+                            {uniqueServices.map((service, index) => (
+                                <li key={index}><a onClick={() => setServiceFilter(service)}>{service}</a></li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Rating Filter */}
+                    <div className="dropdown">
+                        <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
+                            {ratingFilter ? `${ratingFilter}+ étoiles` : 'Note'}
+                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
+                            <li><a onClick={() => setRatingFilter('')}>Toutes les notes</a></li>
+                            <li><a onClick={() => setRatingFilter('4.5')}>4.5+ étoiles</a></li>
+                            <li><a onClick={() => setRatingFilter('4.0')}>4.0+ étoiles</a></li>
+                            <li><a onClick={() => setRatingFilter('3.5')}>3.5+ étoiles</a></li>
+                        </ul>
+                    </div>
+
+                    {/* Price Filter */}
+                    <div className="dropdown">
+                        <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
+                            {priceFilter === 'low' ? 'Économique' : priceFilter === 'medium' ? 'Standard' : priceFilter === 'high' ? 'Premium' : 'Prix'}
+                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
+                            <li><a onClick={() => setPriceFilter('')}>Tous les prix</a></li>
+                            <li><a onClick={() => setPriceFilter('low')}>Économique (≤15k CFA)</a></li>
+                            <li><a onClick={() => setPriceFilter('medium')}>Standard (15k-20k CFA)</a></li>
+                            <li><a onClick={() => setPriceFilter('high')}>Premium (+20k CFA)</a></li>
+                        </ul>
+                    </div>
+
+                    {(searchTerm || locationFilter || serviceFilter || ratingFilter || priceFilter) && (
+                        <button
+                            onClick={clearFilters}
+                            className="px-3 py-2 text-xs text-slate-400 hover:text-white transition-colors"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Mobile: Header with Logo and Filter Toggle */}
+            <div className="mb-6 lg:hidden">
                 {/* Top row: Logo and Filter Toggle */}
                 <div className="flex items-center justify-between mb-4">
                     <button
@@ -148,23 +279,23 @@ export default function DriversList({ onBackToHome }) {
                         </svg>
                     </button>
 
-                    {/* Filter Toggle Button (Mobile) */}
+                    {/* Filter Toggle Button */}
                     <button
                         onClick={() => setShowFilters(!showFilters)}
-                        className="lg:hidden flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/15 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/15 transition-colors"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                         </svg>
                         Filtres
-                        {(locationFilter || serviceFilter || ratingFilter) && (
+                        {(locationFilter || serviceFilter || availabilityFilter || ratingFilter || priceFilter) && (
                             <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
                         )}
                     </button>
                 </div>
 
-                {/* Search Bar - Always visible */}
-                <div className="relative max-w-md mx-auto lg:max-w-lg">
+                {/* Search Bar - Always visible on mobile */}
+                <div className="relative max-w-md mx-auto mb-4">
                     <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -177,70 +308,9 @@ export default function DriversList({ onBackToHome }) {
                     />
                 </div>
 
-                {/* Filters Section */}
-                <div className={`mt-4 transition-all duration-300 overflow-hidden ${showFilters ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 lg:max-h-96 lg:opacity-100'}`}>
-                    {/* Desktop Filters */}
-                    <div className="hidden lg:flex items-center justify-center gap-3 flex-wrap">
-                        {/* Location Filter */}
-                        <div className="dropdown">
-                            <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
-                                {locationFilter ? locationFilter.split(',')[0] : 'Ville'}
-                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                            <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
-                                <li><a onClick={() => setLocationFilter('')}>Toutes les villes</a></li>
-                                {uniqueLocations.map((location, index) => (
-                                    <li key={index}><a onClick={() => setLocationFilter(location)}>{location.split(',')[0]}</a></li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {/* Service Filter */}
-                        <div className="dropdown">
-                            <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
-                                {serviceFilter || 'Service'}
-                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                            <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
-                                <li><a onClick={() => setServiceFilter('')}>Tous les services</a></li>
-                                {uniqueServices.map((service, index) => (
-                                    <li key={index}><a onClick={() => setServiceFilter(service)}>{service}</a></li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {/* Rating Filter */}
-                        <div className="dropdown">
-                            <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
-                                {ratingFilter ? `${ratingFilter}+ étoiles` : 'Note'}
-                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                </svg>
-                            </div>
-                            <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
-                                <li><a onClick={() => setRatingFilter('')}>Toutes les notes</a></li>
-                                <li><a onClick={() => setRatingFilter('4.5')}>4.5+ étoiles</a></li>
-                                <li><a onClick={() => setRatingFilter('4.0')}>4.0+ étoiles</a></li>
-                                <li><a onClick={() => setRatingFilter('3.5')}>3.5+ étoiles</a></li>
-                            </ul>
-                        </div>
-
-                        {(locationFilter || serviceFilter || ratingFilter) && (
-                            <button
-                                onClick={clearFilters}
-                                className="px-3 py-2 text-xs text-slate-400 hover:text-white transition-colors"
-                            >
-                                ✕ Effacer
-                            </button>
-                        )}
-                    </div>
-
-                    {/* Mobile Filters */}
-                    <div className="lg:hidden space-y-3 bg-white/5 rounded-2xl p-4 border border-white/10">
+                {/* Mobile Filters */}
+                <div className={`transition-all duration-300 overflow-hidden ${showFilters ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <div className="space-y-3 bg-white/5 rounded-2xl p-4 border border-white/10">
                         {/* Location Filter Mobile */}
                         <div>
                             <label className="block text-sm font-medium text-white mb-2">Ville</label>
@@ -290,8 +360,23 @@ export default function DriversList({ onBackToHome }) {
                             </select>
                         </div>
 
+                        {/* Price Filter Mobile */}
+                        <div>
+                            <label className="block text-sm font-medium text-white mb-2">Gamme de prix</label>
+                            <select
+                                value={priceFilter}
+                                onChange={(e) => setPriceFilter(e.target.value)}
+                                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
+                            >
+                                <option value="">Tous les prix</option>
+                                <option value="low" className="bg-slate-800">Économique (≤15k CFA)</option>
+                                <option value="medium" className="bg-slate-800">Standard (15k-20k CFA)</option>
+                                <option value="high" className="bg-slate-800">Premium (+20k CFA)</option>
+                            </select>
+                        </div>
+
                         {/* Clear Filters Button Mobile */}
-                        {(locationFilter || serviceFilter || ratingFilter) && (
+                        {(locationFilter || serviceFilter || availabilityFilter || ratingFilter || priceFilter) && (
                             <button
                                 onClick={clearFilters}
                                 className="w-full px-4 py-2 text-sm text-slate-300 hover:text-white border border-white/20 rounded-lg hover:bg-white/10 transition-colors"
