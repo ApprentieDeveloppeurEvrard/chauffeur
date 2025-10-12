@@ -1,10 +1,12 @@
 import { useState } from "react";
 
-export default function SignIn() {
+export default function SignIn({ onAuthSuccess }) {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -14,10 +16,23 @@ export default function SignIn() {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Sign in data:', formData);
-        // Add sign in logic here
+        setIsLoading(true);
+        setError('');
+        
+        // Simulation d'authentification
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Identifiants de test pour accéder au profil
+        if (formData.email === 'chauffeur@test.com' && formData.password === 'password123') {
+            console.log('Connexion réussie!');
+            onAuthSuccess && onAuthSuccess('driver'); // Indique que c'est un chauffeur
+        } else {
+            setError('Email ou mot de passe incorrect');
+        }
+        
+        setIsLoading(false);
     };
 
     return (
@@ -65,6 +80,20 @@ export default function SignIn() {
                         </div>
                     </div>
 
+                    {error && (
+                        <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 mt-4">
+                            <p className="text-red-300 text-sm text-center">{error}</p>
+                        </div>
+                    )}
+
+                    <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-3 mt-4">
+                        <p className="text-blue-300 text-xs text-center">
+                            <strong>Identifiants de test :</strong><br/>
+                            Email: chauffeur@test.com<br/>
+                            Mot de passe: password123
+                        </p>
+                    </div>
+
                     <div className="flex justify-between items-center pt-2">
                         <label className="flex items-center">
                             <input type="checkbox" className="mr-2 accent-white" />
@@ -75,9 +104,20 @@ export default function SignIn() {
                     
                     <button 
                         type="submit"
-                        className="w-full mt-6 bg-white hover:bg-slate-200 text-black transition-all active:scale-95 py-3 rounded-lg font-medium"
+                        disabled={isLoading}
+                        className="w-full mt-6 bg-white hover:bg-slate-200 text-black transition-all active:scale-95 py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Se connecter
+                        {isLoading ? (
+                            <>
+                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Connexion...
+                            </>
+                        ) : (
+                            'Se connecter'
+                        )}
                     </button>
                 </form>
                 

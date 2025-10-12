@@ -91,6 +91,22 @@ export default function DriversList({ onBackToHome }) {
         // Add contact logic here (phone, WhatsApp, etc.)
     };
 
+    const handleCallDriver = (driver) => {
+        console.log("Calling driver:", driver);
+        // Add call logic here
+        if (driver.phone) {
+            window.location.href = `tel:${driver.phone}`;
+        }
+    };
+
+    const handleSMSDriver = (driver) => {
+        console.log("Sending SMS to driver:", driver);
+        // Add SMS logic here
+        if (driver.phone) {
+            window.location.href = `sms:${driver.phone}`;
+        }
+    };
+
     // Filter logic
     useEffect(() => {
         let filtered = drivers.filter(driver => {
@@ -395,34 +411,28 @@ export default function DriversList({ onBackToHome }) {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
+            <div className="flex flex-wrap items-center justify-center gap-6">
                 {filteredDrivers.map((driver) => (
-                    <div key={driver.id} className="w-full max-w-sm bg-white/10 backdrop-blur-sm rounded-2xl pb-3 overflow-hidden border border-white/20 hover:bg-white/15 transition-all">
+                    <div key={driver.id} className="bg-slate-800/90 backdrop-blur-sm rounded-2xl pb-4 overflow-hidden border border-slate-600/50 hover:bg-slate-700/90 hover:border-slate-500/60 transition-all">
+                        {/* Image rectangulaire en haut */}
                         <div className="relative">
                             <img 
-                                className="w-full h-40 object-cover object-center" 
+                                className="w-64 h-52 object-cover object-top" 
                                 src={driver.avatar} 
                                 alt={driver.name} 
                             />
-                            {driver.verified && (
-                                <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
-                                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                </div>
-                            )}
                         </div>
                         
-                        <div className="flex flex-col items-center">
-                            <div className="flex items-center gap-2 mt-2">
-                                <p className="font-medium text-white">{driver.name}</p>
-                                {driver.verified && (
-                                    <span className="text-xs bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full border border-green-500/30">✓</span>
-                                )}
-                            </div>
+                        <div className="flex flex-col items-center px-4">
+                            {/* Nom du chauffeur */}
+                            <p className="font-medium mt-3 text-white text-center">{driver.name}</p>
+                            
+                            {/* Localisation et prix */}
+                            <p className="text-slate-300 text-sm text-center">{driver.location}</p>
+                            <p className="text-blue-300 text-sm font-medium mt-1">{driver.price}</p>
                             
                             {/* Rating */}
-                            <div className="flex items-center gap-1 mt-1">
+                            <div className="flex items-center gap-1 mt-2">
                                 <div className="flex text-yellow-400">
                                     {[...Array(5)].map((_, i) => (
                                         <svg key={i} className={`w-3 h-3 ${i < Math.floor(driver.rating) ? 'fill-current' : 'text-slate-600'}`} viewBox="0 0 20 20">
@@ -430,14 +440,11 @@ export default function DriversList({ onBackToHome }) {
                                         </svg>
                                     ))}
                                 </div>
-                                <span className="text-xs text-slate-300">{driver.rating}</span>
+                                <span className="text-xs text-slate-400">{driver.rating}</span>
                             </div>
                             
-                            <p className="text-slate-300 text-sm mt-1">{driver.location}</p>
-                            <p className="text-white text-sm font-medium mt-1">{driver.price}</p>
-                            
                             {/* Services */}
-                            <div className="flex gap-1 mt-1">
+                            <div className="flex gap-1 mt-2 flex-wrap justify-center">
                                 {driver.services.slice(0, 2).map((service, index) => (
                                     <span key={index} className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/30">
                                         {service}
@@ -445,18 +452,24 @@ export default function DriversList({ onBackToHome }) {
                                 ))}
                             </div>
                             
-                            <div className="flex flex-col sm:flex-row gap-2 mt-3 px-2">
-                                <button 
-                                    onClick={() => handleViewProfile(driver)}
-                                    className="border text-sm text-slate-300 border-white/30 px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition-colors flex-1"
-                                >
-                                    Voir profil
-                                </button>
+                            {/* Boutons d'action alignés */}
+                            <div className="flex gap-3 mt-5 items-center">
                                 <button 
                                     onClick={() => handleContactDriver(driver)}
-                                    className="text-sm text-black bg-white px-4 py-2 rounded-full hover:bg-slate-200 transition-colors flex items-center justify-center gap-1 flex-1"
+                                    className="border text-sm text-slate-300 border-slate-500/50 w-28 h-8 rounded-full flex items-center justify-center gap-1 hover:bg-slate-600/50 hover:text-white hover:border-slate-400 transition-colors"
                                 >
-                                    Contacter
+                                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="m7.107 11.684.31-.521-.736-.436-.309.522zm-2.28-.521.308.521.735-.435-.309-.522zm1.545.086a.297.297 0 0 1-.502 0l-.735.435a1.15 1.15 0 0 0 1.972 0zM5.267.854h1.708V0H5.267zm6.121 4.413v.57h.854v-.57zm-10.534.57v-.57H0v-.57zm-.854 0c0 .657 0 1.171.028 1.586.029.42.088.768.221 1.09l.79-.327c-.084-.2-.133-.446-.159-.82-.026-.38-.026-.86-.026-1.53zm3.731 3.838c-.715-.012-1.09-.058-1.383-.18l-.327.79c.459.19.98.232 1.695.244zM.249 8.513c.333.802.97 1.44 1.772 1.772l.327-.79a2.42 2.42 0 0 1-1.31-1.309zm11.14-2.677c0 .67-.001 1.15-.027 1.53-.026.374-.075.62-.158.82l.79.327c.133-.322.192-.67.22-1.09.028-.415.028-.93.028-1.587zM8.525 10.53c.715-.012 1.237-.054 1.695-.244l-.327-.79c-.293.122-.668.168-1.383.18zm2.678-2.343a2.42 2.42 0 0 1-1.31 1.31l.327.789a3.27 3.27 0 0 0 1.772-1.772zM6.975.854c.94 0 1.616 0 2.142.05.52.05.852.145 1.116.307l.446-.729C10.259.225 9.78.11 9.199.054 8.621 0 7.898 0 6.974 0zm5.267 4.413c0-.924 0-1.646-.054-2.223-.056-.583-.17-1.06-.428-1.48l-.728.446c.161.264.256.595.306 1.115.05.527.05 1.202.05 2.142zm-2.01-4.056c.326.2.6.473.8.799l.728-.447c-.27-.44-.64-.81-1.081-1.08zM5.268 0c-.924 0-1.646 0-2.223.054-.583.056-1.06.17-1.48.428l.446.729c.264-.162.595-.257 1.115-.306.527-.05 1.202-.05 2.142-.05zM.854 5.267c0-.94 0-1.615.05-2.142.05-.52.145-.851.307-1.115l-.729-.447c-.257.421-.372.898-.428 1.481C0 3.621 0 4.344 0 5.267zm.71-4.785A3.3 3.3 0 0 0 .482 1.563l.729.447c.2-.326.473-.6.799-.8zM5.56 10.728a6 6 0 0 0-.316-.503 1.3 1.3 0 0 0-.388-.368l-.43.739a.4.4 0 0 1 .128.131c.07.095.147.226.271.436zm-1.845-.199c.25.004.409.008.53.02a.45.45 0 0 1 .182.047l.429-.739a1.3 1.3 0 0 0-.518-.156c-.169-.019-.374-.022-.608-.026zm3.7.634c.124-.21.202-.34.271-.436a.4.4 0 0 1 .128-.131l-.43-.739a1.3 1.3 0 0 0-.388.368c-.099.135-.2.307-.316.502zM8.51 9.675c-.234.004-.439.007-.608.026-.178.02-.351.06-.518.156l.43.739a.45.45 0 0 1 .182-.046 6 6 0 0 1 .529-.20z" fill="currentColor"/>
+                                        <path d="M3.844 5.552h.005m2.268 0h.005m2.272 0H8.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <span>message</span>
+                                </button>
+                                
+                                <button 
+                                    onClick={() => handleViewProfile(driver)}
+                                    className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
+                                >
+                                    Voir profil
                                 </button>
                             </div>
                         </div>
@@ -618,43 +631,36 @@ export default function DriversList({ onBackToHome }) {
 
                             {/* Action Buttons */}
                             <div className="space-y-3">
-                                {/* Primary Action - Book */}
-                                <button 
-                                    onClick={() => handleBookDriver(selectedDriver)}
-                                    className="w-full bg-white text-black hover:bg-slate-200 border-none py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    Réserver maintenant
-                                </button>
                                 
-                                {/* Secondary Actions */}
-                                <div className="grid grid-cols-2 gap-3">
+                                {/* Contact Actions */}
+                                <div className="grid grid-cols-2 gap-3 mb-3">
                                     <button 
-                                        onClick={() => handleContactDriver(selectedDriver)}
+                                        onClick={() => handleCallDriver(selectedDriver)}
+                                        className="py-2.5 px-4 border border-white/30 text-white hover:bg-white/10 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                        Appeler
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={() => handleSMSDriver(selectedDriver)}
                                         className="py-2.5 px-4 border border-white/30 text-white hover:bg-white/10 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                         </svg>
-                                        Contacter
+                                        SMS
                                     </button>
-                                    
-                                    {/* Close Button for Desktop */}
-                                    <form method="dialog" className="hidden sm:block">
-                                        <button type="submit" className="w-full py-2.5 px-4 border border-white/30 text-white hover:bg-white/10 rounded-xl transition-colors text-sm">
-                                            Fermer
-                                        </button>
-                                    </form>
-                                    
-                                    {/* Close Button for Mobile */}
-                                    <form method="dialog" className="sm:hidden">
-                                        <button type="submit" className="w-full py-2.5 px-4 border border-white/30 text-white hover:bg-white/10 rounded-xl transition-colors text-sm">
-                                            Fermer
-                                        </button>
-                                    </form>
                                 </div>
+
+                                {/* Close Button */}
+                                <form method="dialog">
+                                    <button type="submit" className="w-full py-2.5 px-4 border border-white/30 text-white hover:bg-white/10 rounded-xl transition-colors text-sm">
+                                        Fermer
+                                    </button>
+                                </form>
                             </div>
                         </>
                     )}

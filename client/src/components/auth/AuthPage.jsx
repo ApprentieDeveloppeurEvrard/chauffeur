@@ -4,7 +4,7 @@ import SignUp from "./SignUp";
 import SignUpDriver from "./SignUpDriver";
 import SignUpClient from "./SignUpClient";
 
-export default function AuthPage({ onBackToHome }) {
+export default function AuthPage({ onBackToHome, onAuthSuccess }) {
     const [currentView, setCurrentView] = useState('signin'); // 'signin' or 'signup'
 
     return (
@@ -83,7 +83,7 @@ export default function AuthPage({ onBackToHome }) {
                     </div>
 
                     {/* Auth forms */}
-                    {currentView === 'signin' ? <SignIn /> : <SignUp />}
+                    {currentView === 'signin' ? <SignIn onAuthSuccess={onAuthSuccess} /> : <SignUp />}
                 </div>
             </div>
         </div>
