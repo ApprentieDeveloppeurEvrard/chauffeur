@@ -210,128 +210,184 @@ export default function DriversList({ onBackToHome }) {
                     </svg>
                 </button>
 
-                {/* Filtres centrés */}
-                <div className="flex flex-row gap-3 items-center justify-center flex-1">
-                    {/* Search Bar */}
-                    <div className="relative">
-                        <svg className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        <input
-                            type="text"
-                            placeholder="Rechercher..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-8 pr-3 py-2 w-64 bg-white/10 border border-white/20 rounded-full text-white placeholder-slate-400 focus:outline-none focus:border-white/40 text-sm"
-                        />
-                    </div>
+                 {/* Filtres centrés */}
+                 <div className="flex flex-row gap-4 items-center justify-center flex-1">
+                     {/* Search Bar */}
+                     <div className="relative">
+                         <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                         </svg>
+                         <input
+                             type="text"
+                             placeholder="Rechercher un chauffeur..."
+                             value={searchTerm}
+                             onChange={(e) => setSearchTerm(e.target.value)}
+                             className="pl-10 pr-4 py-3 w-72 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 focus:bg-white/15 transition-all"
+                         />
+                     </div>
 
-                    {/* Location Filter */}
-                    <div className="dropdown">
-                        <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
-                            {locationFilter ? locationFilter.split(',')[0] : 'Ville'}
-                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                        <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
-                            <li><a onClick={() => setLocationFilter('')}>Toutes les villes</a></li>
-                            {uniqueLocations.map((location, index) => (
-                                <li key={index}><a onClick={() => setLocationFilter(location)}>{location.split(',')[0]}</a></li>
-                            ))}
-                        </ul>
-                    </div>
+                     {/* Location Filter */}
+                     <div className="relative">
+                         <button
+                             onClick={() => {
+                                 const dropdown = document.getElementById('location-dropdown');
+                                 dropdown.classList.toggle('hidden');
+                             }}
+                             className={`px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                                 locationFilter 
+                                     ? 'bg-blue-500 text-white border border-blue-400' 
+                                     : 'bg-white/10 text-slate-300 border border-white/20 hover:bg-white/15'
+                             }`}
+                         >
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                             </svg>
+                             {locationFilter ? locationFilter.split(',')[0] : 'Ville'}
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                             </svg>
+                         </button>
+                         <div id="location-dropdown" className="hidden absolute top-full mt-2 left-0 bg-slate-800 border border-slate-600 rounded-xl p-2 shadow-xl z-50 min-w-48">
+                             <button onClick={() => {setLocationFilter(''); document.getElementById('location-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">Toutes les villes</button>
+                             {uniqueLocations.map((location, index) => (
+                                 <button key={index} onClick={() => {setLocationFilter(location); document.getElementById('location-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">{location.split(',')[0]}</button>
+                             ))}
+                         </div>
+                     </div>
 
-                    {/* Service Filter */}
-                    <div className="dropdown">
-                        <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
-                            {serviceFilter || 'Service'}
-                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                        <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
-                            <li><a onClick={() => setServiceFilter('')}>Tous les services</a></li>
-                            {uniqueServices.map((service, index) => (
-                                <li key={index}><a onClick={() => setServiceFilter(service)}>{service}</a></li>
-                            ))}
-                        </ul>
-                    </div>
+                     {/* Service Filter */}
+                     <div className="relative">
+                         <button
+                             onClick={() => {
+                                 const dropdown = document.getElementById('service-dropdown');
+                                 dropdown.classList.toggle('hidden');
+                             }}
+                             className={`px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                                 serviceFilter 
+                                     ? 'bg-green-500 text-white border border-green-400' 
+                                     : 'bg-white/10 text-slate-300 border border-white/20 hover:bg-white/15'
+                             }`}
+                         >
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                             </svg>
+                             {serviceFilter || 'Service'}
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                             </svg>
+                         </button>
+                         <div id="service-dropdown" className="hidden absolute top-full mt-2 left-0 bg-slate-800 border border-slate-600 rounded-xl p-2 shadow-xl z-50 min-w-48">
+                             <button onClick={() => {setServiceFilter(''); document.getElementById('service-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">Tous les services</button>
+                             {uniqueServices.map((service, index) => (
+                                 <button key={index} onClick={() => {setServiceFilter(service); document.getElementById('service-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">{service}</button>
+                             ))}
+                         </div>
+                     </div>
 
-                    {/* Rating Filter */}
-                    <div className="dropdown">
-                        <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
-                            {ratingFilter ? `${ratingFilter}+ étoiles` : 'Note'}
-                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                        <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
-                            <li><a onClick={() => setRatingFilter('')}>Toutes les notes</a></li>
-                            <li><a onClick={() => setRatingFilter('4.5')}>4.5+ étoiles</a></li>
-                            <li><a onClick={() => setRatingFilter('4.0')}>4.0+ étoiles</a></li>
-                            <li><a onClick={() => setRatingFilter('3.5')}>3.5+ étoiles</a></li>
-                        </ul>
-                    </div>
+                     {/* Rating Filter */}
+                     <div className="relative">
+                         <button
+                             onClick={() => {
+                                 const dropdown = document.getElementById('rating-dropdown');
+                                 dropdown.classList.toggle('hidden');
+                             }}
+                             className={`px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                                 ratingFilter 
+                                     ? 'bg-yellow-500 text-white border border-yellow-400' 
+                                     : 'bg-white/10 text-slate-300 border border-white/20 hover:bg-white/15'
+                             }`}
+                         >
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                             </svg>
+                             {ratingFilter ? `${ratingFilter}+` : 'Note'}
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                             </svg>
+                         </button>
+                         <div id="rating-dropdown" className="hidden absolute top-full mt-2 left-0 bg-slate-800 border border-slate-600 rounded-xl p-2 shadow-xl z-50 min-w-48">
+                             <button onClick={() => {setRatingFilter(''); document.getElementById('rating-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">Toutes les notes</button>
+                             <button onClick={() => {setRatingFilter('4.5'); document.getElementById('rating-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">4.5+ étoiles</button>
+                             <button onClick={() => {setRatingFilter('4.0'); document.getElementById('rating-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">4.0+ étoiles</button>
+                             <button onClick={() => {setRatingFilter('3.5'); document.getElementById('rating-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">3.5+ étoiles</button>
+                         </div>
+                     </div>
 
-                    {/* Price Filter */}
-                    <div className="dropdown">
-                        <div tabIndex={0} role="button" className="btn btn-sm bg-slate-700 border-slate-600 text-white hover:bg-slate-600 rounded-full">
-                            {priceFilter === 'low' ? 'Économique' : priceFilter === 'medium' ? 'Standard' : priceFilter === 'high' ? 'Premium' : 'Prix'}
-                            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                        <ul tabIndex={0} className="dropdown-content menu bg-slate-800 border border-slate-600 rounded-box w-56 p-2 shadow text-white z-50">
-                            <li><a onClick={() => setPriceFilter('')}>Tous les prix</a></li>
-                            <li><a onClick={() => setPriceFilter('low')}>Économique (≤15k CFA)</a></li>
-                            <li><a onClick={() => setPriceFilter('medium')}>Standard (15k-20k CFA)</a></li>
-                            <li><a onClick={() => setPriceFilter('high')}>Premium (+20k CFA)</a></li>
-                        </ul>
-                    </div>
+                     {/* Price Filter */}
+                     <div className="relative">
+                         <button
+                             onClick={() => {
+                                 const dropdown = document.getElementById('price-dropdown');
+                                 dropdown.classList.toggle('hidden');
+                             }}
+                             className={`px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                                 priceFilter 
+                                     ? 'bg-purple-500 text-white border border-purple-400' 
+                                     : 'bg-white/10 text-slate-300 border border-white/20 hover:bg-white/15'
+                             }`}
+                         >
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                             </svg>
+                             {priceFilter === 'low' ? 'Économique' : priceFilter === 'medium' ? 'Standard' : priceFilter === 'high' ? 'Premium' : 'Prix'}
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                             </svg>
+                         </button>
+                         <div id="price-dropdown" className="hidden absolute top-full mt-2 left-0 bg-slate-800 border border-slate-600 rounded-xl p-2 shadow-xl z-50 min-w-48">
+                             <button onClick={() => {setPriceFilter(''); document.getElementById('price-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">Tous les prix</button>
+                             <button onClick={() => {setPriceFilter('low'); document.getElementById('price-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">Économique (≤15k CFA)</button>
+                             <button onClick={() => {setPriceFilter('medium'); document.getElementById('price-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">Standard (15k-20k CFA)</button>
+                             <button onClick={() => {setPriceFilter('high'); document.getElementById('price-dropdown').classList.add('hidden');}} className="w-full text-left px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg">Premium (+20k CFA)</button>
+                         </div>
+                     </div>
 
-                    {(searchTerm || locationFilter || serviceFilter || ratingFilter || priceFilter) && (
-                        <button
-                            onClick={clearFilters}
-                            className="px-3 py-2 text-xs text-slate-400 hover:text-white transition-colors"
-                        >
-                            ✕
-                        </button>
-                    )}
-                </div>
+                     {/* Clear Filters */}
+                     {(searchTerm || locationFilter || serviceFilter || ratingFilter || priceFilter) && (
+                         <button
+                             onClick={clearFilters}
+                             className="px-4 py-3 rounded-xl text-sm font-medium bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30 transition-all flex items-center gap-2"
+                         >
+                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                             </svg>
+                             Effacer
+                         </button>
+                     )}
+                 </div>
             </div>
 
-            {/* Mobile: Logo, Search Bar and Filter Toggle aligned */}
+            {/* Mobile: Centered Search Bar */}
             <div className="mb-6 lg:hidden">
-                {/* Logo, Search Bar and Filter Toggle on same line - Fixed */}
+                {/* Fixed header with centered search */}
                 <div className="fixed top-0 left-0 right-0 z-50 bg-[#0b0f19] px-4 py-3 lg:hidden">
                     <div className="flex items-center justify-between">
                         {/* Logo */}
-                        <div className="flex-shrink-0">
-                            <button
-                                onClick={() => onBackToHome && onBackToHome()}
-                                className="hover:opacity-80 transition-opacity"
+                        <button
+                            onClick={() => onBackToHome && onBackToHome()}
+                            className="hover:opacity-80 transition-opacity"
+                            title="Retour à l'accueil"
+                        >
+                            <svg
+                                width="80"
+                                height="21"
+                                viewBox="0 0 155 40"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
                             >
-                                <svg
-                                    width="80"
-                                    height="21"
-                                    viewBox="0 0 155 40"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        d="m8.75 11.3 6.75 3.884 6.75-3.885M8.75 34.58v-7.755L2 22.939m27 0-6.75 3.885v7.754"
-                                        stroke="#fff"
-                                        strokeWidth="2.5"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+                                <path
+                                    d="m8.75 11.3 6.75 3.884 6.75-3.885M8.75 34.58v-7.755L2 22.939m27 0-6.75 3.885v7.754"
+                                    stroke="#fff"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            </svg>
+                        </button>
 
-                        {/* Search Bar */}
-                        <div className="relative flex-1 mx-3">
+                        {/* Centered Search Bar */}
+                        <div className="relative w-48 max-w-xs">
                             <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
@@ -345,24 +401,22 @@ export default function DriversList({ onBackToHome }) {
                         </div>
 
                         {/* Filter Toggle Button */}
-                        <div className="flex-shrink-0">
-                            <button
-                                onClick={() => setShowFilters(!showFilters)}
-                                className="relative flex items-center justify-center w-12 h-12 bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/15 transition-colors"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                </svg>
-                                {(locationFilter || serviceFilter || availabilityFilter || ratingFilter || priceFilter) && (
-                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full"></span>
-                                )}
-                            </button>
-                        </div>
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="relative flex items-center justify-center w-12 h-12 bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/15 transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            {(locationFilter || serviceFilter || availabilityFilter || ratingFilter || priceFilter) && (
+                                <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full"></span>
+                            )}
+                        </button>
                     </div>
                 </div>
 
                 {/* Spacer for fixed header */}
-                <div className="h-20"></div>
+                <div className="h-12"></div>
 
                 {/* Mobile Filters */}
                 <div className={`transition-all duration-300 overflow-hidden ${showFilters ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
@@ -445,13 +499,13 @@ export default function DriversList({ onBackToHome }) {
             </div>
 
             {/* Results Count */}
-            <div className="mb-6 text-center">
+            <div className="text-center -mt-6 lg:mt-6">
                 <p className="text-slate-300">
                     {filteredDrivers.length} chauffeur{filteredDrivers.length !== 1 ? 's' : ''} trouvé{filteredDrivers.length !== 1 ? 's' : ''}
                 </p>
             </div>
 
-            <div className="grid grid-cols-2 xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-3 gap-4 lg:gap-6">
+            <div className="grid grid-cols-2 xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-3 gap-4 lg:gap-6 mt-4 lg:mt-6">
                 {filteredDrivers.map((driver) => (
                     <div key={driver.id} className="bg-slate-800/90 backdrop-blur-sm rounded-xl pb-2 overflow-hidden border border-slate-600/50 hover:bg-slate-700/90 hover:border-slate-500/60 transition-all w-full max-w-xs mx-auto">
                         {/* Image rectangulaire en haut */}
