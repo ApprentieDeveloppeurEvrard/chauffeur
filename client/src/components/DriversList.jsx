@@ -304,7 +304,7 @@ export default function DriversList({ onBackToHome }) {
             {/* Mobile: Logo, Search Bar and Filter Toggle aligned */}
             <div className="mb-6 lg:hidden">
                 {/* Logo, Search Bar and Filter Toggle on same line - Fixed */}
-                <div className="fixed top-0 left-0 right-0 z-50  border-b border-slate-700/50 px-4 py-3 lg:hidden">
+                <div className="fixed top-0 left-0 right-0 z-50 bg-white/5 backdrop-blur-md border-b border-white/10 px-4 py-3 lg:hidden">
                     <div className="flex items-center justify-between">
                         {/* Logo */}
                         <div className="flex-shrink-0">
