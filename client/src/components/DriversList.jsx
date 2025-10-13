@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { User, MessageSquare } from "lucide-react";
 
 export default function DriversList({ onBackToHome }) {
     // Mock data for drivers
@@ -62,6 +63,36 @@ export default function DriversList({ onBackToHome }) {
             verified: false,
             languages: ["French", "Baoulé"],
             availability: "Available tomorrow"
+        },
+        {
+            id: 5,
+            name: "Youssouf Diallo",
+            rating: 4.5,
+            reviews: 92,
+            experience: "6 years",
+            vehicle: "BMW 3 Series 2022",
+            services: ["Professional", "VIP", "Events"],
+            location: "Abidjan, Treichville",
+            price: "22,000 CFA/hour",
+            avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=300&fit=crop&crop=face",
+            verified: true,
+            languages: ["French", "English", "Dioula"],
+            availability: "Available now"
+        },
+        {
+            id: 6,
+            name: "Fatou Camara",
+            rating: 4.7,
+            reviews: 115,
+            experience: "3 years",
+            vehicle: "Audi A4 2021",
+            services: ["Personal", "Airport", "City Tours"],
+            location: "Abidjan, Yopougon",
+            price: "18,000 CFA/hour",
+            avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=300&fit=crop&crop=face",
+            verified: true,
+            languages: ["French", "English"],
+            availability: "Available in 15 min"
         }
     ]);
 
@@ -270,59 +301,68 @@ export default function DriversList({ onBackToHome }) {
                 </div>
             </div>
 
-            {/* Mobile: Header with Logo and Filter Toggle */}
+            {/* Mobile: Logo, Search Bar and Filter Toggle aligned */}
             <div className="mb-6 lg:hidden">
-                {/* Top row: Logo and Filter Toggle */}
-                <div className="flex items-center justify-between mb-4">
-                    <button
-                        onClick={() => onBackToHome && onBackToHome()}
-                        className="hover:opacity-80 transition-opacity flex-shrink-0"
-                    >
-                        <svg
-                            width="100"
-                            height="26"
-                            viewBox="0 0 155 40"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="m8.75 11.3 6.75 3.884 6.75-3.885M8.75 34.58v-7.755L2 22.939m27 0-6.75 3.885v7.754"
-                                stroke="#fff"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
+                {/* Logo, Search Bar and Filter Toggle on same line - Fixed */}
+                <div className="fixed top-0 left-0 right-0 z-50  border-b border-slate-700/50 px-4 py-3 lg:hidden">
+                    <div className="flex items-center justify-between">
+                        {/* Logo */}
+                        <div className="flex-shrink-0">
+                            <button
+                                onClick={() => onBackToHome && onBackToHome()}
+                                className="hover:opacity-80 transition-opacity"
+                            >
+                                <svg
+                                    width="80"
+                                    height="21"
+                                    viewBox="0 0 155 40"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        d="m8.75 11.3 6.75 3.884 6.75-3.885M8.75 34.58v-7.755L2 22.939m27 0-6.75 3.885v7.754"
+                                        stroke="#fff"
+                                        strokeWidth="2.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="relative flex-1 mx-3">
+                            <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input
+                                type="text"
+                                placeholder="Rechercher..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-9 pr-4 py-3 bg-white/10 border border-white/20 rounded-full text-white placeholder-slate-400 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all text-sm"
                             />
-                        </svg>
-                    </button>
+                        </div>
 
-                    {/* Filter Toggle Button */}
-                    <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/15 transition-colors"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                        Filtres
-                        {(locationFilter || serviceFilter || availabilityFilter || ratingFilter || priceFilter) && (
-                            <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                        )}
-                    </button>
+                        {/* Filter Toggle Button */}
+                        <div className="flex-shrink-0">
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className="relative flex items-center justify-center w-12 h-12 bg-white/10 border border-white/20 rounded-full text-white hover:bg-white/15 transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                {(locationFilter || serviceFilter || availabilityFilter || ratingFilter || priceFilter) && (
+                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-400 rounded-full"></span>
+                                )}
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Search Bar - Always visible on mobile */}
-                <div className="relative max-w-md mx-auto mb-4">
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Rechercher par nom, ville ou véhicule..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-full text-white placeholder-slate-400 focus:outline-none focus:border-white/40 focus:bg-white/15 transition-all"
-                    />
-                </div>
+                {/* Spacer for fixed header */}
+                <div className="h-20"></div>
 
                 {/* Mobile Filters */}
                 <div className={`transition-all duration-300 overflow-hidden ${showFilters ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
@@ -411,65 +451,63 @@ export default function DriversList({ onBackToHome }) {
                 </p>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-6">
+            <div className="grid grid-cols-2 xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-3 gap-4 lg:gap-6">
                 {filteredDrivers.map((driver) => (
-                    <div key={driver.id} className="bg-slate-800/90 backdrop-blur-sm rounded-2xl pb-4 overflow-hidden border border-slate-600/50 hover:bg-slate-700/90 hover:border-slate-500/60 transition-all">
+                    <div key={driver.id} className="bg-slate-800/90 backdrop-blur-sm rounded-xl pb-2 overflow-hidden border border-slate-600/50 hover:bg-slate-700/90 hover:border-slate-500/60 transition-all w-full max-w-xs mx-auto">
                         {/* Image rectangulaire en haut */}
                         <div className="relative">
                             <img 
-                                className="w-64 h-52 object-cover object-top" 
+                                className="w-full h-24 sm:h-28 lg:h-32 object-cover object-top" 
                                 src={driver.avatar} 
                                 alt={driver.name} 
                             />
                         </div>
                         
-                        <div className="flex flex-col items-center px-4">
+                        <div className="flex flex-col items-center px-2">
                             {/* Nom du chauffeur */}
-                            <p className="font-medium mt-3 text-white text-center">{driver.name}</p>
+                            <p className="font-medium mt-1.5 text-white text-center text-xs leading-tight">{driver.name}</p>
                             
                             {/* Localisation et prix */}
-                            <p className="text-slate-300 text-sm text-center">{driver.location}</p>
-                            <p className="text-blue-300 text-sm font-medium mt-1">{driver.price}</p>
+                            <p className="text-slate-300 text-xs text-center leading-tight">{driver.location}</p>
+                            <p className="text-blue-300 text-xs font-medium">{driver.price}</p>
                             
                             {/* Rating */}
-                            <div className="flex items-center gap-1 mt-2">
+                            <div className="flex items-center gap-0.5 mt-1">
                                 <div className="flex text-yellow-400">
                                     {[...Array(5)].map((_, i) => (
-                                        <svg key={i} className={`w-3 h-3 ${i < Math.floor(driver.rating) ? 'fill-current' : 'text-slate-600'}`} viewBox="0 0 20 20">
+                                        <svg key={i} className={`w-2 h-2 ${i < Math.floor(driver.rating) ? 'fill-current' : 'text-slate-600'}`} viewBox="0 0 20 20">
                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
                                     ))}
                                 </div>
-                                <span className="text-xs text-slate-400">{driver.rating}</span>
+                                <span className="text-xs text-slate-400 ml-0.5">{driver.rating}</span>
                             </div>
                             
                             {/* Services */}
-                            <div className="flex gap-1 mt-2 flex-wrap justify-center">
+                            <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
                                 {driver.services.slice(0, 2).map((service, index) => (
-                                    <span key={index} className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-500/30">
+                                    <span key={index} className="text-xs bg-blue-500/20 text-blue-300 px-1 py-0.5 rounded-full border border-blue-500/30">
                                         {service}
                                     </span>
                                 ))}
                             </div>
                             
                             {/* Boutons d'action alignés */}
-                            <div className="flex gap-3 mt-5 items-center">
+                            <div className="flex gap-1.5 mt-2 items-center justify-center">
                                 <button 
                                     onClick={() => handleContactDriver(driver)}
-                                    className="border text-sm text-slate-300 border-slate-500/50 w-28 h-8 rounded-full flex items-center justify-center gap-1 hover:bg-slate-600/50 hover:text-white hover:border-slate-400 transition-colors"
+                                    className="border text-xs text-slate-300 border-slate-500/50 w-8 h-6 rounded-full flex items-center justify-center hover:bg-slate-600/50 hover:text-white hover:border-slate-400 transition-colors"
+                                    title="Contacter"
                                 >
-                                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="m7.107 11.684.31-.521-.736-.436-.309.522zm-2.28-.521.308.521.735-.435-.309-.522zm1.545.086a.297.297 0 0 1-.502 0l-.735.435a1.15 1.15 0 0 0 1.972 0zM5.267.854h1.708V0H5.267zm6.121 4.413v.57h.854v-.57zm-10.534.57v-.57H0v-.57zm-.854 0c0 .657 0 1.171.028 1.586.029.42.088.768.221 1.09l.79-.327c-.084-.2-.133-.446-.159-.82-.026-.38-.026-.86-.026-1.53zm3.731 3.838c-.715-.012-1.09-.058-1.383-.18l-.327.79c.459.19.98.232 1.695.244zM.249 8.513c.333.802.97 1.44 1.772 1.772l.327-.79a2.42 2.42 0 0 1-1.31-1.309zm11.14-2.677c0 .67-.001 1.15-.027 1.53-.026.374-.075.62-.158.82l.79.327c.133-.322.192-.67.22-1.09.028-.415.028-.93.028-1.587zM8.525 10.53c.715-.012 1.237-.054 1.695-.244l-.327-.79c-.293.122-.668.168-1.383.18zm2.678-2.343a2.42 2.42 0 0 1-1.31 1.31l.327.789a3.27 3.27 0 0 0 1.772-1.772zM6.975.854c.94 0 1.616 0 2.142.05.52.05.852.145 1.116.307l.446-.729C10.259.225 9.78.11 9.199.054 8.621 0 7.898 0 6.974 0zm5.267 4.413c0-.924 0-1.646-.054-2.223-.056-.583-.17-1.06-.428-1.48l-.728.446c.161.264.256.595.306 1.115.05.527.05 1.202.05 2.142zm-2.01-4.056c.326.2.6.473.8.799l.728-.447c-.27-.44-.64-.81-1.081-1.08zM5.268 0c-.924 0-1.646 0-2.223.054-.583.056-1.06.17-1.48.428l.446.729c.264-.162.595-.257 1.115-.306.527-.05 1.202-.05 2.142-.05zM.854 5.267c0-.94 0-1.615.05-2.142.05-.52.145-.851.307-1.115l-.729-.447c-.257.421-.372.898-.428 1.481C0 3.621 0 4.344 0 5.267zm.71-4.785A3.3 3.3 0 0 0 .482 1.563l.729.447c.2-.326.473-.6.799-.8zM5.56 10.728a6 6 0 0 0-.316-.503 1.3 1.3 0 0 0-.388-.368l-.43.739a.4.4 0 0 1 .128.131c.07.095.147.226.271.436zm-1.845-.199c.25.004.409.008.53.02a.45.45 0 0 1 .182.047l.429-.739a1.3 1.3 0 0 0-.518-.156c-.169-.019-.374-.022-.608-.026zm3.7.634c.124-.21.202-.34.271-.436a.4.4 0 0 1 .128-.131l-.43-.739a1.3 1.3 0 0 0-.388.368c-.099.135-.2.307-.316.502zM8.51 9.675c-.234.004-.439.007-.608.026-.178.02-.351.06-.518.156l.43.739a.45.45 0 0 1 .182-.046 6 6 0 0 1 .529-.20z" fill="currentColor"/>
-                                        <path d="M3.844 5.552h.005m2.268 0h.005m2.272 0H8.4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
-                                    <span>message</span>
+                                    <MessageSquare size={10} />
                                 </button>
                                 
                                 <button 
                                     onClick={() => handleViewProfile(driver)}
-                                    className="text-sm text-slate-400 hover:text-slate-200 transition-colors"
+                                    className="border text-xs text-slate-300 border-slate-500/50 w-8 h-6 rounded-full flex items-center justify-center hover:bg-slate-600/50 hover:text-white hover:border-slate-400 transition-colors"
+                                    title="Voir profil"
                                 >
-                                    Voir profil
+                                    <User size={10} />
                                 </button>
                             </div>
                         </div>
