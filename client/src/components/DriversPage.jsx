@@ -1,14 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Hero from "./hero";
 import DriversList from "./DriversList";
 import AuthPage from "./auth/AuthPage";
 import DriverProfile from "./DriverProfile";
+import { auth, getCurrentUserRole } from "../services/api";
 
 export default function DriversPage() {
     const [currentView, setCurrentView] = useState('hero'); // 'hero', 'drivers', 'auth', 'profile'
     const [searchData, setSearchData] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userType, setUserType] = useState(null); // 'driver' ou 'client'
+
+    useEffect(() => {
+        const syncFromToken = () => {
+            const token = auth.getToken();
+            const role = getCurrentUserRole();
+            setIsAuthenticated(!!token);
+            setUserType(role === 'driver' ? 'driver' : (token ? 'connected' : null));
+        };
+        syncFromToken();
+        const onAuthChanged = () => syncFromToken();
+        window.addEventListener('auth-changed', onAuthChanged);
+        return () => window.removeEventListener('auth-changed', onAuthChanged);
+    }, []);
 
     const handleShowDrivers = (formData = null) => {
         setSearchData(formData);
@@ -21,7 +35,15 @@ export default function DriversPage() {
     };
 
     const handleShowAuth = () => {
-        setCurrentView('auth');
+        if (isAuthenticated) {
+            if (userType === 'driver') {
+                setCurrentView('profile');
+            } else {
+                setCurrentView('hero');
+            }
+        } else {
+            setCurrentView('auth');
+        }
     };
 
     const handleAuthSuccess = (type) => {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { authApi } from "../../services/api";
 
 export default function SignIn({ onAuthSuccess }) {
     const [formData, setFormData] = useState({
@@ -20,18 +21,17 @@ export default function SignIn({ onAuthSuccess }) {
         e.preventDefault();
         setIsLoading(true);
         setError('');
-        
-        // Simulation d'authentification
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Identifiants de test pour accéder au profil
-        if (formData.email === 'chauffeur@test.com' && formData.password === 'password123') {
-            console.log('Connexion réussie!');
-            onAuthSuccess && onAuthSuccess('driver'); // Indique que c'est un chauffeur
-        } else {
-            setError('Email ou mot de passe incorrect');
+        try {
+            const { role } = await authApi.login({ email: formData.email, password: formData.password });
+            if (role === 'driver') {
+                onAuthSuccess && onAuthSuccess('driver');
+            } else {
+                onAuthSuccess && onAuthSuccess('connected');
+            }
+        } catch (err) {
+            const msg = err?.response?.data?.error || 'Email ou mot de passe incorrect';
+            setError(msg);
         }
-        
         setIsLoading(false);
     };
 
@@ -86,13 +86,7 @@ export default function SignIn({ onAuthSuccess }) {
                         </div>
                     )}
 
-                    <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-3 mt-4">
-                        <p className="text-blue-300 text-xs text-center">
-                            <strong>Identifiants de test :</strong><br/>
-                            Email: chauffeur@test.com<br/>
-                            Mot de passe: password123
-                        </p>
-                    </div>
+                    
 
                     <div className="flex justify-between items-center pt-2">
                         <label className="flex items-center">

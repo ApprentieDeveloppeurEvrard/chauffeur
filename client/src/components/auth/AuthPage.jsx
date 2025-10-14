@@ -83,7 +83,9 @@ export default function AuthPage({ onBackToHome, onAuthSuccess }) {
                     </div>
 
                     {/* Auth forms */}
-                    {currentView === 'signin' ? <SignIn onAuthSuccess={onAuthSuccess} /> : <SignUp />}
+                    {currentView === 'signin'
+                      ? <SignIn onAuthSuccess={onAuthSuccess} />
+                      : <SignUp onAuthSuccess={onAuthSuccess} onSwitchToSignIn={() => setCurrentView('signin')} />}
                 </div>
             </div>
         </div>

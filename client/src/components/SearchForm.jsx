@@ -8,6 +8,7 @@ export default function SearchForm({ onSearch }) {
         time: '',
         serviceType: ''
     });
+    const [errors, setErrors] = useState({ departure: '' });
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -19,12 +20,13 @@ export default function SearchForm({ onSearch }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Recherche de chauffeurs:', formData);
-        
-        // Call the onSearch callback if provided
-        if (onSearch) {
-            onSearch(formData);
+        const hasDeparture = formData.departure && formData.departure.trim().length > 0;
+        if (!hasDeparture) {
+            setErrors({ departure: 'Veuillez renseigner la ville de départ' });
+            return;
         }
+        setErrors({ departure: '' });
+        if (onSearch) onSearch(formData);
     };
 
     return (
@@ -42,6 +44,9 @@ export default function SearchForm({ onSearch }) {
                         placeholder="Abidjan, Bouaké, Yamoussoukro..."
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-white/40"
                     />
+                    {errors.departure && (
+                        <p className="mt-2 text-xs text-red-300">{errors.departure}</p>
+                    )}
                 </div>
                 
                 <div>

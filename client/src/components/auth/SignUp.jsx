@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { authApi } from "../../services/api";
 
-export default function SignUp() {
+export default function SignUp({ onAuthSuccess, onSwitchToSignIn }) {
     const [formData, setFormData] = useState({
         userType: '',
         name: '',
@@ -21,10 +22,30 @@ export default function SignUp() {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Sign up data:', formData);
-        // Add sign up logic here
+        setSubmitting(true);
+        setError('');
+        try {
+            const payload = { email: formData.email, password: formData.password, role: formData.userType || 'client' };
+            await authApi.register(payload);
+            if (formData.userType === 'driver') {
+                // Rediriger vers la page de connexion pour que le chauffeur se connecte
+                onSwitchToSignIn && onSwitchToSignIn();
+            } else {
+                // Employé: connecter directement
+                const { role } = await authApi.login({ email: formData.email, password: formData.password });
+                onAuthSuccess && onAuthSuccess(role === 'driver' ? 'driver' : 'connected');
+            }
+        } catch (err) {
+            const msg = err?.response?.data?.error || err?.message || 'Erreur lors de la création du compte';
+            setError(msg);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -206,12 +227,19 @@ export default function SignUp() {
                         </div>
                     )}
                     
+                    {error && (
+                        <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3">
+                            <p className="text-red-300 text-sm text-center">{error}</p>
+                        </div>
+                    )}
+
                     {formData.userType && (
                         <button 
                             type="submit"
-                            className="w-full mt-6 bg-white hover:bg-slate-200 text-black transition-all active:scale-95 py-3 rounded-lg font-medium"
+                            disabled={submitting}
+                            className="w-full mt-6 bg-white hover:bg-slate-200 text-black transition-all active:scale-95 py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {formData.userType === 'driver' ? 'Devenir chauffeur' : 'Créer un compte'}
+                            {submitting ? 'Création...' : (formData.userType === 'driver' ? 'Devenir chauffeur' : 'Créer un compte')}
                         </button>
                     )}
                 </form>
