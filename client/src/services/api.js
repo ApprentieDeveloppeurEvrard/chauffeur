@@ -63,6 +63,11 @@ export const authApi = {
     return { token, role }
   },
   logout: () => auth.clear(),
+  me: () => api.get('/auth/me'),
+}
+
+export const driversApi = {
+  list: () => api.get('/drivers'),
 }
 
 export default api

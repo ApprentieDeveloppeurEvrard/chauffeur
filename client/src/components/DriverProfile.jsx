@@ -1,28 +1,50 @@
 import { useState, useEffect, useRef } from "react";
+import { authApi } from "../services/api";
 
 export default function DriverProfile({ onBackToHome }) {
     // État pour les données du profil
     const [profileData, setProfileData] = useState({
-        name: "Kouassi Jean-Baptiste",
-        email: "kouassi.jean@gmail.com",
-        phone: "+225 07 12 34 56 78",
-        location: "Abidjan, Cocody",
-        vehicle: "Toyota Camry 2020",
-        vehicleColor: "Noir",
-        licensePlate: "AB 1234 CI",
-        drivingLicense: "CI123456789",
-        licenseExpiryDate: "2027-12-31",
+        name: "",
+        email: "",
+        phone: "",
+        location: "",
+        vehicle: "",
+        vehicleColor: "",
+        licensePlate: "",
+        drivingLicense: "",
+        licenseExpiryDate: "",
         licenseCategory: "B",
         licenseRectoFile: null,
         licenseVersoFile: null,
-        experience: "5",
-        services: ["Personal", "Professional", "Airport"],
-        languages: ["French", "English", "Baoulé"],
-        price: "15000",
-        availability: "Available now",
-        bio: "Chauffeur professionnel avec 5 ans d'expérience. Service de qualité et ponctualité garantie.",
+        experience: "",
+        services: [],
+        languages: [],
+        price: "",
+        availability: "",
+        bio: "",
         avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&crop=face"
     });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        (async () => {
+            try {
+                setLoading(true);
+                const res = await authApi.me();
+                const me = res?.data || {};
+                setProfileData(prev => ({
+                    ...prev,
+                    email: me.email || prev.email,
+                    // other fields would come from dedicated driver profile endpoint in future
+                }));
+            } catch (e) {
+                setError("Impossible de charger le profil");
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []);
 
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);

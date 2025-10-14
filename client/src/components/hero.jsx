@@ -1,8 +1,10 @@
 import { useState } from "react";
 import SearchForm from "./SearchForm";
+import { auth } from "../services/api";
 
 export default function Hero({ onShowDrivers, onShowAuth, isAuthenticated }) {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
     return (
         <div className="relative min-h-screen bg-[#0b0f19] text-white font-poppins overflow-hidden">
@@ -53,12 +55,32 @@ export default function Hero({ onShowDrivers, onShowAuth, isAuthenticated }) {
                 </div>
 
                 {/* Desktop Button */}
-                <button 
-                    onClick={onShowAuth}
-                    className="hidden md:block px-6 py-2.5 text-black bg-white hover:bg-slate-200 active:scale-95 transition-all rounded-full"
-                >
-                    {isAuthenticated ? 'Profil' : 'Connexion'}
-                </button>
+                <div className="hidden md:block relative">
+                    {isAuthenticated ? (
+                        <div
+                            onClick={() => setProfileMenuOpen((v) => !v)}
+                            role="button"
+                            className="btn btn-ghost btn-circle avatar"
+                        >
+                            <div className="w-10 rounded-full">
+                                <img alt="avatar" src={`https://api.dicebear.com/9.x/initials/svg?seed=user`} />
+                            </div>
+                        </div>
+                    ) : (
+                        <button 
+                            onClick={() => onShowAuth && onShowAuth()}
+                            className="px-6 py-2.5 text-black bg-white hover:bg-slate-200 active:scale-95 transition-all rounded-full"
+                        >
+                            Connexion
+                        </button>
+                    )}
+                    {isAuthenticated && profileMenuOpen && (
+                        <ul className="menu bg-white/10 border border-white/20 rounded-box w-56 absolute right-0 mt-2 z-[200] shadow text-white backdrop-blur">
+                          <li><a onClick={() => { setProfileMenuOpen(false); onShowAuth && onShowAuth(); }}>Profil</a></li>
+                          <li><a onClick={() => { auth.clear(); setProfileMenuOpen(false); }}>Déconnexion</a></li>
+                        </ul>
+                    )}
+                </div>
 
                 {/* Mobile Menu Button */}
                 <button
@@ -92,15 +114,34 @@ export default function Hero({ onShowDrivers, onShowAuth, isAuthenticated }) {
                 <a href="/services">Services</a>
                 <a href="/tarifs">Tarifs</a>
                 
-                <button 
-                    onClick={() => {
-                        setMenuOpen(false);
-                        onShowAuth && onShowAuth();
-                    }}
-                    className="px-6 py-2.5 text-black bg-white hover:bg-slate-200 active:scale-95 transition-all rounded-full"
-                >
-                    {isAuthenticated ? 'Profil' : 'Connexion'}
-                </button>
+                <div className="w-full px-6">
+                    <div className="relative flex flex-col items-center">
+                        {isAuthenticated ? (
+                            <div
+                                onClick={() => setProfileMenuOpen((v) => !v)}
+                                role="button"
+                                className="btn btn-ghost btn-circle avatar"
+                            >
+                                <div className="w-10 rounded-full">
+                                    <img alt="avatar" src={`https://api.dicebear.com/9.x/initials/svg?seed=user`} />
+                                </div>
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={() => { setMenuOpen(false); onShowAuth && onShowAuth(); }}
+                                className="w-full px-6 py-2.5 text-black bg-white hover:bg-slate-200 active:scale-95 transition-all rounded-full"
+                            >
+                                Connexion
+                            </button>
+                        )}
+                        {isAuthenticated && profileMenuOpen && (
+                            <ul className="menu bg-white/10 border border-white/20 rounded-box w-56 mt-2 z-[200] shadow text-white backdrop-blur">
+                              <li><a onClick={() => { setProfileMenuOpen(false); onShowAuth && onShowAuth(); }}>Profil</a></li>
+                              <li><a onClick={() => { auth.clear(); setProfileMenuOpen(false); }}>Déconnexion</a></li>
+                            </ul>
+                        )}
+                    </div>
+                </div>
 
                 <button
                     onClick={() => setMenuOpen(false)}

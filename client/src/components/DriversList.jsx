@@ -1,100 +1,11 @@
 import { useState, useEffect } from "react";
 import { User, MessageSquare } from "lucide-react";
+import { driversApi } from "../services/api";
 
 export default function DriversList({ onBackToHome }) {
-    // Mock data for drivers
-    const [drivers] = useState([
-        {
-            id: 1,
-            name: "Kouassi Jean-Baptiste",
-            rating: 4.8,
-            reviews: 127,
-            experience: "5 years",
-            vehicle: "Toyota Camry 2020",
-            services: ["Personal", "Professional", "Airport"],
-            location: "Abidjan, Cocody",
-            price: "15,000 CFA/hour",
-            avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&crop=face",
-            verified: true,
-            languages: ["French", "English", "Baoulé"],
-            availability: "Available now"
-        },
-        {
-            id: 2,
-            name: "Aminata Traoré",
-            rating: 4.9,
-            reviews: 89,
-            experience: "3 years",
-            vehicle: "Honda Accord 2019",
-            services: ["Personal", "Events", "City Tours"],
-            location: "Abidjan, Plateau",
-            price: "12,000 CFA/hour",
-            avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=300&fit=crop&crop=face",
-            verified: true,
-            languages: ["French", "English"],
-            availability: "Available in 30 min"
-        },
-        {
-            id: 3,
-            name: "Ibrahim Ouattara",
-            rating: 4.7,
-            reviews: 156,
-            experience: "7 years",
-            vehicle: "Mercedes E-Class 2021",
-            services: ["Professional", "VIP", "Airport"],
-            location: "Abidjan, Marcory",
-            price: "25,000 CFA/hour",
-            avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop&crop=face",
-            verified: true,
-            languages: ["French", "English", "Arabic"],
-            availability: "Available now"
-        },
-        {
-            id: 4,
-            name: "Marie-Claire Koffi",
-            rating: 4.6,
-            reviews: 73,
-            experience: "4 years",
-            vehicle: "Nissan Altima 2020",
-            services: ["Personal", "Shopping", "Medical"],
-            location: "Bouaké, Centre",
-            price: "10,000 CFA/hour",
-            avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=300&fit=crop&crop=face",
-            verified: false,
-            languages: ["French", "Baoulé"],
-            availability: "Available tomorrow"
-        },
-        {
-            id: 5,
-            name: "Youssouf Diallo",
-            rating: 4.5,
-            reviews: 92,
-            experience: "6 years",
-            vehicle: "BMW 3 Series 2022",
-            services: ["Professional", "VIP", "Events"],
-            location: "Abidjan, Treichville",
-            price: "22,000 CFA/hour",
-            avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=300&fit=crop&crop=face",
-            verified: true,
-            languages: ["French", "English", "Dioula"],
-            availability: "Available now"
-        },
-        {
-            id: 6,
-            name: "Fatou Camara",
-            rating: 4.7,
-            reviews: 115,
-            experience: "3 years",
-            vehicle: "Audi A4 2021",
-            services: ["Personal", "Airport", "City Tours"],
-            location: "Abidjan, Yopougon",
-            price: "18,000 CFA/hour",
-            avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=300&fit=crop&crop=face",
-            verified: true,
-            languages: ["French", "English"],
-            availability: "Available in 15 min"
-        }
-    ]);
+    const [drivers, setDrivers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const [selectedDriver, setSelectedDriver] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -103,8 +14,38 @@ export default function DriversList({ onBackToHome }) {
     const [availabilityFilter, setAvailabilityFilter] = useState('');
     const [ratingFilter, setRatingFilter] = useState('');
     const [priceFilter, setPriceFilter] = useState('');
-    const [filteredDrivers, setFilteredDrivers] = useState(drivers);
+    const [filteredDrivers, setFilteredDrivers] = useState([]);
     const [showFilters, setShowFilters] = useState(false);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                setLoading(true);
+                const res = await driversApi.list();
+                const list = res?.data || [];
+                setDrivers(list.map(d => ({
+                    id: d._id || d.id,
+                    name: d.name || 'Sans nom',
+                    rating: 4.8,
+                    reviews: 0,
+                    experience: d.experience || '',
+                    vehicle: d.vehicle || '',
+                    services: d.services || [],
+                    location: d.location || '',
+                    price: d.price ? `${d.price} CFA/hour` : '',
+                    avatar: d.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop&crop=face',
+                    verified: !!d.verified,
+                    languages: d.languages || [],
+                    availability: d.availability || '',
+                    phone: d.phone || '',
+                })));
+            } catch (e) {
+                setError('Impossible de charger les chauffeurs');
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []);
 
     const handleBookDriver = (driver) => {
         console.log("Booking driver:", driver);
@@ -171,9 +112,9 @@ export default function DriversList({ onBackToHome }) {
     }, [searchTerm, locationFilter, serviceFilter, availabilityFilter, ratingFilter, priceFilter, drivers]);
 
     // Get unique values for filter options
-    const uniqueLocations = [...new Set(drivers.map(driver => driver.location))];
-    const uniqueServices = [...new Set(drivers.flatMap(driver => driver.services))];
-    const uniqueAvailability = [...new Set(drivers.map(driver => driver.availability))];
+    const uniqueLocations = [...new Set(drivers.map(driver => driver.location).filter(Boolean))];
+    const uniqueServices = [...new Set(drivers.flatMap(driver => driver.services || []).filter(Boolean))];
+    const uniqueAvailability = [...new Set(drivers.map(driver => driver.availability).filter(Boolean))];
 
     const clearFilters = () => {
         setSearchTerm('');
@@ -186,6 +127,12 @@ export default function DriversList({ onBackToHome }) {
 
     return (
         <div className="relative z-10 max-w-7xl mx-auto p-6">
+            {loading && (
+                <div className="text-center text-slate-300">Chargement des chauffeurs...</div>
+            )}
+            {error && (
+                <div className="text-center text-red-300">{error}</div>
+            )}
             {/* Desktop: Logo and Centered Filters */}
             <div className="mb-6 hidden lg:flex flex-row gap-4 items-center max-w-6xl mx-auto">
                 {/* Logo à gauche */}
