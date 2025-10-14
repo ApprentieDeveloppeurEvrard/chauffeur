@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -29,5 +30,16 @@ router.post('/login', async (req, res) => {
 });
 
 module.exports = router;
+
+// Current user profile
+router.get('/me', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.sub).select('_id email role');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    return res.json({ id: user._id, email: user.email, role: user.role });
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to load profile' });
+  }
+});
 
 
