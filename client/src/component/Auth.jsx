@@ -1,0 +1,316 @@
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+
+export default function Auth() {
+  const [searchParams] = useSearchParams();
+  const [isLogin, setIsLogin] = useState(false);
+  const [userType, setUserType] = useState('chauffeur'); // 'chauffeur' ou 'employeur'
+
+  const [formData, setFormData] = useState({
+    loginIdentifier: '', // Pour connexion (téléphone ou email)
+    password: '',
+    confirmPassword: '', // Pour confirmation mot de passe inscription
+    firstName: '',
+    lastName: '',
+    phone: '',
+    // Champs spécifiques chauffeur
+    licenseNumber: '',
+    experience: '',
+    zone: '',
+    availability: '',
+    // Champs spécifiques employeur
+    companyName: '',
+    sector: ''
+  });
+
+  // Détecter le mode depuis l'URL
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    if (mode === 'login') {
+      setIsLogin(true);
+    } else {
+      setIsLogin(false);
+    }
+  }, [searchParams]);
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // TODO: Intégrer avec l'API backend
+    console.log('Form submitted:', { ...formData, userType, isLogin });
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md rounded-lg bg-gray-50 border border-gray-200 p-6">
+        {/* Logo */}
+        <div className="py-4 flex justify-center">
+          <Link to="/" className="flex items-center gap-2">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="40" height="40" rx="8" fill="#4F39F6"/>
+              <path d="M12 16L20 12L28 16V28L20 32L12 28V16Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 16L20 20L28 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </Link>
+        </div>
+
+        {/* Titre */}
+        <h1 className="mb-6 text-center text-2xl font-semibold">
+          {isLogin ? 'Se connecter' : 'Créer un compte'}
+        </h1>
+
+        {/* Sélecteur de type d'utilisateur (uniquement pour l'inscription) */}
+        {!isLogin && (
+          <div className="mb-6">
+            <label className="mb-2 block text-sm text-gray-600 font-medium">Je suis :</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setUserType('chauffeur')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  userType === 'chauffeur'
+                    ? 'bg-indigo-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Chauffeur
+              </button>
+              <button
+                type="button"
+                onClick={() => setUserType('employeur')}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  userType === 'employeur'
+                    ? 'bg-indigo-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Employeur
+              </button>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          {/* Champs communs */}
+          {!isLogin && (
+            <>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label htmlFor="firstName" className="mb-1 block text-sm text-gray-600">Prénom</label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    placeholder="Prénom"
+                    className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="mb-1 block text-sm text-gray-600">Nom</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Nom"
+                    className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
+                    required
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+
+          {/* Champs pour connexion */}
+          {isLogin && (
+            <>
+              <div className="mb-4">
+                <label htmlFor="loginIdentifier" className="mb-1 block text-sm text-gray-600">Téléphone ou Email</label>
+                <input
+                  type="text"
+                  id="loginIdentifier"
+                  name="loginIdentifier"
+                  value={formData.loginIdentifier || ''}
+                  onChange={handleInputChange}
+                  placeholder="06 12 34 56 78 ou nom@exemple.com"
+                  className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="password" className="mb-1 block text-sm text-gray-600">Mot de passe</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Mot de passe"
+                  autoComplete="current-password"
+                  className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div className="mb-2 text-right">
+                <a href="#" className="text-sm text-gray-500 hover:text-indigo-500">Mot de passe oublié ?</a>
+              </div>
+            </>
+          )}
+
+          {/* Champs pour inscription */}
+          {!isLogin && (
+            <>
+              <div className="mb-4">
+                <label htmlFor="phone" className="mb-1 block text-sm text-gray-600">Téléphone</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  placeholder="06 12 34 56 78"
+                  className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="password" className="mb-1 block text-sm text-gray-600">Mot de passe</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Mot de passe"
+                  autoComplete="new-password"
+                  className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="confirmPassword" className="mb-1 block text-sm text-gray-600">Confirmer le mot de passe</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  placeholder="Confirmer le mot de passe"
+                  autoComplete="new-password"
+                  className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
+                  required
+                />
+              </div>
+              
+              {/* Champ spécifique pour les chauffeurs */}
+              {userType === 'chauffeur' && (
+                <div className="mb-4">
+                  <label htmlFor="licenseNumber" className="mb-1 block text-sm text-gray-600">Numéro de permis de conduire</label>
+                  <input
+                    type="text"
+                    id="licenseNumber"
+                    name="licenseNumber"
+                    value={formData.licenseNumber}
+                    onChange={handleInputChange}
+                    placeholder="Ex: 123456789"
+                    className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
+                    required
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+
+          {isLogin && (
+            <div className="mb-2 text-right">
+              <a href="#" className="text-sm text-gray-500 hover:text-indigo-500">Mot de passe oublié ?</a>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="py-2.5 font-medium w-full rounded bg-indigo-500 text-white transition-colors duration-300 hover:bg-indigo-600"
+          >
+            {isLogin ? 'Se connecter' : 'Créer mon compte'}
+          </button>
+        </form>
+
+        {/* Réseaux sociaux pour connexion seulement */}
+        {isLogin && (
+          <>
+            {/* Séparateur */}
+            <div className="relative my-6 text-center">
+              <span className="relative z-10 bg-gray-50 px-3 text-gray-500 text-sm">Ou se connecter avec</span>
+              <div className="absolute top-1/2 left-0 h-px w-2/5 -translate-y-1/2 transform bg-gray-300"></div>
+              <div className="absolute top-1/2 right-0 h-px w-2/5 -translate-y-1/2 transform bg-gray-300"></div>
+            </div>
+
+            {/* Boutons sociaux */}
+            <button type="button"
+              className="flex py-2.5 w-full items-center justify-center gap-2 rounded bg-gray-800 text-gray-300 hover:bg-gray-900 transition-colors mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+                <path
+                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                  fill="#fff"></path>
+              </svg>
+              Github
+            </button>
+
+            <button type="button"
+              className="flex py-2.5 w-full items-center justify-center gap-2 rounded bg-gray-800 text-gray-300 hover:bg-gray-900 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20">
+                <path fill="#FFC107"
+                  d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917">
+                </path>
+                <path fill="#FF3D00"
+                  d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691">
+                </path>
+                <path fill="#4CAF50"
+                  d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.9 11.9 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44">
+                </path>
+                <path fill="#1976D2"
+                  d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917">
+                </path>
+              </svg>
+              Google
+            </button>
+          </>
+        )}
+
+        {/* Basculer entre connexion et inscription */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            {isLogin ? "Pas encore de compte ?" : "Déjà un compte ?"}
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="ml-1 text-indigo-500 hover:text-indigo-600 font-medium"
+            >
+              {isLogin ? "S'inscrire" : "Se connecter"}
+            </button>
+          </p>
+        </div>
+
+        {/* Conditions d'utilisation */}
+        <p className="mt-6 text-center text-xs text-gray-500">
+          En {isLogin ? 'vous connectant' : 'créant un compte'}, vous acceptez nos
+          <a href="#" className="underline hover:text-indigo-500"> Conditions d'utilisation</a> et notre 
+          <a href="#" className="underline hover:text-indigo-500"> Politique de confidentialité</a>.
+        </p>
+      </div>
+    </div>
+  );
+}

@@ -3,3 +3,12 @@
   themes :
   lofi
 };
+
+/* Global font */
+:root {
+  --font-poppins: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+html, body, #root {
+  font-family: var(--font-poppins);
+}
