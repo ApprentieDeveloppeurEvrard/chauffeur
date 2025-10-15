@@ -9,6 +9,7 @@ import MyOffers from './dashboard/MyOffers';
 import Candidates from './dashboard/Candidates';
 import Missions from './dashboard/Missions';
 import Settings from './dashboard/Settings';
+import Notifications from './dashboard/Notifications';
 
 export default function EmployerDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -109,6 +110,7 @@ export default function EmployerDashboard() {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         notifications={notifications}
+        onNotificationClick={() => setActiveTab('notifications')}
       />
 
       <div className="flex pt-20">
@@ -154,6 +156,11 @@ export default function EmployerDashboard() {
           {/* Missions en cours */}
           {activeTab === 'missions' && (
             <Missions activeMissions={activeMissions} />
+          )}
+
+          {/* Notifications */}
+          {activeTab === 'notifications' && (
+            <Notifications notifications={notifications} />
           )}
 
           {/* Paramètres */}

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export default function Header({ searchQuery, setSearchQuery, notifications }) {
+export default function Header({ searchQuery, setSearchQuery, notifications, onNotificationClick }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-white shadow-sm border-b border-gray-200">
       <div className="flex items-center justify-between px-6 py-4">
@@ -35,7 +35,10 @@ export default function Header({ searchQuery, setSearchQuery, notifications }) {
 
         {/* Actions utilisateur */}
         <div className="flex items-center gap-4">
-          <button className="relative p-2 text-gray-400 hover:text-gray-600">
+          <button 
+            onClick={onNotificationClick}
+            className="relative p-2 text-gray-400 hover:text-gray-600"
+          >
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5zM4 19h10v-1a3 3 0 00-3-3H7a3 3 0 00-3 3v1z" />
             </svg>

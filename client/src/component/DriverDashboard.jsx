@@ -4,12 +4,12 @@ import { useState } from 'react';
 import DriverHeader from './driver/DriverHeader';
 import DriverSidebar from './driver/DriverSidebar';
 import DriverDashboard from './driver/DriverDashboard';
-import DriverProfile from './driver/DriverProfile';
 import AvailableOffers from './driver/AvailableOffers';
 import MyApplications from './driver/MyApplications';
 import DriverMissions from './driver/DriverMissions';
 import DriverPayments from './driver/DriverPayments';
 import DriverNotifications from './driver/DriverNotifications';
+import DriverSettings from './driver/DriverSettings';
 
 export default function DriverDashboardMain() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -200,6 +200,7 @@ export default function DriverDashboardMain() {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         notifications={notifications}
+        onNotificationClick={() => setActiveTab('notifications')}
       />
 
       <div className="flex pt-20">
@@ -224,11 +225,6 @@ export default function DriverDashboardMain() {
               totalEarnings={totalEarnings}
               notifications={notifications}
             />
-          )}
-
-          {/* Profil */}
-          {activeTab === 'profile' && (
-            <DriverProfile />
           )}
 
           {/* Offres disponibles */}
@@ -257,6 +253,11 @@ export default function DriverDashboardMain() {
           {/* Notifications */}
           {activeTab === 'notifications' && (
             <DriverNotifications notifications={notifications} />
+          )}
+
+          {/* Paramètres */}
+          {activeTab === 'settings' && (
+            <DriverSettings />
           )}
         </main>
       </div>
