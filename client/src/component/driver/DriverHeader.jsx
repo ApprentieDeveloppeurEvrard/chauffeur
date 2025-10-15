@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import UserMenu from '../common/UserMenu';
 
 export default function DriverHeader({ searchQuery, setSearchQuery, notifications, onNotificationClick }) {
   return (
@@ -49,9 +50,7 @@ export default function DriverHeader({ searchQuery, setSearchQuery, notification
               </span>
             )}
           </button>
-          <div className="h-8 w-8 bg-green-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">C</span>
-          </div>
+          <UserMenu userInitial="C" userRole="driver" />
         </div>
       </div>
     </header>

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import UserMenu from '../common/UserMenu';
 
 export default function Header({ searchQuery, setSearchQuery, notifications, onNotificationClick }) {
   return (
@@ -48,9 +49,7 @@ export default function Header({ searchQuery, setSearchQuery, notifications, onN
               </span>
             )}
           </button>
-          <div className="h-8 w-8 bg-indigo-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">E</span>
-          </div>
+          <UserMenu userInitial="E" userRole="client" />
         </div>
       </div>
     </header>

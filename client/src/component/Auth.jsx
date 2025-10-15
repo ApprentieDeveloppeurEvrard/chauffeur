@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
+import Notification from "./common/Notification";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(false);
   const [userType, setUserType] = useState('chauffeur'); // 'chauffeur' ou 'employeur'
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
+  
+  const { login, register } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     loginIdentifier: '', // Pour connexion (téléphone ou email)
@@ -40,10 +47,111 @@ export default function Auth() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Intégrer avec l'API backend
-    console.log('Form submitted:', { ...formData, userType, isLogin });
+    setLoading(true);
+    setNotification(null);
+
+    try {
+      if (isLogin) {
+        // Connexion
+        const result = await login(formData.loginIdentifier, formData.password);
+        
+        if (result.success) {
+          setNotification({
+            type: 'success',
+            title: 'Connexion réussie !',
+            message: `Bienvenue ${result.user.firstName || result.user.email}`
+          });
+          
+          // Rediriger selon le rôle
+          setTimeout(() => {
+            if (result.user.role === 'driver') {
+              navigate('/driver-dashboard');
+            } else if (result.user.role === 'client') {
+              navigate('/employer-dashboard');
+            } else {
+              navigate('/');
+            }
+          }, 1500);
+        } else {
+          setNotification({
+            type: 'error',
+            title: 'Erreur de connexion',
+            message: result.error || 'Identifiants incorrects'
+          });
+        }
+      } else {
+        // Inscription
+        if (formData.password !== formData.confirmPassword) {
+          setNotification({
+            type: 'error',
+            title: 'Erreur de validation',
+            message: 'Les mots de passe ne correspondent pas'
+          });
+          setLoading(false);
+          return;
+        }
+
+        const userData = {
+          email: formData.email,
+          password: formData.password,
+          role: userType === 'chauffeur' ? 'driver' : 'client',
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone || '', // Téléphone optionnel
+        };
+
+        // Ajouter les champs spécifiques aux chauffeurs
+        if (userType === 'chauffeur') {
+          userData.licenseNumber = formData.licenseNumber;
+          userData.licenseType = 'B'; // Par défaut
+          userData.licenseDate = new Date().toISOString().split('T')[0]; // Date actuelle par défaut
+          userData.experience = formData.experience || '1-3';
+          userData.vehicleType = 'berline'; // Par défaut
+          userData.workZone = formData.zone || 'Paris';
+          userData.specialties = ['transport_personnel'];
+        }
+
+        const result = await register(userData);
+        
+        if (result.success) {
+          setNotification({
+            type: 'success',
+            title: 'Compte créé avec succès !',
+            message: userType === 'chauffeur' 
+              ? 'Votre profil chauffeur est en cours de validation'
+              : 'Vous pouvez maintenant accéder à votre tableau de bord'
+          });
+          
+          // Rediriger selon le rôle
+          setTimeout(() => {
+            if (result.user.role === 'driver') {
+              navigate('/driver-dashboard');
+            } else if (result.user.role === 'client') {
+              navigate('/employer-dashboard');
+            } else {
+              navigate('/');
+            }
+          }, 2000);
+        } else {
+          setNotification({
+            type: 'error',
+            title: 'Erreur lors de la création du compte',
+            message: result.error || 'Une erreur est survenue'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      setNotification({
+        type: 'error',
+        title: 'Erreur technique',
+        message: 'Une erreur technique est survenue. Veuillez réessayer.'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,6 +173,18 @@ export default function Auth() {
         <h1 className="mb-6 text-center text-2xl font-semibold">
           {isLogin ? 'Se connecter' : 'Créer un compte'}
         </h1>
+
+        {/* Notification */}
+        {notification && (
+          <div className="mb-4">
+            <Notification
+              type={notification.type}
+              title={notification.title}
+              message={notification.message}
+              onClose={() => setNotification(null)}
+            />
+          </div>
+        )}
 
         {/* Sélecteur de type d'utilisateur (uniquement pour l'inscription) */}
         {!isLogin && (
@@ -129,22 +249,35 @@ export default function Auth() {
                   />
                 </div>
               </div>
+              
+              <div className="mb-4">
+                <label htmlFor="email" className="mb-1 block text-sm text-gray-600">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email || ''}
+                  onChange={handleInputChange}
+                  placeholder="nom@exemple.com"
+                  className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
+                  required
+                />
+              </div>
             </>
           )}
-
 
           {/* Champs pour connexion */}
           {isLogin && (
             <>
               <div className="mb-4">
-                <label htmlFor="loginIdentifier" className="mb-1 block text-sm text-gray-600">Téléphone ou Email</label>
+                <label htmlFor="loginIdentifier" className="mb-1 block text-sm text-gray-600">Email ou Téléphone</label>
                 <input
                   type="text"
                   id="loginIdentifier"
                   name="loginIdentifier"
                   value={formData.loginIdentifier || ''}
                   onChange={handleInputChange}
-                  placeholder="06 12 34 56 78 ou nom@exemple.com"
+                  placeholder="nom@exemple.com ou 06 12 34 56 78"
                   className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
                   required
                 />
@@ -172,19 +305,6 @@ export default function Auth() {
           {/* Champs pour inscription */}
           {!isLogin && (
             <>
-              <div className="mb-4">
-                <label htmlFor="phone" className="mb-1 block text-sm text-gray-600">Téléphone</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="06 12 34 56 78"
-                  className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
-                  required
-                />
-              </div>
               <div className="mb-4">
                 <label htmlFor="password" className="mb-1 block text-sm text-gray-600">Mot de passe</label>
                 <input
@@ -242,9 +362,20 @@ export default function Auth() {
 
           <button
             type="submit"
-            className="py-2.5 font-medium w-full rounded bg-indigo-500 text-white transition-colors duration-300 hover:bg-indigo-600"
+            disabled={loading}
+            className="py-2.5 font-medium w-full rounded bg-indigo-500 text-white transition-colors duration-300 hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
-            {isLogin ? 'Se connecter' : 'Créer mon compte'}
+            {loading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {isLogin ? 'Connexion...' : 'Création...'}
+              </>
+            ) : (
+              isLogin ? 'Se connecter' : 'Créer mon compte'
+            )}
           </button>
         </form>
 
