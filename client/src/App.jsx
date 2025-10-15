@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import HeroSection from './component/hero.jsx'
 import Auth from './component/Auth.jsx'
 import EmployerDashboard from './component/EmployerDashboard.jsx'
+import DriverDashboard from './component/DriverDashboard.jsx'
 
 function App() {
   return (
@@ -17,6 +18,9 @@ function App() {
           
           {/* Dashboard employeur */}
           <Route path="/employer-dashboard" element={<EmployerDashboard />} />
+          
+          {/* Dashboard chauffeur */}
+          <Route path="/driver-dashboard" element={<DriverDashboard />} />
         </Routes>
       </div>
     </Router>
