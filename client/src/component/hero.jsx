@@ -53,11 +53,8 @@ export default function HeroSection() {
 
         {/* Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/auth?mode=login" className="px-6 py-2.5 text-slate-700 hover:text-slate-900 transition-all">
+          <Link to="/auth?mode=login" className="px-6 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all rounded-full">
             Se connecter
-          </Link>
-          <Link to="/auth?mode=register" className="px-6 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all rounded-full">
-            S'inscrire
           </Link>
         </div>
 
@@ -85,11 +82,8 @@ export default function HeroSection() {
         <a href="#employeurs">Employeurs</a>
         <a href="#comment-ca-marche">Comment ça marche</a>
         <div className="flex flex-col gap-4 mt-4">
-          <Link to="/auth?mode=login" className="px-6 py-2.5 text-slate-700 hover:text-slate-900 transition-all text-center">
+          <Link to="/auth?mode=login" className="px-6 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all rounded-full text-center">
             Se connecter
-          </Link>
-          <Link to="/auth?mode=register" className="px-6 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all rounded-full text-center">
-            S'inscrire
           </Link>
         </div>
 
@@ -158,10 +152,10 @@ export default function HeroSection() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 mt-8 text-sm">
-            <Link to="/auth?mode=register" className="bg-indigo-600 hover:bg-indigo-700 text-white active:scale-95 rounded-md px-7 h-11 w-full sm:w-auto flex items-center justify-center">
+            <Link to="/auth?mode=login" className="bg-indigo-600 hover:bg-indigo-700 text-white active:scale-95 rounded-md px-7 h-11 w-full sm:w-auto flex items-center justify-center">
               Je suis employeur
             </Link>
-            <Link to="/auth?mode=register" className="flex items-center justify-center gap-2 border border-slate-600 active:scale-95 hover:bg-white/10 transition text-slate-600 rounded-md px-6 h-11 w-full sm:w-auto">
+            <Link to="/auth?mode=login" className="flex items-center justify-center gap-2 border border-slate-600 active:scale-95 hover:bg-white/10 transition text-slate-600 rounded-md px-6 h-11 w-full sm:w-auto">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>

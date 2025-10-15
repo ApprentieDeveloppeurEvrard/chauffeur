@@ -5,7 +5,8 @@ import ProtectedRoute from './component/ProtectedRoute'
 import HeroSection from './component/hero.jsx'
 import Auth from './component/Auth.jsx'
 import EmployerDashboard from './component/EmployerDashboard.jsx'
-import DriverDashboard from './component/DriverDashboard.jsx'
+import DriverDashboard from './component/DriverDashboardMain.jsx'
+import SafeDriverDashboard from './component/SafeDriverDashboard.jsx'
 
 function App() {
   return (
@@ -34,7 +35,7 @@ function App() {
               path="/driver-dashboard" 
               element={
                 <ProtectedRoute requiredRole="driver">
-                  <DriverDashboard />
+                  <SafeDriverDashboard />
                 </ProtectedRoute>
               } 
             />

@@ -66,8 +66,96 @@ export const authApi = {
   me: () => api.get('/auth/me'),
 }
 
+// API pour les chauffeurs
 export const driversApi = {
+  // Récupérer tous les chauffeurs (pour employeurs)
   list: () => api.get('/drivers'),
+  // Récupérer les chauffeurs à proximité
+  nearby: (params) => api.get('/drivers/nearby', { params }),
+  // Récupérer le profil d'un chauffeur
+  getProfile: (driverId) => api.get(`/drivers/${driverId}`),
+  // Mettre à jour le profil du chauffeur connecté
+  updateProfile: (data) => api.put('/drivers/profile', data),
+  // Mettre à jour le statut du chauffeur
+  updateStatus: (driverId, status) => api.put(`/drivers/${driverId}/status`, { status }),
+  // Mettre à jour la localisation
+  updateLocation: (location) => api.put('/drivers/location', location),
+}
+
+// API pour les offres/missions
+export const offersApi = {
+  // Récupérer toutes les offres
+  list: (params) => api.get('/offers', { params }),
+  // Récupérer les offres de l'utilisateur connecté
+  myOffers: () => api.get('/offers/my'),
+  // Créer une nouvelle offre
+  create: (data) => api.post('/offers', data),
+  // Mettre à jour une offre
+  update: (offerId, data) => api.put(`/offers/${offerId}`, data),
+  // Supprimer une offre
+  delete: (offerId) => api.delete(`/offers/${offerId}`),
+  // Récupérer une offre spécifique
+  getById: (offerId) => api.get(`/offers/${offerId}`),
+}
+
+// API pour les candidatures
+export const applicationsApi = {
+  // Récupérer les candidatures pour une offre
+  getForOffer: (offerId) => api.get(`/offers/${offerId}/applications`),
+  // Récupérer les candidatures du chauffeur connecté
+  myApplications: () => api.get('/applications/my'),
+  // Postuler à une offre
+  apply: (offerId, data) => api.post(`/offers/${offerId}/apply`, data),
+  // Accepter/refuser une candidature
+  updateStatus: (applicationId, status) => api.put(`/applications/${applicationId}/status`, { status }),
+}
+
+// API pour les missions
+export const missionsApi = {
+  // Récupérer toutes les missions
+  list: (params) => api.get('/missions', { params }),
+  // Récupérer les missions de l'utilisateur connecté
+  myMissions: () => api.get('/missions/my'),
+  // Créer une nouvelle mission
+  create: (data) => api.post('/missions', data),
+  // Mettre à jour une mission
+  update: (missionId, data) => api.put(`/missions/${missionId}`, data),
+  // Terminer une mission
+  complete: (missionId, data) => api.put(`/missions/${missionId}/complete`, data),
+}
+
+// API pour les notifications
+export const notificationsApi = {
+  // Récupérer les notifications de l'utilisateur
+  list: () => api.get('/notifications'),
+  // Marquer une notification comme lue
+  markAsRead: (notificationId) => api.put(`/notifications/${notificationId}/read`),
+  // Marquer toutes les notifications comme lues
+  markAllAsRead: () => api.put('/notifications/read-all'),
+  // Supprimer une notification
+  delete: (notificationId) => api.delete(`/notifications/${notificationId}`),
+}
+
+// API pour les statistiques
+export const statsApi = {
+  // Statistiques du dashboard employeur
+  employerStats: () => api.get('/stats/employer'),
+  // Statistiques du dashboard chauffeur
+  driverStats: () => api.get('/stats/driver'),
+  // Statistiques générales
+  general: () => api.get('/stats/general'),
+}
+
+// API pour les véhicules
+export const vehiclesApi = {
+  // Récupérer les véhicules du chauffeur connecté
+  myVehicles: () => api.get('/vehicles/my'),
+  // Ajouter un véhicule
+  create: (data) => api.post('/vehicles', data),
+  // Mettre à jour un véhicule
+  update: (vehicleId, data) => api.put(`/vehicles/${vehicleId}`, data),
+  // Supprimer un véhicule
+  delete: (vehicleId) => api.delete(`/vehicles/${vehicleId}`),
 }
 
 export default api

@@ -44,9 +44,9 @@ export default function DriverHeader({ searchQuery, setSearchQuery, notification
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5zM4 19h10v-1a3 3 0 00-3-3H7a3 3 0 00-3 3v1z" />
             </svg>
-            {notifications.filter(n => n.unread).length > 0 && (
+            {notifications && notifications.filter(n => n.unread || !n.read).length > 0 && (
               <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                {notifications.filter(n => n.unread).length}
+                {notifications.filter(n => n.unread || !n.read).length}
               </span>
             )}
           </button>
