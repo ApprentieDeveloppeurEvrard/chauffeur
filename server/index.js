@@ -7,6 +7,11 @@ const authRoutes = require('./routes/auth');
 const driverRoutes = require('./routes/drivers');
 const vehicleRoutes = require('./routes/vehicles');
 const rideRoutes = require('./routes/rides');
+const offerRoutes = require('./routes/offers');
+const applicationRoutes = require('./routes/applications');
+const statsRoutes = require('./routes/stats');
+const missionRoutes = require('./routes/missions');
+const notificationRoutes = require('./routes/notifications');
 
 const { connectToDatabase } = require('./db/connect');
 const app = express();
@@ -23,6 +28,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/rides', rideRoutes);
+app.use('/api/offers', offerRoutes);
+app.use('/api/applications', applicationRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/missions', missionRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Not found handler
 app.use((req, res) => {
