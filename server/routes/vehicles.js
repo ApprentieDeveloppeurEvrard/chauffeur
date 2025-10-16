@@ -9,6 +9,18 @@ router.get('/', async (req, res) => {
   return res.json(vehicles);
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    const vehicle = await Vehicle.findById(req.params.id);
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+    return res.json(vehicle);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/', requireAuth, async (req, res) => {
   const { make, model, plate, driverId } = req.body || {};
   if (!plate) return res.status(400).json({ error: 'plate required' });

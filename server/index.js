@@ -12,6 +12,7 @@ const applicationRoutes = require('./routes/applications');
 const statsRoutes = require('./routes/stats');
 const missionRoutes = require('./routes/missions');
 const notificationRoutes = require('./routes/notifications');
+const adminRoutes = require('./routes/admin');
 
 const { connectToDatabase } = require('./db/connect');
 const app = express();
@@ -33,6 +34,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/missions', missionRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Not found handler
 app.use((req, res) => {

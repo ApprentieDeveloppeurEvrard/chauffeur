@@ -9,6 +9,18 @@ router.get('/', async (req, res) => {
   return res.json(rides);
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    const ride = await Ride.findById(req.params.id);
+    if (!ride) {
+      return res.status(404).json({ error: 'Ride not found' });
+    }
+    return res.json(ride);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 router.post('/', requireAuth, async (req, res) => {
   const { clientName, pickup, dropoff, driverId, vehicleId, time } = req.body || {};
   if (!clientName || !pickup || !dropoff) return res.status(400).json({ error: 'missing required fields' });
