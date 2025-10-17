@@ -17,7 +17,20 @@ const adminRoutes = require('./routes/admin');
 const { connectToDatabase } = require('./db/connect');
 const app = express();
 
-app.use(cors());
+// Configuration CORS pour la production
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? [
+        'https://client-chauffeur.onrender.com',
+        'https://admin-chauffeur.onrender.com',
+        'https://server-chauffeur.onrender.com'
+      ]
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(morgan('dev'));
 
