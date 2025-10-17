@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { applicationsApi } from '../../services/api';
+import DriverProfileModal from './DriverProfileModal';
 
 export default function Candidates({ receivedApplications, loading, refreshData }) {
   const [processingApplication, setProcessingApplication] = useState(null);
+  const [selectedApplication, setSelectedApplication] = useState(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -70,21 +73,14 @@ export default function Candidates({ receivedApplications, loading, refreshData 
   // Fonction pour voir le profil d'un chauffeur
   const handleViewProfile = (application) => {
     console.log('Voir profil:', application);
-    
-    // Pour l'instant, affichons les informations dans une alerte
-    // Plus tard, on pourra ouvrir une modale avec le profil complet
-    const driver = application.driver;
-    const profileInfo = `
-Profil du chauffeur:
-- Nom: ${driver?.firstName} ${driver?.lastName}
-- Email: ${driver?.email}
-- Téléphone: ${driver?.phone || 'Non renseigné'}
-- Candidature pour: ${application.offer?.title}
-- Message: ${application.message || 'Aucun message'}
-- Date de candidature: ${new Date(application.createdAt).toLocaleDateString()}
-    `;
-    
-    alert(profileInfo);
+    setSelectedApplication(application);
+    setIsProfileModalOpen(true);
+  };
+
+  // Fonction pour fermer la modale
+  const handleCloseProfileModal = () => {
+    setIsProfileModalOpen(false);
+    setSelectedApplication(null);
   };
   
   return (
@@ -281,6 +277,13 @@ Profil du chauffeur:
           </div>
         </div>
       )}
+
+      {/* Modale du profil du chauffeur */}
+      <DriverProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={handleCloseProfileModal}
+        application={selectedApplication}
+      />
     </div>
   );
 }

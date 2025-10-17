@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { offersApi } from '../../services/api';
+import Modal from '../common/Modal';
 
 // Style pour masquer la barre de défilement
 const scrollbarHideStyle = `
@@ -20,8 +21,7 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
     requirements: {
       licenseType: 'B',
       experience: '1-3 ans',
-      vehicleType: '',
-      zone: ''
+      vehicleType: ''
     },
     conditions: {
       salary: '',
@@ -50,6 +50,20 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     
+    // Validation spéciale pour le champ salaire (seuls les chiffres)
+    if (name === 'conditions.salary') {
+      const numericValue = value.replace(/[^0-9]/g, '');
+      const [section, field] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: numericValue
+        }
+      }));
+      return;
+    }
+    
     if (name.includes('.')) {
       const [section, field] = name.split('.');
       setFormData(prev => ({
@@ -73,8 +87,7 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
     if (!formData.title.trim()) newErrors.title = 'Le titre est obligatoire';
     if (!formData.description.trim()) newErrors.description = 'La description est obligatoire';
     if (!formData.type) newErrors.type = 'Le type de mission est obligatoire';
-    if (!formData.requirements.zone.trim()) newErrors.zone = 'La zone géographique est obligatoire';
-    if (!formData.location.city.trim()) newErrors.city = 'La ville est obligatoire';
+    if (!formData.location.city.trim()) newErrors.city = 'La zone géographique est obligatoire';
     if (!formData.conditions.startDate) newErrors.startDate = 'La date de début est obligatoire';
     
     setErrors(newErrors);
@@ -94,14 +107,36 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
       // Nettoyer les données avant envoi
       const cleanedData = { ...formData };
       
-      // Supprimer salary s'il est vide pour éviter les erreurs de validation
-      if (!cleanedData.conditions.salary || cleanedData.conditions.salary === '') {
+      // Ajouter le champ zone requis par le serveur (utiliser la valeur de city)
+      cleanedData.requirements.zone = cleanedData.location.city;
+      
+      // Convertir le salaire en nombre s'il existe
+      if (cleanedData.conditions.salary && cleanedData.conditions.salary.toString().trim() !== '') {
+        cleanedData.conditions.salary = parseInt(cleanedData.conditions.salary, 10);
+      } else {
         delete cleanedData.conditions.salary;
       }
       
       // Supprimer vehicleType s'il est vide pour éviter les erreurs d'enum
       if (!cleanedData.requirements.vehicleType || cleanedData.requirements.vehicleType === '') {
         delete cleanedData.requirements.vehicleType;
+      }
+      
+      // Nettoyer les champs vides
+      if (!cleanedData.conditions.endDate) {
+        delete cleanedData.conditions.endDate;
+      }
+      if (!cleanedData.conditions.schedule || cleanedData.conditions.schedule.trim() === '') {
+        delete cleanedData.conditions.schedule;
+      }
+      if (!cleanedData.location.address || cleanedData.location.address.trim() === '') {
+        delete cleanedData.location.address;
+      }
+      
+      // Validation finale des données
+      if (!cleanedData.title || !cleanedData.description || !cleanedData.type || 
+          !cleanedData.location?.city || !cleanedData.conditions?.startDate) {
+        throw new Error('Champs obligatoires manquants');
       }
       
       console.log('Données envoyées:', cleanedData);
@@ -116,8 +151,7 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
         requirements: {
           licenseType: 'B',
           experience: '1-3 ans',
-          vehicleType: '',
-          zone: ''
+          vehicleType: ''
         },
         conditions: {
           salary: '',
@@ -153,11 +187,20 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
     } catch (error) {
       console.error('Erreur complète:', error);
       console.error('Réponse du serveur:', error.response?.data);
+      console.error('Status:', error.response?.status);
+      console.error('Headers:', error.response?.headers);
       
       let errorMessage = 'Erreur lors de la création de l\'offre';
       
-      if (error.response?.data?.details) {
-        errorMessage += ':\n' + error.response.data.details.join('\n');
+      if (error.response?.status === 400) {
+        errorMessage = 'Données invalides. Vérifiez les champs obligatoires.';
+        if (error.response?.data?.details) {
+          errorMessage += '\nDétails: ' + error.response.data.details.join(', ');
+        }
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Vous devez être connecté pour créer une offre.';
+      } else if (error.response?.status === 500) {
+        errorMessage = 'Erreur serveur. Veuillez réessayer plus tard.';
       } else if (error.response?.data?.error) {
         errorMessage += ': ' + error.response.data.error;
       } else if (error.message) {
@@ -170,28 +213,16 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
     }
   };
 
-  if (!showCreateForm) return null;
-
   return (
     <>
       <style>{scrollbarHideStyle}</style>
-      <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="relative w-full max-w-2xl shadow-2xl rounded-lg bg-white max-h-[85vh] overflow-hidden border-0 flex flex-col">
-        {/* Header fixe */}
-        <div className="flex justify-between items-center p-5 border-b border-gray-200 flex-shrink-0">
-          <h3 className="text-lg font-medium text-gray-900">Créer une nouvelle offre</h3>
-          <button
-            onClick={() => setShowCreateForm(false)}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        
-        {/* Contenu avec défilement interne */}
-        <div className="flex-1 overflow-y-auto p-5 scrollbar-hide">
+      <Modal
+        isOpen={showCreateForm}
+        onClose={() => setShowCreateForm(false)}
+        title="Créer une nouvelle offre"
+        size="lg"
+      >
+        <div className="max-h-[70vh] overflow-y-auto scrollbar-hide">
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Titre */}
             <div>
@@ -259,43 +290,46 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
               {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
             </div>
 
-            {/* Zone et Ville */}
+            {/* Zone géographique et Salaire */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Zone géographique *</label>
                 <input
                   type="text"
-                  name="requirements.zone"
-                  value={formData.requirements.zone}
-                  onChange={handleInputChange}
-                  placeholder="Ex: Cocody, Plateau, Marcory, Treichville, Yopougon..."
-                  className={`w-full p-3 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 ${errors.zone ? 'border-red-500' : 'border-gray-300'}`}
-                  required
-                />
-                {errors.zone && <p className="text-red-500 text-sm mt-1">{errors.zone}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ville *</label>
-                <select 
                   name="location.city"
                   value={formData.location.city}
                   onChange={handleInputChange}
+                  placeholder="Ex: Abidjan, Cocody..."
                   className={`w-full p-3 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 ${errors.city ? 'border-red-500' : 'border-gray-300'}`}
                   required
-                >
-                  <option value="">Sélectionner une ville</option>
-                  <option value="Abidjan">Abidjan</option>
-                  <option value="Bouaké">Bouaké</option>
-                  <option value="Daloa">Daloa</option>
-                  <option value="Yamoussoukro">Yamoussoukro</option>
-                  <option value="San-Pédro">San-Pédro</option>
-                  <option value="Korhogo">Korhogo</option>
-                  <option value="Man">Man</option>
-                  <option value="Divo">Divo</option>
-                  <option value="Gagnoa">Gagnoa</option>
-                  <option value="Abengourou">Abengourou</option>
-                </select>
+                />
                 {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Salaire proposé</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    name="conditions.salary"
+                    value={formData.conditions.salary}
+                    onChange={handleInputChange}
+                    placeholder="150000"
+                    className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <select 
+                    name="conditions.salaryType"
+                    value={formData.conditions.salaryType}
+                    onChange={handleInputChange}
+                    className="w-16 p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-xs"
+                  >
+                    <option value="horaire">/h</option>
+                    <option value="journalier">/j</option>
+                    <option value="mensuel">/m</option>
+                    <option value="fixe">Fixe</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -371,7 +405,7 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">Type de véhicule (optionnel)</label>
+                  <label className="block text-sm text-gray-600 mb-1">Type de véhicule</label>
                   <select 
                     name="requirements.vehicleType"
                     value={formData.requirements.vehicleType}
@@ -424,8 +458,7 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
             </div>
           </form>
         </div>
-      </div>
-      </div>
+      </Modal>
     </>
   );
 }

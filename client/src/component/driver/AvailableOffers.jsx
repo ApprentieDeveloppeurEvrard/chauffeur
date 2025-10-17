@@ -194,7 +194,7 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                     
                     <p className="text-gray-600 mb-3">{offer.description}</p>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-gray-500">📍 Zone:</span>
                         <span className="ml-1 font-medium">{offer.location?.city || offer.requirements?.zone}</span>
@@ -203,6 +203,22 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                         <span className="text-gray-500">💼 Type:</span>
                         <span className="ml-1 font-medium">{offer.conditions?.workType || 'Non spécifié'}</span>
                       </div>
+                      {offer.conditions?.salary && (
+                        <div>
+                          <span className="text-gray-500">💰 Salaire:</span>
+                          <span className="ml-1 font-medium text-green-600">
+                            {offer.conditions.salary}€
+                            {offer.conditions.salaryType && (
+                              <span className="text-gray-500">
+                                {offer.conditions.salaryType === 'horaire' && '/h'}
+                                {offer.conditions.salaryType === 'journalier' && '/j'}
+                                {offer.conditions.salaryType === 'mensuel' && '/m'}
+                                {offer.conditions.salaryType === 'fixe' && ''}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      )}
                       <div>
                         <span className="text-gray-500">📅 Publié:</span>
                         <span className="ml-1 font-medium">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { applicationsApi } from '../../services/api';
+import Modal from '../common/Modal';
 
 // Style pour masquer la barre de défilement
 const scrollbarHideStyle = `
@@ -92,35 +93,27 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
   return (
     <>
       <style>{scrollbarHideStyle}</style>
-      <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-        <div className="relative w-full max-w-3xl shadow-2xl rounded-lg bg-white max-h-[90vh] overflow-hidden border-0 flex flex-col">
-          {/* Header fixe */}
-          <div className="flex justify-between items-center p-6 border-b border-gray-200 flex-shrink-0">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900">{offer.title}</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
-                  {offer.type}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={
+          <div>
+            <div className="text-xl font-semibold text-gray-900">{offer.title}</div>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                {offer.type}
+              </span>
+              {offer.isUrgent && (
+                <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">
+                  🚨 Urgent
                 </span>
-                {offer.isUrgent && (
-                  <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">
-                    🚨 Urgent
-                  </span>
-                )}
-              </div>
+              )}
             </div>
-            <button
-              onClick={() => setShowModal(false)}
-              className="text-gray-400 hover:text-gray-600 p-2"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
-          
-          {/* Contenu avec défilement interne */}
-          <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+        }
+        size="xl"
+      >
+        <div className="max-h-[60vh] overflow-y-auto scrollbar-hide">
             <div className="space-y-6">
               
               {/* Description */}
@@ -176,6 +169,22 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
                       <div>
                         <span className="text-sm font-medium text-gray-600">Horaires:</span>
                         <span className="ml-2 text-gray-900">{offer.conditions.schedule}</span>
+                      </div>
+                    )}
+                    {offer.conditions?.salary && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Salaire:</span>
+                        <span className="ml-2 text-gray-900 font-semibold text-green-600">
+                          {offer.conditions.salary}€
+                          {offer.conditions.salaryType && (
+                            <span className="text-gray-600 font-normal">
+                              {offer.conditions.salaryType === 'horaire' && ' /heure'}
+                              {offer.conditions.salaryType === 'journalier' && ' /jour'}
+                              {offer.conditions.salaryType === 'mensuel' && ' /mois'}
+                              {offer.conditions.salaryType === 'fixe' && ' (fixe)'}
+                            </span>
+                          )}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -286,64 +295,63 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Footer avec boutons */}
-          <div className="flex justify-end gap-3 p-6 border-t border-gray-200 flex-shrink-0">
-            <button
-              onClick={() => setShowModal(false)}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              Fermer
-            </button>
-            {hasApplied ? (
-              <button
-                onClick={handleCancelApplication}
-                disabled={applying}
-                className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {applying ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Annulation...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Annuler la candidature
-                  </>
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={handleApply}
-                disabled={applying}
-                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {applying ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Envoi en cours...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                    Postuler à cette offre
-                  </>
-                )}
-              </button>
-            )}
-          </div>
         </div>
-      </div>
+
+        {/* Footer avec boutons */}
+        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+          <button
+            onClick={() => setShowModal(false)}
+            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            Fermer
+          </button>
+          {hasApplied ? (
+            <button
+              onClick={handleCancelApplication}
+              disabled={applying}
+              className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {applying ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Annulation...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Annuler la candidature
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={handleApply}
+              disabled={applying}
+              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {applying ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Envoi en cours...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                  Postuler à cette offre
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </Modal>
     </>
   );
 }

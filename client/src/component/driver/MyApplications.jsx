@@ -154,12 +154,22 @@ export default function MyApplications({ myApplications, loading }) {
                       <span className="text-gray-500">Type:</span>
                       <span className="ml-1 font-medium">{application.offer?.type || 'Non spécifié'}</span>
                     </div>
-                    <div>
-                      <span className="text-gray-500">Horaires:</span>
-                      <span className="ml-1 font-medium">
-                        {application.offer?.conditions?.workType || 'Non spécifié'}
-                      </span>
-                    </div>
+                    {application.offer?.conditions?.salary && (
+                      <div>
+                        <span className="text-gray-500">💰 Salaire:</span>
+                        <span className="ml-1 font-medium text-green-600">
+                          {application.offer.conditions.salary}€
+                          {application.offer.conditions.salaryType && (
+                            <span className="text-gray-500">
+                              {application.offer.conditions.salaryType === 'horaire' && '/h'}
+                              {application.offer.conditions.salaryType === 'journalier' && '/j'}
+                              {application.offer.conditions.salaryType === 'mensuel' && '/m'}
+                              {application.offer.conditions.salaryType === 'fixe' && ''}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    )}
                     <div>
                       <span className="text-gray-500">Postulé:</span>
                       <span className="ml-1 font-medium">
