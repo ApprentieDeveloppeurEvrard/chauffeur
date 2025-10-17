@@ -1,0 +1,49 @@
+services:
+  # Backend API Server
+  - type: web
+    name: server-chauffeur
+    env: node
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && node index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: true
+      - key: MONGO_URI
+        sync: false # À configurer manuellement dans Render
+      - key: JWT_SECRET
+        sync: false # À configurer manuellement dans Render
+      - key: CLIENT_URL
+        sync: false # URL du client frontend
+      - key: ADMIN_URL
+        sync: false # URL de l'admin frontend
+
+  # Client Frontend
+  - type: web
+    name: chauffeur
+    env: static
+    plan: free
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: client/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false # À configurer manuellement dans Render
+      - key: VITE_API_BASE_URL
+        sync: false # À configurer manuellement dans Render
+
+  # Admin Frontend  
+  - type: web
+    name: admin-chauffeur
+    env: static
+    plan: free
+    buildCommand: cd admin && npm install && npm run build
+    staticPublishPath: admin/dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false # À configurer manuellement dans Render
+      - key: VITE_API_BASE_URL
+        sync: false # À configurer manuellement dans Render
+      - key: VITE_CLIENT_URL
+        sync: false # URL du client frontend
