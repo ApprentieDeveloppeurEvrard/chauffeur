@@ -21,10 +21,10 @@ const app = express();
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? [
-        'https://client-chauffeur.onrender.com',
-        'https://admin-chauffeur.onrender.com',
-        'https://server-chauffeur.onrender.com'
-      ]
+        process.env.CLIENT_URL,
+        process.env.ADMIN_URL,
+        process.env.API_URL || `https://${process.env.RENDER_SERVICE_NAME}.onrender.com`
+      ].filter(Boolean) // Supprime les valeurs undefined
     : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
   credentials: true,
   optionsSuccessStatus: 200
