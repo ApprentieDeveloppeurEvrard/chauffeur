@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import Notification from "./common/Notification";
-import { debugConfig, testApiConnection } from "../utils/debug";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -429,19 +428,6 @@ export default function Auth() {
           <a href="#" className="underline hover:text-indigo-500"> Conditions d'utilisation</a> et notre 
           <a href="#" className="underline hover:text-indigo-500"> Politique de confidentialité</a>.
         </p>
-
-        {/* DEBUG - À supprimer en production */}
-        <div className="mt-4 p-2 bg-yellow-100 rounded text-xs">
-          <button 
-            onClick={() => {
-              debugConfig();
-              testApiConnection();
-            }}
-            className="text-blue-600 underline"
-          >
-            🔧 Debug API Config
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import Auth from './component/Auth.jsx'
 import EmployerDashboard from './component/EmployerDashboard.jsx'
 import DriverDashboard from './component/DriverDashboardMain.jsx'
 import SafeDriverDashboard from './component/SafeDriverDashboard.jsx'
+import TestAPI from './pages/TestAPI.jsx'
 
 function App() {
   return (
@@ -39,6 +40,9 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Page de test API */}
+            <Route path="/test-api" element={<TestAPI />} />
           </Routes>
         </div>
       </Router>
