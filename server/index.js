@@ -61,10 +61,15 @@ app.get('/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
+    version: '1.0.1', // Version pour vérifier le déploiement
     cors: {
       clientUrl: process.env.CLIENT_URL,
       adminUrl: process.env.ADMIN_URL,
       apiUrl: process.env.API_URL
+    },
+    requestHeaders: {
+      origin: req.get('Origin'),
+      userAgent: req.get('User-Agent')?.substring(0, 50) + '...'
     }
   });
 });
