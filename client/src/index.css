@@ -1,8 +1,5 @@
 @import "tailwindcss";
-@plugin "daisyui"{
-  themes :
-  lofi
-};
+@import "daisyui";
 
 /* Global font */
 :root {
@@ -11,4 +8,49 @@
 
 html, body, #root {
   font-family: var(--font-poppins);
+}
+
+/* Masquer les barres de défilement globalement */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Safari et Chrome */
+}
+
+/* Masquer spécifiquement pour les éléments avec overflow */
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar {
+  display: none;
+}
+
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-auto {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Classe utilitaire pour masquer les scrollbars */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Masquer les scrollbars pour les éléments body et html */
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
 }

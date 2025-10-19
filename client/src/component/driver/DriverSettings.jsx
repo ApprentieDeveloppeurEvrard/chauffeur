@@ -383,7 +383,7 @@ export default function DriverSettings() {
                   name="licenseNumber"
                   value={formData.licenseNumber}
                   onChange={handleInputChange}
-                  placeholder="123456789"
+                  placeholder="CI240001234"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                 />
               </div>
@@ -434,7 +434,7 @@ export default function DriverSettings() {
                   name="vehicleBrand"
                   value={formData.vehicleBrand}
                   onChange={handleInputChange}
-                  placeholder="Ex: Peugeot 508"
+                  placeholder="Ex: Toyota Corolla"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                 />
               </div>

@@ -11,6 +11,7 @@ import DriverMissions from './driver/DriverMissions';
 import DriverPayments from './driver/DriverPayments';
 import DriverNotifications from './driver/DriverNotifications';
 import DriverSettings from './driver/DriverSettings';
+import MobileBottomNav from './mobile/MobileBottomNav';
 
 export default function SafeDriverDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -100,6 +101,11 @@ export default function SafeDriverDashboard() {
     );
   }
 
+  // Fonction pour gérer le clic sur le logo
+  const handleLogoClick = () => {
+    setActiveTab('dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -108,30 +114,28 @@ export default function SafeDriverDashboard() {
         setSearchQuery={setSearchQuery}
         notifications={notifications || []}
         onNotificationClick={() => setActiveTab('notifications')}
+        onLogoClick={handleLogoClick}
         loading={loading}
       />
 
       <div className="flex pt-20">
-        {/* Sidebar */}
-        <DriverSidebar 
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          availableOffers={availableOffers || []}
-          myApplications={myApplications || []}
-          activeMissions={myMissions || []}
-          notifications={notifications || []}
-        />
+        {/* Sidebar - Desktop uniquement */}
+        <div className="hidden lg:block">
+          <DriverSidebar 
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            availableOffers={availableOffers || []}
+            myApplications={myApplications || []}
+            activeMissions={myMissions || []}
+            notifications={notifications || []}
+          />
+        </div>
 
         {/* Contenu principal */}
-        <main className="flex-1 ml-64 p-6">
+        <main className="flex-1 lg:ml-64 p-4 lg:p-6 pb-32 lg:pb-6">
           {/* Dashboard - Vue d'ensemble */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
-              {/* Test simple d'abord */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">Tableau de bord</h1>
-                <p className="text-gray-600">Vue d'ensemble de votre activité chauffeur</p>
-              </div>
 
               {/* Statistiques rapides */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -186,7 +190,7 @@ export default function SafeDriverDashboard() {
                     </div>
                     <div className="ml-4">
                       <p className="text-sm font-medium text-gray-600">Revenus ce mois</p>
-                      <p className="text-2xl font-semibold text-gray-900">{totalEarnings || 0}€</p>
+                      <p className="text-2xl font-semibold text-gray-900">{totalEarnings || 0} FCFA</p>
                     </div>
                   </div>
                 </div>
@@ -258,6 +262,55 @@ export default function SafeDriverDashboard() {
           )}
         </main>
       </div>
+
+      {/* Navigation mobile */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        userRole="driver"
+        menuItems={[
+          {
+            id: 'dashboard',
+            label: 'Tableau de bord',
+            icon: (
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+              </svg>
+            )
+          },
+          {
+            id: 'available-offers',
+            label: 'Offres disponibles',
+            icon: (
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            ),
+            badge: availableOffers?.length || 0
+          },
+          {
+            id: 'my-applications',
+            label: 'Mes candidatures',
+            icon: (
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            ),
+            badge: myApplications?.filter(app => app.status === 'pending').length || 0
+          },
+          {
+            id: 'missions',
+            label: 'Missions',
+            icon: (
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            ),
+            badge: myMissions?.filter(m => m.status === 'active').length || 0
+          }
+        ]}
+      />
+
     </div>
   );
 }

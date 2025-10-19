@@ -113,7 +113,7 @@ export default function DriverProfile() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Numéro de permis</label>
                 <input
                   type="text"
-                  placeholder="123456789"
+                  placeholder="CI240001234"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                 />
               </div>
@@ -151,7 +151,7 @@ export default function DriverProfile() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Marque et modèle</label>
                 <input
                   type="text"
-                  placeholder="Ex: Peugeot 508"
+                  placeholder="Ex: Toyota Corolla"
                   className="w-full p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                 />
               </div>

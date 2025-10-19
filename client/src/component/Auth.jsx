@@ -258,7 +258,7 @@ export default function Auth() {
                   name="email"
                   value={formData.email || ''}
                   onChange={handleInputChange}
-                  placeholder="nom@exemple.com"
+                  placeholder="nom@exemple.ci"
                   className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
                   required
                 />
@@ -277,7 +277,7 @@ export default function Auth() {
                   name="loginIdentifier"
                   value={formData.loginIdentifier || ''}
                   onChange={handleInputChange}
-                  placeholder="nom@exemple.com ou 06 12 34 56 78"
+                  placeholder="nom@exemple.ci ou 07 12 34 56 78"
                   className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
                   required
                 />
@@ -341,7 +341,7 @@ export default function Auth() {
                     name="licenseNumber"
                     value={formData.licenseNumber}
                     onChange={handleInputChange}
-                    placeholder="Ex: 123456789"
+                    placeholder="Ex: CI240001234"
                     className="py-2 w-full rounded border border-gray-300 bg-white px-3 text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none focus:border-indigo-500"
                     required
                   />

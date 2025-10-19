@@ -175,7 +175,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
                       <div>
                         <span className="text-sm font-medium text-gray-600">Salaire:</span>
                         <span className="ml-2 text-gray-900 font-semibold text-green-600">
-                          {offer.conditions.salary}€
+                          {offer.conditions.salary} FCFA
                           {offer.conditions.salaryType && (
                             <span className="text-gray-600 font-normal">
                               {offer.conditions.salaryType === 'horaire' && ' /heure'}

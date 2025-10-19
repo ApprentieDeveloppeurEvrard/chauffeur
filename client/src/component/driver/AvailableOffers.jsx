@@ -95,21 +95,21 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Offres disponibles</h1>
-        <p className="text-gray-600">Découvrez les missions qui correspondent à votre profil</p>
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Offres disponibles</h1>
+        <p className="text-sm lg:text-base text-gray-600">Découvrez les missions qui correspondent à votre profil</p>
       </div>
 
       {/* Header avec bouton actualiser */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-3 mb-6">
         <div>
-          <p className="text-gray-600">
+          <p className="text-sm lg:text-base text-gray-600">
             {availableOffers?.length || 0} offre{(availableOffers?.length || 0) !== 1 ? 's' : ''} disponible{(availableOffers?.length || 0) !== 1 ? 's' : ''}
           </p>
         </div>
         <button
           onClick={refreshData}
           disabled={loading}
-          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
+          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 w-full lg:w-auto justify-center lg:justify-start"
         >
           <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -120,7 +120,7 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
 
       {/* Filtres pour la Côte d'Ivoire */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <div className="flex flex-wrap gap-4">
+        <div className="grid grid-cols-1 lg:flex lg:flex-wrap gap-4">
           <select className="px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
             <option>Toutes villes</option>
             <option>Abidjan</option>
@@ -151,23 +151,23 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-lg shadow p-6 animate-pulse">
-              <div className="flex justify-between items-start">
+            <div key={i} className="bg-white rounded-lg shadow p-4 lg:p-6 animate-pulse">
+              <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-                    <div className="h-5 bg-gray-200 rounded w-16"></div>
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 mb-2">
+                    <div className="h-5 lg:h-6 bg-gray-200 rounded w-1/2 lg:w-1/3"></div>
+                    <div className="h-4 lg:h-5 bg-gray-200 rounded w-16"></div>
                   </div>
                   <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-2 lg:gap-4">
                     {[1, 2, 3, 4].map(j => (
                       <div key={j} className="h-3 bg-gray-200 rounded w-20"></div>
                     ))}
                   </div>
                 </div>
-                <div className="ml-6 flex flex-col gap-2">
-                  <div className="h-8 bg-gray-200 rounded w-20"></div>
-                  <div className="h-8 bg-gray-200 rounded w-20"></div>
+                <div className="flex lg:flex-col gap-2 lg:ml-6">
+                  <div className="h-8 bg-gray-200 rounded flex-1 lg:w-20"></div>
+                  <div className="h-8 bg-gray-200 rounded flex-1 lg:w-20"></div>
                 </div>
               </div>
             </div>
@@ -177,37 +177,39 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
         <div className="space-y-4">
           {availableOffers.map(offer => (
             <div key={offer._id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-              <div className="p-6">
-                <div className="flex justify-between items-start">
+              <div className="p-4 lg:p-6">
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{offer.title}</h3>
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
-                        {offer.type}
-                      </span>
-                      {offer.isUrgent && (
-                        <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">
-                          Urgent
+                    <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 mb-2">
+                      <h3 className="text-base lg:text-lg font-semibold text-gray-900">{offer.title}</h3>
+                      <div className="flex gap-2">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                          {offer.type}
                         </span>
-                      )}
+                        {offer.isUrgent && (
+                          <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">
+                            Urgent
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
-                    <p className="text-gray-600 mb-3">{offer.description}</p>
+                    <p className="text-sm lg:text-base text-gray-600 mb-3">{offer.description}</p>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-2 lg:gap-4 text-sm">
+                      <div className="flex justify-between lg:block">
                         <span className="text-gray-500">📍 Zone:</span>
                         <span className="ml-1 font-medium">{offer.location?.city || offer.requirements?.zone}</span>
                       </div>
-                      <div>
+                      <div className="flex justify-between lg:block">
                         <span className="text-gray-500">💼 Type:</span>
                         <span className="ml-1 font-medium">{offer.conditions?.workType || 'Non spécifié'}</span>
                       </div>
                       {offer.conditions?.salary && (
-                        <div>
+                        <div className="flex justify-between lg:block">
                           <span className="text-gray-500">💰 Salaire:</span>
                           <span className="ml-1 font-medium text-green-600">
-                            {offer.conditions.salary}€
+                            {offer.conditions.salary} FCFA
                             {offer.conditions.salaryType && (
                               <span className="text-gray-500">
                                 {offer.conditions.salaryType === 'horaire' && '/h'}
@@ -219,7 +221,7 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                           </span>
                         </div>
                       )}
-                      <div>
+                      <div className="flex justify-between lg:block">
                         <span className="text-gray-500">📅 Publié:</span>
                         <span className="ml-1 font-medium">
                           {new Date(offer.createdAt).toLocaleDateString()}
@@ -237,12 +239,12 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                     )}
                   </div>
 
-                  <div className="ml-6 flex flex-col gap-2">
+                  <div className="flex lg:flex-col gap-2 lg:ml-6">
                     {appliedOffers.has(offer._id) ? (
                       <button 
                         onClick={() => handleCancelApplication(offer)}
                         disabled={applying === offer._id}
-                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 lg:flex-none px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {applying === offer._id ? 'Annulation...' : 'Annuler'}
                       </button>
@@ -250,14 +252,14 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                       <button 
                         onClick={() => handleApply(offer)}
                         disabled={applying === offer._id}
-                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 lg:flex-none px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {applying === offer._id ? 'Envoi...' : 'Postuler'}
                       </button>
                     )}
                     <button 
                       onClick={() => handleShowDetails(offer)}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                      className="flex-1 lg:flex-none px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
                     >
                       Détails
                     </button>

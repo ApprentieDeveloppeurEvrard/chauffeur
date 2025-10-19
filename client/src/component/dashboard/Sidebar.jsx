@@ -81,7 +81,7 @@ export default function Sidebar({ activeTab, setActiveTab, myOffers, availableDr
             >
               {item.icon}
               {item.label}
-              {item.badge && (
+              {item.badge !== undefined && item.badge > 0 && (
                 <span className={`ml-auto text-xs px-2 py-1 rounded-full ${item.badgeColor}`}>
                   {item.badge}
                 </span>

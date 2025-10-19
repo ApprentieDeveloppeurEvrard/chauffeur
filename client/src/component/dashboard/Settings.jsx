@@ -40,10 +40,10 @@ export default function Settings() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">SIRET</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Numéro d'entreprise</label>
                   <input
                     type="text"
-                    placeholder="12345678901234"
+                    placeholder="CI-ABJ-2024-001234"
                     className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>

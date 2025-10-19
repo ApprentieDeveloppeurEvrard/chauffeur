@@ -84,27 +84,27 @@ export default function Candidates({ receivedApplications, loading, refreshData 
   };
   
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Candidatures reçues</h1>
-        <p className="text-gray-600">Consultez les profils des chauffeurs intéressés</p>
+    <div className="space-y-4 lg:space-y-6">
+      <div className="mb-4 lg:mb-6">
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Candidatures reçues</h1>
+        <p className="text-sm lg:text-base text-gray-600">Consultez les profils des chauffeurs intéressés</p>
       </div>
 
       {/* Statistiques rapides */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <svg className="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="grid grid-cols-3 gap-2 lg:gap-4 mb-4 lg:mb-6">
+        <div className="bg-white rounded-lg shadow p-2 lg:p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center text-center lg:text-left">
+            <div className="p-1 lg:p-2 bg-yellow-100 rounded-lg mx-auto lg:mx-0 mb-2 lg:mb-0">
+              <svg className="h-4 w-4 lg:h-5 lg:w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">En attente</p>
+            <div className="lg:ml-3">
+              <p className="text-xs lg:text-sm font-medium text-gray-600">En attente</p>
               {loading ? (
-                <div className="h-6 bg-gray-200 rounded w-8 animate-pulse"></div>
+                <div className="h-4 lg:h-6 bg-gray-200 rounded w-6 lg:w-8 animate-pulse mx-auto lg:mx-0"></div>
               ) : (
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-sm lg:text-lg font-semibold text-gray-900">
                   {receivedApplications?.filter(app => app.status === 'pending').length || 0}
                 </p>
               )}
@@ -112,19 +112,19 @@ export default function Candidates({ receivedApplications, loading, refreshData 
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white rounded-lg shadow p-2 lg:p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center text-center lg:text-left">
+            <div className="p-1 lg:p-2 bg-green-100 rounded-lg mx-auto lg:mx-0 mb-2 lg:mb-0">
+              <svg className="h-4 w-4 lg:h-5 lg:w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Acceptées</p>
+            <div className="lg:ml-3">
+              <p className="text-xs lg:text-sm font-medium text-gray-600">Acceptées</p>
               {loading ? (
-                <div className="h-6 bg-gray-200 rounded w-8 animate-pulse"></div>
+                <div className="h-4 lg:h-6 bg-gray-200 rounded w-6 lg:w-8 animate-pulse mx-auto lg:mx-0"></div>
               ) : (
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-sm lg:text-lg font-semibold text-gray-900">
                   {receivedApplications?.filter(app => app.status === 'accepted').length || 0}
                 </p>
               )}
@@ -132,19 +132,19 @@ export default function Candidates({ receivedApplications, loading, refreshData 
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex items-center">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <svg className="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="bg-white rounded-lg shadow p-2 lg:p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center text-center lg:text-left">
+            <div className="p-1 lg:p-2 bg-red-100 rounded-lg mx-auto lg:mx-0 mb-2 lg:mb-0">
+              <svg className="h-4 w-4 lg:h-5 lg:w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Refusées</p>
+            <div className="lg:ml-3">
+              <p className="text-xs lg:text-sm font-medium text-gray-600">Refusées</p>
               {loading ? (
-                <div className="h-6 bg-gray-200 rounded w-8 animate-pulse"></div>
+                <div className="h-4 lg:h-6 bg-gray-200 rounded w-6 lg:w-8 animate-pulse mx-auto lg:mx-0"></div>
               ) : (
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-sm lg:text-lg font-semibold text-gray-900">
                   {receivedApplications?.filter(app => app.status === 'rejected').length || 0}
                 </p>
               )}
@@ -180,41 +180,41 @@ export default function Candidates({ receivedApplications, loading, refreshData 
           ))}
         </div>
       ) : receivedApplications?.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-3 lg:space-y-4">
           {receivedApplications.map(application => {
             console.log('Application data:', application);
             return (
             <div key={application._id} className="bg-white rounded-lg shadow">
-              <div className="p-6">
-                <div className="flex justify-between items-start">
+              <div className="p-3 lg:p-6">
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                    <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 mb-3">
+                      <h3 className="text-base lg:text-lg font-semibold text-gray-900">
                         {application.driver?.firstName} {application.driver?.lastName}
                       </h3>
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${getStatusColor(application.status)}`}>
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium self-start ${getStatusColor(application.status)}`}>
                         {getStatusText(application.status)}
                       </span>
                     </div>
                     
-                    <p className="text-gray-600 mb-3">
+                    <p className="text-sm lg:text-base text-gray-600 mb-3">
                       Candidature pour: <span className="font-medium">{application.offer?.title}</span>
                     </p>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-2 lg:gap-4 text-sm">
+                      <div className="flex justify-between lg:block">
                         <span className="text-gray-500">📧 Email:</span>
-                        <span className="ml-1 font-medium">{application.driver?.email}</span>
+                        <span className="ml-1 font-medium truncate">{application.driver?.email}</span>
                       </div>
-                      <div>
+                      <div className="flex justify-between lg:block">
                         <span className="text-gray-500">📱 Téléphone:</span>
                         <span className="ml-1 font-medium">{application.driver?.phone || 'Non renseigné'}</span>
                       </div>
-                      <div>
+                      <div className="flex justify-between lg:block">
                         <span className="text-gray-500">📍 Zone:</span>
                         <span className="ml-1 font-medium">{application.offer?.location?.city}</span>
                       </div>
-                      <div>
+                      <div className="flex justify-between lg:block">
                         <span className="text-gray-500">📅 Postulé:</span>
                         <span className="ml-1 font-medium">
                           {new Date(application.createdAt).toLocaleDateString()}
@@ -232,20 +232,20 @@ export default function Candidates({ receivedApplications, loading, refreshData 
                     )}
                   </div>
 
-                  <div className="ml-6 flex flex-col gap-2">
+                  <div className="flex lg:flex-col gap-2 lg:ml-6">
                     {application.status === 'pending' && (
                       <>
                         <button 
                           onClick={() => handleApplicationAction(application._id, 'accepted')}
                           disabled={processingApplication === application._id}
-                          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
+                          className="flex-1 lg:flex-none px-3 lg:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 text-sm"
                         >
                           {processingApplication === application._id ? 'Traitement...' : 'Accepter'}
                         </button>
                         <button 
                           onClick={() => handleApplicationAction(application._id, 'rejected')}
                           disabled={processingApplication === application._id}
-                          className="px-4 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50"
+                          className="flex-1 lg:flex-none px-3 lg:px-4 py-2 border border-red-300 text-red-700 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50 text-sm"
                         >
                           {processingApplication === application._id ? 'Traitement...' : 'Refuser'}
                         </button>
@@ -253,7 +253,7 @@ export default function Candidates({ receivedApplications, loading, refreshData 
                     )}
                     <button 
                       onClick={() => handleViewProfile(application)}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                      className="flex-1 lg:flex-none px-3 lg:px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm"
                     >
                       Voir profil
                     </button>

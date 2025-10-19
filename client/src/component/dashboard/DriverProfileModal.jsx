@@ -117,7 +117,7 @@ export default function DriverProfileModal({ isOpen, onClose, application }) {
             {offer?.salary && (
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1">Salaire proposé</label>
-                <p className="text-gray-900 font-medium">{offer.salary}€</p>
+                <p className="text-gray-900 font-medium">{offer.salary} FCFA</p>
               </div>
             )}
           </div>
