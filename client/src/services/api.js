@@ -9,13 +9,41 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    console.log('API Request:', config.method?.toUpperCase(), config.url)
+    return config
+  },
+  (error) => {
+    console.error('API Request Error:', error)
+    return Promise.reject(error)
   }
-  return config
-})
+)
+
+api.interceptors.response.use(
+  (response) => {
+    console.log('API Response:', response.status, response.config.url)
+    return response
+  },
+  (error) => {
+    console.error('API Response Error:', {
+      message: error.message,
+      status: error.response?.status,
+      url: error.config?.url,
+      data: error.response?.data
+    })
+    
+    if (error.message === 'Network Error' || error.code === 'ERR_NETWORK') {
+      console.error('Network connectivity issue. Check if server is running and CORS is configured.')
+    }
+    
+    return Promise.reject(error)
+  }
+)
 
 export const auth = {
   setToken: (token) => {

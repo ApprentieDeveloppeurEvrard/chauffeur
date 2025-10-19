@@ -8,6 +8,7 @@ import EmployerDashboard from './component/EmployerDashboard.jsx'
 import DriverDashboard from './component/DriverDashboardMain.jsx'
 import SafeDriverDashboard from './component/SafeDriverDashboard.jsx'
 import TestAPI from './pages/TestAPI.jsx'
+import TestConnection from './pages/TestConnection.jsx'
 
 function App() {
   return (
@@ -43,6 +44,9 @@ function App() {
             
             {/* Page de test API */}
             <Route path="/test-api" element={<TestAPI />} />
+            
+            {/* Page de test de connexion */}
+            <Route path="/test-connection" element={<TestConnection />} />
           </Routes>
         </div>
       </Router>
