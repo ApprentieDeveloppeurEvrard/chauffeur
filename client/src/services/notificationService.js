@@ -197,14 +197,16 @@ class NotificationService {
 
   // Créer une notification de test (pour le développement)
   createTestNotification(type = 'new_offer') {
+    const content = this.getTestNotificationContent(type);
     const testNotification = {
       id: Date.now().toString(),
       type: type,
-      title: this.getTestNotificationContent(type).title,
-      message: this.getTestNotificationContent(type).message,
+      title: content.title,
+      message: content.message,
       time: 'À l\'instant',
       unread: true,
-      action: 'Voir les détails'
+      action: 'Voir les détails',
+      hasApplied: content.hasApplied || false
     };
     
     this.notifications.unshift(testNotification);
@@ -214,26 +216,36 @@ class NotificationService {
 
   // Contenu des notifications de test
   getTestNotificationContent(type) {
+    const isAppliedRandomly = Math.random() > 0.5; // 50% de chance d'avoir déjà postulé
+    
     switch (type) {
       case 'new_offer':
         return {
           title: 'Nouvelle offre : Chauffeur VTC - Abidjan',
-          message: 'Une nouvelle offre correspond à votre profil. Salaire : 150,000 FCFA/mois'
+          message: 'Une nouvelle offre correspond à votre profil. Salaire : 150,000 FCFA/mois',
+          hasApplied: isAppliedRandomly
         };
       case 'urgent_offer':
         return {
           title: 'Offre urgente : Livraison express',
-          message: 'Mission urgente disponible. Bonus de 50,000 FCFA. Répondez rapidement !'
+          message: 'Mission urgente disponible. Bonus de 50,000 FCFA. Répondez rapidement !',
+          hasApplied: isAppliedRandomly
         };
       case 'application_accepted':
         return {
           title: 'Candidature acceptée',
-          message: 'Votre candidature pour "Chauffeur personnel" a été acceptée !'
+          message: 'Votre candidature pour "Chauffeur personnel" a été acceptée !',
+          hasApplied: true // Forcément déjà postulé si accepté
         };
       case 'payment_received':
         return {
           title: 'Paiement reçu',
           message: 'Vous avez reçu un paiement de 75,000 FCFA pour votre dernière mission'
+        };
+      case 'driver_profile_updated':
+        return {
+          title: 'Profil chauffeur mis à jour',
+          message: 'Jean D. a mis à jour son profil. Consultez les nouvelles informations.'
         };
       default:
         return {

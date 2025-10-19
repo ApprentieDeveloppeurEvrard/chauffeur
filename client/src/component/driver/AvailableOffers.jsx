@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import EmptyState from '../common/EmptyState';
 import OfferDetailsModal from './OfferDetailsModal';
@@ -6,10 +6,25 @@ import { applicationsApi } from '../../services/api';
 
 export default function AvailableOffers({ availableOffers, loading, refreshData }) {
   const [applying, setApplying] = useState(null);
-  const [appliedOffers, setAppliedOffers] = useState(new Set());
+  const [appliedOffers, setAppliedOffers] = useState(() => {
+    // Charger les offres postulées depuis le localStorage
+    const saved = localStorage.getItem('appliedOffers');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Sauvegarder les offres postulées dans le localStorage quand elles changent
+  useEffect(() => {
+    localStorage.setItem('appliedOffers', JSON.stringify([...appliedOffers]));
+  }, [appliedOffers]);
+
+  // Fonction pour réinitialiser les candidatures (optionnel, pour le développement)
+  const resetAppliedOffers = () => {
+    setAppliedOffers(new Set());
+    localStorage.removeItem('appliedOffers');
+  };
 
   // Fonction pour afficher les détails d'une offre
   const handleShowDetails = (offer) => {
@@ -22,6 +37,10 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
     if (applying) return;
 
     setApplying(offer._id);
+    
+    // Marquer immédiatement l'offre comme postulée dans l'interface
+    setAppliedOffers(prev => new Set([...prev, offer._id]));
+    
     try {
       // Préparer les données de candidature avec tous les champs requis
       const applicationData = {
@@ -35,10 +54,8 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
         }
       };
 
+      // Envoyer la candidature
       await applicationsApi.apply(offer._id, applicationData);
-      
-      // Marquer l'offre comme postulée
-      setAppliedOffers(prev => new Set([...prev, offer._id]));
       
       alert('Candidature envoyée avec succès !');
       
@@ -48,6 +65,14 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
       }
     } catch (error) {
       console.error('Erreur:', error);
+      
+      // En cas d'erreur, retirer l'offre de la liste des candidatures
+      setAppliedOffers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(offer._id);
+        return newSet;
+      });
+      
       let errorMessage = 'Erreur lors de l\'envoi de la candidature';
       
       if (error.response?.data?.details) {
@@ -62,45 +87,31 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
     }
   };
 
-  // Fonction pour annuler une candidature
-  const handleCancelApplication = async (offer) => {
-    if (applying) return;
-
-    if (!window.confirm(`Êtes-vous sûr de vouloir annuler votre candidature pour "${offer.title}" ?`)) {
-      return;
-    }
-
-    setApplying(offer._id);
-    try {
-      // Ici on devrait appeler une API pour annuler la candidature
-      // Pour l'instant, on retire juste de l'état local
-      setAppliedOffers(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(offer._id);
-        return newSet;
-      });
-      
-      alert('Candidature annulée avec succès !');
-      
-      // Actualiser les données si possible
-      if (refreshData) {
-        refreshData();
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
-      alert('Erreur lors de l\'annulation de la candidature');
-    } finally {
-      setApplying(null);
-    }
-  };
   return (
     <div>
       <div className="mb-6">
         {/* Titre avec bouton filtres mobile */}
         <div className="flex items-center justify-between lg:block">
           <div>
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Offres disponibles</h1>
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+              Offres disponibles
+              {appliedOffers.size > 0 && (
+                <span className="ml-3 text-sm text-green-600">
+                  ({appliedOffers.size} postulée{appliedOffers.size > 1 ? 's' : ''})
+                </span>
+              )}
+            </h1>
             <p className="text-sm lg:text-base text-gray-600 lg:block hidden">Découvrez les missions qui correspondent à votre profil</p>
+            
+            {/* Bouton de debug temporaire */}
+            {appliedOffers.size > 0 && (
+              <button
+                onClick={resetAppliedOffers}
+                className="mt-2 text-xs text-red-600 hover:text-red-700 underline"
+              >
+                Réinitialiser les candidatures (debug)
+              </button>
+            )}
           </div>
           
           {/* Bouton filtres mobile - carré sur la même ligne */}
@@ -302,11 +313,13 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                   <div className="flex lg:flex-col gap-2 lg:ml-6">
                     {appliedOffers.has(offer._id) ? (
                       <button 
-                        onClick={() => handleCancelApplication(offer)}
-                        disabled={applying === offer._id}
-                        className="flex-1 lg:flex-none px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled
+                        className="flex-1 lg:flex-none px-4 py-2 bg-gray-100 text-gray-500 rounded-md cursor-not-allowed flex items-center justify-center gap-2"
                       >
-                        {applying === offer._id ? 'Annulation...' : 'Annuler'}
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Déjà postulé
                       </button>
                     ) : (
                       <button 

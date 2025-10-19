@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { driversApi } from '../../services/api';
 
 export default function DriverProfile() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -36,7 +36,12 @@ export default function DriverProfile() {
     // Expérience
     experience: '',
     workZone: '',
-    specialties: []
+    specialties: [],
+    
+    // Expérience professionnelle (lieux de travail)
+    workExperience: [
+      // { company: '', location: '', position: '', startDate: '', endDate: '', description: '' }
+    ]
   });
 
   // Charger les données du profil au montage
@@ -44,10 +49,16 @@ export default function DriverProfile() {
     console.log('=== USEEFFECT DÉCLENCHÉ ===');
     console.log('user disponible:', user);
     console.log('user.sub:', user?.sub);
+    console.log('authLoading:', authLoading);
     
-    // Forcer le chargement même sans user pour tester
-    console.log('FORÇAGE DU CHARGEMENT...');
-    const forceLoad = async () => {
+    // Ne charger que si l'utilisateur est disponible et l'auth n'est pas en cours
+    if (!user || authLoading) {
+      console.log('Utilisateur non disponible ou auth en cours, skip du chargement');
+      return;
+    }
+    
+    console.log('Chargement du profil...');
+    const loadProfile = async () => {
       try {
         const response = await driversApi.getMyProfile();
         console.log('Force load response:', response);
@@ -85,16 +96,17 @@ export default function DriverProfile() {
       }
     };
     
-    forceLoad();
-  }, []); // Pas de dépendance pour se déclencher immédiatement
+    loadProfile();
+  }, [user, authLoading]); // Dépendances : user et authLoading
 
   const loadDriverProfile = async () => {
-    if (!user?.sub) {
+    const userId = user?.sub || user?._id || user?.id;
+    if (!userId) {
       console.log('Aucun utilisateur connecté, impossible de charger le profil');
       return;
     }
     
-    console.log('Chargement du profil chauffeur pour l\'utilisateur:', user.sub);
+    console.log('Chargement du profil chauffeur pour l\'utilisateur:', userId);
     setLoading(true);
     
     try {
@@ -129,10 +141,12 @@ export default function DriverProfile() {
           vehicleSeats: profile.vehicleSeats ? profile.vehicleSeats.toString() : '',
           experience: profile.experience || '',
           workZone: profile.workZone || '',
-          specialties: profile.specialties || []
+          specialties: profile.specialties || [],
+          workExperience: profile.workExperience || []
         };
         
         console.log('Données traitées dans loadDriverProfile:', processedData);
+        console.log('workExperience récupéré:', processedData.workExperience);
         setFormData(processedData);
         setProfileLoaded(true);
       }
@@ -157,10 +171,13 @@ export default function DriverProfile() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log('=== CHANGEMENT CHAMP ===');
+    console.log('Champ:', name, 'Valeur:', value);
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+    console.log('FormData mis à jour');
   };
 
   const handleSpecialtyChange = (specialty, checked) => {
@@ -170,6 +187,52 @@ export default function DriverProfile() {
         ? [...prev.specialties, specialty]
         : prev.specialties.filter(s => s !== specialty)
     }));
+  };
+
+  // Fonctions pour gérer l'expérience professionnelle
+  const addWorkExperience = () => {
+    try {
+      setFormData(prev => ({
+        ...prev,
+        workExperience: [
+          ...(prev.workExperience || []),
+          {
+            company: '',
+            location: '',
+            position: '',
+            startDate: '',
+            endDate: '',
+            description: ''
+          }
+        ]
+      }));
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout d\'expérience:', error);
+    }
+  };
+
+  const updateWorkExperience = (index, field, value) => {
+    try {
+      setFormData(prev => ({
+        ...prev,
+        workExperience: (prev.workExperience || []).map((exp, i) => 
+          i === index ? { ...exp, [field]: value } : exp
+        )
+      }));
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour d\'expérience:', error);
+    }
+  };
+
+  const removeWorkExperience = (index) => {
+    try {
+      setFormData(prev => ({
+        ...prev,
+        workExperience: (prev.workExperience || []).filter((_, i) => i !== index)
+      }));
+    } catch (error) {
+      console.error('Erreur lors de la suppression d\'expérience:', error);
+    }
   };
 
   const handleFileUpload = (e, side) => {
@@ -235,6 +298,27 @@ export default function DriverProfile() {
   };
 
   const handleSave = async () => {
+    console.log('=== DÉBUT SAUVEGARDE ===');
+    console.log('Utilisateur:', user);
+    console.log('User.sub:', user?.sub);
+    console.log('Données à sauvegarder:', formData);
+    
+    // Vérification plus robuste de l'utilisateur
+    if (!user) {
+      alert('Erreur: Aucun utilisateur connecté. Veuillez vous reconnecter.');
+      return;
+    }
+    
+    // Vérifier l'ID utilisateur (peut être sub, _id, ou id selon le système)
+    const userId = user.sub || user._id || user.id;
+    if (!userId) {
+      console.error('Structure utilisateur:', user);
+      alert('Erreur: ID utilisateur manquant. Veuillez vous reconnecter.');
+      return;
+    }
+    
+    console.log('ID utilisateur trouvé:', userId);
+    
     setSaving(true);
     try {
       // Si des fichiers sont sélectionnés, on utilise FormData
@@ -243,13 +327,16 @@ export default function DriverProfile() {
         
         // Ajouter tous les champs du profil
         Object.keys(formData).forEach(key => {
-          if (!key.includes('licenseDocument') && !key.includes('profilePhoto') && key !== 'specialties') {
+          if (!key.includes('licenseDocument') && !key.includes('profilePhoto') && key !== 'specialties' && key !== 'workExperience') {
             formDataToSend.append(key, formData[key]);
           }
         });
         
         // Ajouter les spécialités
         formDataToSend.append('specialties', JSON.stringify(formData.specialties));
+        
+        // Ajouter l'expérience professionnelle
+        formDataToSend.append('workExperience', JSON.stringify(formData.workExperience || []));
         
         // Ajouter les fichiers s'ils existent
         if (formData.licenseDocumentRecto) {
@@ -263,18 +350,24 @@ export default function DriverProfile() {
         }
         
         // Ajouter l'ID utilisateur
-        formDataToSend.append('userId', user.sub);
+        formDataToSend.append('userId', userId);
         
         // Envoyer avec FormData
-        await driversApi.updateProfileWithFile(user.sub, formDataToSend);
+        console.log('Envoi avec FormData...');
+        await driversApi.updateProfileWithFile(userId, formDataToSend);
+        console.log('FormData envoyé avec succès');
       } else {
         // Sauvegarde normale sans fichier
+        console.log('Envoi sans fichier...');
         const profileData = {
           ...formData,
-          userId: user.sub
+          userId: userId
         };
+        console.log('Données à envoyer:', profileData);
+        console.log('workExperience à envoyer:', profileData.workExperience);
         
-        await driversApi.updateProfile(user.sub, profileData);
+        await driversApi.updateProfile(userId, profileData);
+        console.log('Données envoyées avec succès');
       }
       
       setIsEditing(false);
@@ -284,7 +377,20 @@ export default function DriverProfile() {
       await loadDriverProfile();
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      alert('Erreur lors de la sauvegarde du profil');
+      console.error('Détails de l\'erreur:', error.response?.data);
+      console.error('Status:', error.response?.status);
+      console.error('Message:', error.message);
+      
+      let errorMessage = 'Erreur lors de la sauvegarde du profil';
+      if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.details) {
+        errorMessage = error.response.data.details.join(', ');
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(`Erreur: ${errorMessage}`);
     } finally {
       setSaving(false);
     }
@@ -296,18 +402,57 @@ export default function DriverProfile() {
   };
 
   const handleEdit = () => {
+    console.log('=== ACTIVATION MODE ÉDITION ===');
+    console.log('isEditing avant:', isEditing);
     setIsEditing(true);
+    console.log('Mode édition activé');
   };
 
-  if (loading) {
+  // Attendre que l'authentification soit complète
+  if (authLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-        <span className="ml-2 text-gray-600">Chargement du profil...</span>
+      <div className="px-4 sm:px-6 lg:px-0">
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          <span className="ml-3 text-gray-600">Vérification de l'authentification...</span>
+        </div>
       </div>
     );
   }
 
+  // Vérifier que l'utilisateur est connecté
+  if (!user) {
+    return (
+      <div className="px-4 sm:px-6 lg:px-0">
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Non connecté</h2>
+            <p className="text-gray-600">Veuillez vous connecter pour accéder à votre profil.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Gestion d'erreur pour éviter la page blanche
+  if (loading) {
+    return (
+      <div className="px-4 sm:px-6 lg:px-0">
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          <span className="ml-3 text-gray-600">Chargement du profil...</span>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('=== RENDU COMPOSANT ===');
+  console.log('isEditing:', isEditing);
+  console.log('user complet:', user);
+  console.log('user.sub:', user?.sub);
+  console.log('user._id:', user?._id);
+  console.log('user.id:', user?.id);
+  console.log('formData:', formData);
 
   return (
     <div className="px-4 sm:px-6 lg:px-0">
@@ -979,6 +1124,176 @@ export default function DriverProfile() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Expérience professionnelle */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-4 lg:p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base lg:text-lg font-medium text-gray-900">Expérience professionnelle</h3>
+              {isEditing && (
+                <button
+                  onClick={addWorkExperience}
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Ajouter
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="p-4 lg:p-6">
+            {(!formData.workExperience || formData.workExperience.length === 0) ? (
+              <div className="text-center py-8">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m-8 0V6a2 2 0 00-2 2v6" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune expérience ajoutée</h3>
+                <p className="mt-1 text-sm text-gray-500">Commencez par ajouter vos expériences professionnelles.</p>
+                {isEditing && (
+                  <div className="mt-6">
+                    <button
+                      onClick={addWorkExperience}
+                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Ajouter une expérience
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {(formData.workExperience || []).map((experience, index) => {
+                  // Vérification de sécurité pour chaque expérience
+                  const safeExperience = experience || {};
+                  
+                  return (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 relative">
+                    {isEditing && (
+                      <button
+                        onClick={() => removeWorkExperience(index)}
+                        className="absolute top-2 right-2 text-red-600 hover:text-red-800"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    )}
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Entreprise/Employeur</label>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={safeExperience.company || ''}
+                            onChange={(e) => updateWorkExperience(index, 'company', e.target.value)}
+                            placeholder="Ex: Taxi Abidjan, Uber, Bolt..."
+                            className="w-full p-2 lg:p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm lg:text-base"
+                          />
+                        ) : (
+                          <div className="w-full p-2 lg:p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 text-sm lg:text-base">
+                            {safeExperience.company || 'Non renseigné'}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Lieu</label>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={safeExperience.location || ''}
+                            onChange={(e) => updateWorkExperience(index, 'location', e.target.value)}
+                            placeholder="Ex: Abidjan, Yamoussoukro..."
+                            className="w-full p-2 lg:p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm lg:text-base"
+                          />
+                        ) : (
+                          <div className="w-full p-2 lg:p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 text-sm lg:text-base">
+                            {safeExperience.location || 'Non renseigné'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Poste</label>
+                        {isEditing ? (
+                          <input
+                            type="text"
+                            value={safeExperience.position || ''}
+                            onChange={(e) => updateWorkExperience(index, 'position', e.target.value)}
+                            placeholder="Ex: Chauffeur VTC, Livreur..."
+                            className="w-full p-2 lg:p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm lg:text-base"
+                          />
+                        ) : (
+                          <div className="w-full p-2 lg:p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 text-sm lg:text-base">
+                            {safeExperience.position || 'Non renseigné'}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Date de début</label>
+                        {isEditing ? (
+                          <input
+                            type="month"
+                            value={safeExperience.startDate || ''}
+                            onChange={(e) => updateWorkExperience(index, 'startDate', e.target.value)}
+                            className="w-full p-2 lg:p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm lg:text-base"
+                          />
+                        ) : (
+                          <div className="w-full p-2 lg:p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 text-sm lg:text-base">
+                            {safeExperience.startDate ? new Date(safeExperience.startDate + '-01').toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' }) : 'Non renseigné'}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Date de fin</label>
+                        {isEditing ? (
+                          <input
+                            type="month"
+                            value={safeExperience.endDate || ''}
+                            onChange={(e) => updateWorkExperience(index, 'endDate', e.target.value)}
+                            className="w-full p-2 lg:p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm lg:text-base"
+                          />
+                        ) : (
+                          <div className="w-full p-2 lg:p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 text-sm lg:text-base">
+                            {safeExperience.endDate ? new Date(safeExperience.endDate + '-01').toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' }) : 'En cours'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                      {isEditing ? (
+                        <textarea
+                          value={safeExperience.description || ''}
+                          onChange={(e) => updateWorkExperience(index, 'description', e.target.value)}
+                          placeholder="Décrivez vos missions et responsabilités..."
+                          rows="3"
+                          className="w-full p-2 lg:p-3 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500 text-sm lg:text-base"
+                        />
+                      ) : (
+                        <div className="w-full p-2 lg:p-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 text-sm lg:text-base">
+                          {safeExperience.description || 'Aucune description'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 

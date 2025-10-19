@@ -1,9 +1,24 @@
 import { useState } from 'react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import EmptyState from '../common/EmptyState';
+import DriverProfileModal from '../common/DriverProfileModal';
 
 export default function DriverSearch({ availableDrivers, loading, refreshData }) {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedDriverId, setSelectedDriverId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Ouvrir la modal du profil
+  const handleViewProfile = (driverId) => {
+    setSelectedDriverId(driverId);
+    setIsModalOpen(true);
+  };
+
+  // Fermer la modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedDriverId(null);
+  };
   return (
     <div className="space-y-4 lg:space-y-6">
       <div className="mb-4 lg:mb-6">
@@ -195,7 +210,7 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
           </div>
 
           {/* Version desktop skeleton */}
-          <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="hidden lg:grid lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
               <div key={i} className="card bg-white shadow-sm animate-pulse">
                 {/* Figure skeleton */}
@@ -249,13 +264,29 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
           {/* Version mobile */}
           <div className="lg:hidden grid grid-cols-2 gap-3">
             {availableDrivers.map(driver => (
-              <div key={driver._id || driver.id} className="card bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div key={driver._id || driver.id} className="card bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-xl">
                 {/* Figure mobile - Photo plus petite */}
-                <figure className="px-2 pt-2">
+                <figure className="relative">
                   <div className="relative">
-                    <img 
-                      src={driver.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        driver.fullName ? 
+                    {driver.profilePhotoUrl ? (
+                      <img 
+                        src={driver.profilePhotoUrl} 
+                        alt={`${driver.firstName} ${driver.lastName}`}
+                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md mx-auto"
+                      />
+                    ) : (
+                      <img 
+                        src={`https://ui-avatars.com/api/?name=${driver.fullName ? 
+                          (() => {
+                            const names = driver.fullName.split(' ');
+                            if (names.length >= 2) {
+                              return `${names[0]} ${names[names.length - 1]}`;
+                            }
+                            return driver.fullName;
+                          })() :
+                          `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
+                        )}&background=6366f1&color=fff`} 
+                        alt={driver.fullName ? 
                           (() => {
                             const names = driver.fullName.split(' ');
                             if (names.length >= 2) {
@@ -264,19 +295,10 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
                             return driver.fullName;
                           })() :
                           `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
-                      )}&background=6366f1&color=fff`} 
-                      alt={driver.fullName ? 
-                        (() => {
-                          const names = driver.fullName.split(' ');
-                          if (names.length >= 2) {
-                            return `${names[0]} ${names[names.length - 1].charAt(0)}.`;
-                          }
-                          return driver.fullName;
-                        })() :
-                        `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
-                      }
-                      className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md mx-auto"
-                    />
+                        }
+                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md mx-auto"
+                      />
+                    )}
                     {driver.lastActive === 'En ligne' && (
                       <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                     )}
@@ -333,24 +355,36 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
                     </div>
                   </div>
 
-                  {/* Bouton mobile */}
-                  <button className="btn btn-primary btn-xs w-full">
-                    Profil
-                  </button>
+                  {/* Petit bouton bleu centré */}
+                  <div className="flex justify-center">
+                    <button 
+                      onClick={() => handleViewProfile(driver._id || driver.id)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 px-3 rounded-md transition-colors duration-200"
+                    >
+                      Voir le profil
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Version desktop */}
-          <div className="hidden lg:grid lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="hidden lg:grid lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {availableDrivers.map(driver => (
-              <div key={driver._id || driver.id} className="card bg-white shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div key={driver._id || driver.id} className="card bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-xl">
                 {/* Figure - Photo du chauffeur */}
                 <figure className="px-4 pt-4">
                   <div className="relative">
-                    <img 
-                      src={driver.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    {driver.profilePhotoUrl ? (
+                      <img 
+                        src={driver.profilePhotoUrl} 
+                        alt={`${driver.firstName} ${driver.lastName}`}
+                        className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto"
+                      />
+                    ) : (
+                      <img 
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
                         driver.fullName ? 
                           (() => {
                             const names = driver.fullName.split(' ');
@@ -370,9 +404,10 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
                           return driver.fullName;
                         })() :
                         `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
-                      }
-                      className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto"
-                    />
+                        }
+                        className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto"
+                      />
+                    )}
                     {driver.lastActive === 'En ligne' && (
                       <div className="absolute top-2 right-2 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
                     )}
@@ -431,18 +466,12 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
                     </div>
                   </div>
 
-                  {/* Card Actions - Badges et bouton */}
-                  <div className="card-actions justify-between items-center">
-                    <div className="flex gap-2">
-                      <div className="badge badge-outline text-xs">
-                        {driver.specialties?.[0] || 'Généraliste'}
-                      </div>
-                      <div className="badge badge-outline text-xs">
-                        {driver.vehicleType || 'Standard'}
-                      </div>
-                    </div>
-                    
-                    <button className="btn btn-primary btn-sm">
+                  {/* Petit bouton bleu centré */}
+                  <div className="flex justify-center">
+                    <button 
+                      onClick={() => handleViewProfile(driver._id || driver.id)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200"
+                    >
                       Voir le profil
                     </button>
                   </div>
@@ -464,6 +493,13 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
           description="Il n'y a actuellement aucun chauffeur inscrit sur la plateforme. Les chauffeurs apparaîtront ici une fois qu'ils se seront inscrits."
         />
       )}
+
+      {/* Modal de profil du chauffeur */}
+      <DriverProfileModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        driverId={selectedDriverId}
+      />
     </div>
   );
 }

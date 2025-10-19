@@ -64,6 +64,14 @@ export default function NotificationDropdown({ isOpen, onClose }) {
             </svg>
           </div>
         );
+      case 'driver_profile_updated':
+        return (
+          <div className="p-1.5 bg-indigo-100 rounded-lg">
+            <svg className={`${iconClass} text-indigo-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+        );
       default:
         return (
           <div className="p-1.5 bg-gray-100 rounded-lg">
@@ -82,28 +90,25 @@ export default function NotificationDropdown({ isOpen, onClose }) {
       <div 
         ref={dropdownRef}
         className="
-          /* Desktop styles */
-          lg:absolute lg:right-0 lg:mt-2 lg:w-96 lg:max-h-96 lg:rounded-lg lg:shadow-lg
-          
           /* Mobile styles - Ultra compact */
-          fixed inset-x-4 top-16 bottom-56 w-auto max-h-[calc(100vh-18rem)]
+          fixed inset-x-4 top-16 bottom-56 w-auto max-h-[calc(100vh-18rem)] rounded-2xl shadow-2xl
+          
+          /* Desktop styles - Enhanced */
+          lg:absolute lg:right-0 lg:top-auto lg:bottom-auto lg:inset-x-auto lg:mt-3 lg:w-[420px] lg:max-h-[500px] lg:rounded-xl lg:shadow-xl
           
           /* Common styles */
-          bg-white border border-gray-200 z-50 overflow-hidden
-          rounded-2xl lg:rounded-lg
-          flex flex-col
-          shadow-2xl lg:shadow-lg
+          bg-white/90 backdrop-blur-md border border-gray-200/50 z-50 overflow-hidden flex flex-col
         "
       >
       {/* Header du dropdown */}
-      <div className="p-4 lg:p-4 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+      <div className="p-4 lg:p-5 border-b border-gray-200/50 bg-gray-50/80 backdrop-blur-sm sticky top-0 z-10">
         {/* Barre de glissement mobile */}
         <div className="lg:hidden flex justify-center mb-3">
           <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
         </div>
         
         <div className="flex items-center justify-between">
-          <h3 className="text-base lg:text-sm font-medium text-gray-900">
+          <h3 className="text-base lg:text-lg font-medium text-gray-900">
             Notifications
             {unreadCount > 0 && (
               <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -115,7 +120,7 @@ export default function NotificationDropdown({ isOpen, onClose }) {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-sm lg:text-xs text-blue-600 hover:text-blue-700 font-medium px-3 py-1 lg:px-0 lg:py-0 rounded-full lg:rounded-none bg-blue-50 lg:bg-transparent"
+                className="text-sm lg:text-sm text-blue-600 hover:text-blue-700 font-medium px-3 py-1 lg:px-3 lg:py-1.5 rounded-full lg:rounded-md bg-blue-50 lg:bg-blue-50 hover:bg-blue-100 lg:hover:bg-blue-100 transition-colors"
               >
                 Tout marquer
               </button>
@@ -154,22 +159,35 @@ export default function NotificationDropdown({ isOpen, onClose }) {
             {notifications.slice(0, 10).map(notification => (
               <div
                 key={notification.id}
-                className={`p-4 lg:p-3 hover:bg-white/20 cursor-pointer transition-colors active:bg-white/30 ${
+                className={`p-4 lg:p-4 hover:bg-gray-50/50 lg:hover:bg-gray-100/80 cursor-pointer transition-all duration-200 active:bg-gray-100/90 hover:shadow-sm ${
                   notification.unread ? 'bg-blue-50/30 border-l-4 lg:border-l-2 border-blue-500' : 'bg-transparent'
                 }`}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Marquer comme lu si non lu
                   if (notification.unread) {
                     markAsRead(notification.id);
                   }
+                  // Feedback visuel temporaire
+                  e.currentTarget.style.transform = 'scale(0.98)';
+                  setTimeout(() => {
+                    if (e.currentTarget) {
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }
+                  }, 150);
+                  // Ici on peut ajouter d'autres actions (navigation, détails, etc.)
+                  console.log('Notification cliquée:', notification);
                 }}
               >
                 <div className="flex items-start space-x-4 lg:space-x-3">
                   {getNotificationIcon(notification.type)}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
-                      <p className={`text-sm lg:text-sm ${notification.unread ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
-                        {notification.title}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm lg:text-sm ${notification.unread ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
+                          {notification.title}
+                        </p>
+                      </div>
                       <div className="flex items-center ml-2 flex-shrink-0">
                         <span className="text-xs text-gray-500">{notification.time}</span>
                         {notification.unread && (
@@ -181,6 +199,55 @@ export default function NotificationDropdown({ isOpen, onClose }) {
                       <p className="text-sm lg:text-xs text-gray-500 mt-2 lg:mt-1 line-clamp-2 leading-relaxed lg:leading-normal">
                         {notification.message}
                       </p>
+                    )}
+                    
+                    {/* Boutons d'action */}
+                    {(notification.type === 'new_offer' || notification.type === 'urgent_offer') && (
+                      <div className="mt-3 flex gap-2">
+                        {notification.hasApplied ? (
+                          <button 
+                            disabled
+                            className="text-sm text-gray-500 font-medium px-3 py-1.5 rounded-md bg-gray-100 cursor-not-allowed flex items-center gap-1"
+                          >
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                            Déjà postulé
+                          </button>
+                        ) : (
+                          <button className="text-sm text-white font-medium px-3 py-1.5 rounded-md bg-green-600 hover:bg-green-700 transition-colors">
+                            Postuler
+                          </button>
+                        )}
+                        <button className="text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors">
+                          Voir les détails
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Autres types de notifications avec leurs actions spécifiques */}
+                    {notification.type === 'application_accepted' && (
+                      <div className="mt-3">
+                        <button className="text-sm text-green-600 hover:text-green-700 font-medium transition-colors">
+                          Voir l'offre acceptée
+                        </button>
+                      </div>
+                    )}
+                    
+                    {notification.type === 'payment_received' && (
+                      <div className="mt-3">
+                        <button className="text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors">
+                          Voir le paiement
+                        </button>
+                      </div>
+                    )}
+                    
+                    {notification.type === 'driver_profile_updated' && (
+                      <div className="mt-3">
+                        <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
+                          Voir le profil
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -200,13 +267,13 @@ export default function NotificationDropdown({ isOpen, onClose }) {
 
       {/* Footer avec lien vers toutes les notifications */}
       {notifications?.length > 10 && (
-        <div className="p-4 lg:p-3 border-t border-gray-200 bg-gray-50 sticky bottom-0">
+        <div className="p-4 lg:p-4 border-t border-gray-200/50 bg-gray-50/80 backdrop-blur-sm sticky bottom-0">
           <button
             onClick={() => {
               // Ici vous pouvez naviguer vers la page complète des notifications
               onClose();
             }}
-            className="w-full text-base lg:text-sm text-blue-600 hover:text-blue-700 font-medium py-2 lg:py-0 px-4 lg:px-0 rounded-lg lg:rounded-none bg-blue-50 lg:bg-transparent hover:bg-blue-100 lg:hover:bg-transparent transition-colors"
+            className="w-full text-base lg:text-base text-blue-600 hover:text-blue-700 font-medium py-2 lg:py-2 px-4 lg:px-4 rounded-lg lg:rounded-lg bg-blue-50 lg:bg-blue-50 hover:bg-blue-100 lg:hover:bg-blue-100 transition-colors"
           >
             Voir toutes les notifications ({notifications.length})
           </button>
