@@ -285,7 +285,7 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
                             return driver.fullName;
                           })() :
                           `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
-                        )}&background=6366f1&color=fff`} 
+                        }&background=6366f1&color=fff`} 
                         alt={driver.fullName ? 
                           (() => {
                             const names = driver.fullName.split(' ');
