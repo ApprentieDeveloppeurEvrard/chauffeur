@@ -222,32 +222,32 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
         title="Créer une nouvelle offre"
         size="lg"
       >
-        <div className="max-h-[70vh] overflow-y-auto scrollbar-hide">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="max-h-[60vh] lg:max-h-[70vh] overflow-y-auto scrollbar-hide">
+          <form onSubmit={handleSubmit} className="space-y-3 lg:space-y-4">
             {/* Titre */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Titre de l'offre *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 lg:mb-2">Titre de l'offre *</label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleInputChange}
                 placeholder="Ex: Chauffeur personnel pour Abidjan"
-                className={`w-full p-3 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+                className={`w-full p-2 lg:p-3 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm lg:text-base ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
                 required
               />
               {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
             </div>
 
             {/* Type et Durée */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Type de mission *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 lg:mb-2">Type de mission *</label>
                 <select 
                   name="type"
                   value={formData.type}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 ${errors.type ? 'border-red-500' : 'border-gray-300'}`}
+                  className={`w-full p-2 lg:p-3 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm lg:text-base ${errors.type ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 >
                   <option value="">Sélectionner un type</option>
@@ -439,11 +439,11 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
             </div>
 
             {/* Boutons */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <div className="flex flex-col lg:flex-row justify-end gap-3 pt-4 lg:pt-6 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => setShowCreateForm(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="w-full lg:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm lg:text-base"
                 disabled={loading}
               >
                 Annuler
@@ -451,7 +451,7 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                className="w-full lg:w-auto px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 text-sm lg:text-base"
               >
                 {loading ? 'Création...' : 'Publier l\'offre'}
               </button>

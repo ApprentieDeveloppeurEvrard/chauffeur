@@ -98,8 +98,8 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
         onClose={() => setShowModal(false)}
         title={
           <div>
-            <div className="text-xl font-semibold text-gray-900">{offer.title}</div>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="text-lg lg:text-xl font-semibold text-gray-900">{offer.title}</div>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
               <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
                 {offer.type}
               </span>
@@ -113,19 +113,19 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
         }
         size="xl"
       >
-        <div className="max-h-[60vh] overflow-y-auto scrollbar-hide">
+        <div className="max-h-[50vh] lg:max-h-[60vh] overflow-y-auto scrollbar-hide">
             <div className="space-y-6">
               
               {/* Description */}
               <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-3">📝 Description</h4>
-                <p className="text-gray-700 leading-relaxed">{offer.description}</p>
+                <h4 className="text-base lg:text-lg font-medium text-gray-900 mb-3">📝 Description</h4>
+                <p className="text-sm lg:text-base text-gray-700 leading-relaxed">{offer.description}</p>
               </div>
 
               {/* Informations principales */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                 <div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-3">📍 Localisation</h4>
+                  <h4 className="text-base lg:text-lg font-medium text-gray-900 mb-3">📍 Localisation</h4>
                   <div className="space-y-2">
                     <div>
                       <span className="text-sm font-medium text-gray-600">Ville:</span>
@@ -145,7 +145,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
                 </div>
 
                 <div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-3">💼 Conditions de travail</h4>
+                  <h4 className="text-base lg:text-lg font-medium text-gray-900 mb-3">💼 Conditions de travail</h4>
                   <div className="space-y-2">
                     <div>
                       <span className="text-sm font-medium text-gray-600">Type:</span>
@@ -298,10 +298,10 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
         </div>
 
         {/* Footer avec boutons */}
-        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+        <div className="flex flex-col lg:flex-row justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
           <button
             onClick={() => setShowModal(false)}
-            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+            className="w-full lg:w-auto px-4 lg:px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm lg:text-base"
           >
             Fermer
           </button>
@@ -309,7 +309,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
             <button
               onClick={handleCancelApplication}
               disabled={applying}
-              className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="w-full lg:w-auto px-4 lg:px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm lg:text-base"
             >
               {applying ? (
                 <>
@@ -331,7 +331,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
             <button
               onClick={handleApply}
               disabled={applying}
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="w-full lg:w-auto px-4 lg:px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm lg:text-base"
             >
               {applying ? (
                 <>
