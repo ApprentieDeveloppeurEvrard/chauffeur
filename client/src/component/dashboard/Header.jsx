@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import UserMenu from '../common/UserMenu';
+import NotificationDropdown from '../common/NotificationDropdown';
+import useNotifications from '../../hooks/useNotifications';
 
-export default function Header({ searchQuery, setSearchQuery, notifications, onNotificationClick, onLogoClick, onProfileClick, onSettingsClick, userRole = 'client' }) {
+export default function Header({ searchQuery, setSearchQuery, onLogoClick, onProfileClick, onSettingsClick, userRole = 'client' }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const { unreadCount } = useNotifications();
 
   const handleLogoClick = (e) => {
     if (onLogoClick) {
@@ -62,19 +66,27 @@ export default function Header({ searchQuery, setSearchQuery, notifications, onN
           </button>
 
           {/* Notifications */}
-          <button 
-            onClick={onNotificationClick}
-            className="relative p-2 text-gray-400 hover:text-gray-600"
-          >
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5zM4 19h10v-1a3 3 0 00-3-3H7a3 3 0 00-3 3v1z" />
-            </svg>
-            {notifications.filter(n => n.unread).length > 0 && (
-              <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                {notifications.filter(n => n.unread).length}
-              </span>
-            )}
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5zM4 19h10v-1a3 3 0 00-3-3H7a3 3 0 00-3 3v1z" />
+              </svg>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+            
+            {/* Dropdown des notifications */}
+            <NotificationDropdown 
+              isOpen={isNotificationOpen}
+              onClose={() => setIsNotificationOpen(false)}
+            />
+          </div>
           <UserMenu 
             userRole="client"
             onProfileClick={onProfileClick}

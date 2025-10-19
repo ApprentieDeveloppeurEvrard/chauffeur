@@ -9,6 +9,7 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
   const [appliedOffers, setAppliedOffers] = useState(new Set());
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Fonction pour afficher les détails d'une offre
   const handleShowDetails = (offer) => {
@@ -95,12 +96,28 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Offres disponibles</h1>
-        <p className="text-sm lg:text-base text-gray-600">Découvrez les missions qui correspondent à votre profil</p>
+        {/* Titre avec bouton filtres mobile */}
+        <div className="flex items-center justify-between lg:block">
+          <div>
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Offres disponibles</h1>
+            <p className="text-sm lg:text-base text-gray-600 lg:block hidden">Découvrez les missions qui correspondent à votre profil</p>
+          </div>
+          
+          {/* Bouton filtres mobile - carré sur la même ligne */}
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className="lg:hidden flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
+          >
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+          </button>
+        </div>
+        <p className="text-sm text-gray-600 lg:hidden mt-2">Découvrez les missions qui correspondent à votre profil</p>
       </div>
 
-      {/* Header avec bouton actualiser */}
-      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-3 mb-6">
+      {/* Header avec bouton actualiser - Desktop seulement */}
+      <div className="hidden lg:flex lg:flex-row lg:justify-between lg:items-center gap-3 mb-6">
         <div>
           <p className="text-sm lg:text-base text-gray-600">
             {availableOffers?.length || 0} offre{(availableOffers?.length || 0) !== 1 ? 's' : ''} disponible{(availableOffers?.length || 0) !== 1 ? 's' : ''}
@@ -118,8 +135,51 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
         </button>
       </div>
 
-      {/* Filtres pour la Côte d'Ivoire */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
+      {/* Filtres conditionnels */}
+      {showFilters && (
+        <div className="lg:hidden bg-white rounded-lg shadow p-4 mb-6">
+          <div className="space-y-3">
+            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+              <option>Toutes villes</option>
+              <option>Abidjan</option>
+              <option>Bouaké</option>
+              <option>Yamoussoukro</option>
+              <option>San-Pédro</option>
+              <option>Daloa</option>
+            </select>
+            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+              <option>Tous types</option>
+              <option>Personnel</option>
+              <option>Livraison</option>
+              <option>VTC</option>
+              <option>Transport</option>
+              <option>Autre</option>
+            </select>
+            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+              <option>Tous horaires</option>
+              <option>Temps plein</option>
+              <option>Temps partiel</option>
+              <option>Ponctuel</option>
+              <option>Weekend</option>
+            </select>
+            
+            {/* Bouton actualiser mobile dans les filtres */}
+            <button
+              onClick={refreshData}
+              disabled={loading}
+              className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 justify-center transition-colors font-medium"
+            >
+              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {loading ? 'Actualisation...' : 'Actualiser les offres'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Filtres desktop - Inchangés */}
+      <div className="hidden lg:block bg-white rounded-lg shadow p-4 mb-6">
         <div className="grid grid-cols-1 lg:flex lg:flex-wrap gap-4">
           <select className="px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
             <option>Toutes villes</option>
