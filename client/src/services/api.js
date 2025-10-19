@@ -106,6 +106,14 @@ export const driversApi = {
   getMyProfile: () => api.get('/drivers/profile'),
   // Mettre à jour le profil du chauffeur connecté
   updateProfile: (driverId, data) => api.put(`/drivers/${driverId}`, data),
+  // Mettre à jour le profil avec fichier
+  updateProfileWithFile: (driverId, formData) => {
+    return api.put(`/drivers/${driverId}/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
   // Mettre à jour le statut du chauffeur
   updateStatus: (driverId, status) => api.put(`/drivers/${driverId}/status`, { status }),
   // Mettre à jour la localisation

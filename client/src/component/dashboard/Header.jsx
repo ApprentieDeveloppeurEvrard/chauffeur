@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import UserMenu from '../common/UserMenu';
 
-export default function Header({ searchQuery, setSearchQuery, notifications, onNotificationClick, onLogoClick }) {
+export default function Header({ searchQuery, setSearchQuery, notifications, onNotificationClick, onLogoClick, onProfileClick, onSettingsClick, userRole = 'client' }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleLogoClick = (e) => {
@@ -23,7 +23,12 @@ export default function Header({ searchQuery, setSearchQuery, notifications, onN
             <path d="M12 16L20 20L28 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="hidden sm:inline text-lg font-bold text-slate-800">ChauffeursConnect</span>
+          <span className="hidden sm:inline text-lg font-bold text-slate-800">
+            {userRole === 'driver' ? 'ChauffeursConnect' : 'EmployeursConnect'}
+          </span>
+          {userRole === 'client' && (
+            <span className="hidden md:inline text-sm bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full font-medium">Employeur</span>
+          )}
         </Link>
 
         {/* Barre de recherche - Desktop */}
@@ -70,7 +75,11 @@ export default function Header({ searchQuery, setSearchQuery, notifications, onN
               </span>
             )}
           </button>
-          <UserMenu />
+          <UserMenu 
+            userRole="client"
+            onProfileClick={onProfileClick}
+            onSettingsClick={onSettingsClick}
+          />
         </div>
       </div>
 

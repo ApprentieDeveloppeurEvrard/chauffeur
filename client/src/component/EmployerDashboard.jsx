@@ -10,6 +10,7 @@ import MyOffers from './dashboard/MyOffers';
 import Candidates from './dashboard/Candidates';
 import Missions from './dashboard/Missions';
 import Settings from './dashboard/Settings';
+import EmployerProfile from './dashboard/EmployerProfile';
 import Notifications from './dashboard/Notifications';
 import MobileBottomNav from './mobile/MobileBottomNav';
 
@@ -52,6 +53,16 @@ export default function EmployerDashboard() {
     setActiveTab('dashboard');
   };
 
+  // Fonction pour gérer le clic sur "Mon profil"
+  const handleProfileClick = () => {
+    setActiveTab('profile');
+  };
+
+  // Fonction pour gérer le clic sur "Paramètres"
+  const handleSettingsClick = () => {
+    setActiveTab('settings');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -61,6 +72,9 @@ export default function EmployerDashboard() {
         notifications={notifications || []}
         onNotificationClick={() => setActiveTab('notifications')}
         onLogoClick={handleLogoClick}
+        onProfileClick={handleProfileClick}
+        onSettingsClick={handleSettingsClick}
+        userRole="client"
         loading={loading}
       />
 
@@ -88,6 +102,7 @@ export default function EmployerDashboard() {
               receivedApplications={receivedApplications || []}
               stats={stats}
               loading={loading}
+              onTabChange={setActiveTab}
             />
           )}
 
@@ -133,6 +148,11 @@ export default function EmployerDashboard() {
               loading={loading}
               onMarkAsRead={clearError}
             />
+          )}
+
+          {/* Profil */}
+          {activeTab === 'profile' && (
+            <EmployerProfile />
           )}
 
           {/* Paramètres */}

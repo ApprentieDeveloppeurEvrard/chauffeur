@@ -11,6 +11,7 @@ import DriverMissions from './driver/DriverMissions';
 import DriverPayments from './driver/DriverPayments';
 import DriverNotifications from './driver/DriverNotifications';
 import DriverSettings from './driver/DriverSettings';
+import DriverProfile from './driver/DriverProfile';
 import MobileBottomNav from './mobile/MobileBottomNav';
 
 export default function SafeDriverDashboard() {
@@ -106,6 +107,15 @@ export default function SafeDriverDashboard() {
     setActiveTab('dashboard');
   };
 
+  // Fonctions pour gérer les clics du menu avatar
+  const handleSettingsClick = () => {
+    setActiveTab('settings');
+  };
+
+  const handleProfileClick = () => {
+    setActiveTab('profile');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -115,6 +125,8 @@ export default function SafeDriverDashboard() {
         notifications={notifications || []}
         onNotificationClick={() => setActiveTab('notifications')}
         onLogoClick={handleLogoClick}
+        onSettingsClick={handleSettingsClick}
+        onProfileClick={handleProfileClick}
         loading={loading}
       />
 
@@ -135,82 +147,15 @@ export default function SafeDriverDashboard() {
         <main className="flex-1 lg:ml-64 p-4 lg:p-6 pb-32 lg:pb-6">
           {/* Dashboard - Vue d'ensemble */}
           {activeTab === 'dashboard' && (
-            <div className="space-y-6">
-
-              {/* Statistiques rapides */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Offres disponibles</p>
-                      <p className="text-2xl font-semibold text-gray-900">{availableOffers?.length || 0}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-orange-100 rounded-lg">
-                      <svg className="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Candidatures envoyées</p>
-                      <p className="text-2xl font-semibold text-gray-900">{myApplications?.length || 0}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Missions actives</p>
-                      <p className="text-2xl font-semibold text-gray-900">{myMissions?.filter(m => m.status === 'active').length || 0}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-600">Revenus ce mois</p>
-                      <p className="text-2xl font-semibold text-gray-900">{totalEarnings || 0} FCFA</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Message d'information */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <div className="flex items-center">
-                  <svg className="h-6 w-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div>
-                    <h3 className="text-lg font-medium text-blue-900">Bienvenue sur votre tableau de bord !</h3>
-                    <p className="text-blue-700 mt-1">
-                      Votre profil est en cours de validation. Une fois approuvé, vous pourrez voir et postuler aux offres disponibles.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <DriverDashboard 
+              availableOffers={availableOffers || []}
+              myApplications={myApplications || []}
+              activeMissions={myMissions?.filter(m => m.status === 'active') || []}
+              notifications={notifications || []}
+              stats={stats}
+              loading={loading}
+              onTabChange={setActiveTab}
+            />
           )}
 
           {/* Offres disponibles */}
@@ -254,6 +199,11 @@ export default function SafeDriverDashboard() {
               loading={loading}
               onMarkAsRead={clearError}
             />
+          )}
+
+          {/* Profil */}
+          {activeTab === 'profile' && (
+            <DriverProfile />
           )}
 
           {/* Paramètres */}

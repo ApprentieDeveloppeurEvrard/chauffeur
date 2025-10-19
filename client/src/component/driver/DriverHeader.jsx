@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import UserMenu from '../common/UserMenu';
 
-export default function DriverHeader({ searchQuery, setSearchQuery, notifications, onNotificationClick, onLogoClick }) {
+export default function DriverHeader({ searchQuery, setSearchQuery, notifications, onNotificationClick, onLogoClick, onSettingsClick, onProfileClick }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleLogoClick = (e) => {
@@ -71,7 +71,11 @@ export default function DriverHeader({ searchQuery, setSearchQuery, notification
               </span>
             )}
           </button>
-          <UserMenu />
+          <UserMenu 
+            userRole="driver"
+            onSettingsClick={onSettingsClick}
+            onProfileClick={onProfileClick}
+          />
         </div>
       </div>
 
