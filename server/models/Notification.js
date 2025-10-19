@@ -15,7 +15,8 @@ const notificationSchema = new mongoose.Schema(
         'mission_update',
         'payment_received',
         'profile_validation',
-        'system_message'
+        'system_message',
+        'driver_profile_updated'
       ],
       required: true
     },

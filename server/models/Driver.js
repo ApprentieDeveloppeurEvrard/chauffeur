@@ -130,6 +130,50 @@ const driverSchema = new mongoose.Schema(
       default: 0
     },
     
+    // Expérience professionnelle
+    workExperience: [{
+      company: { 
+        type: String, 
+        trim: true,
+        maxlength: [100, 'Le nom de l\'entreprise ne peut pas dépasser 100 caractères']
+      },
+      location: { 
+        type: String, 
+        trim: true,
+        maxlength: [100, 'Le lieu ne peut pas dépasser 100 caractères']
+      },
+      position: { 
+        type: String, 
+        trim: true,
+        maxlength: [100, 'Le poste ne peut pas dépasser 100 caractères']
+      },
+      startDate: { 
+        type: String, // Format YYYY-MM
+        validate: {
+          validator: function(v) {
+            // Permettre les chaînes vides ou le format YYYY-MM
+            return !v || /^\d{4}-\d{2}$/.test(v);
+          },
+          message: 'Format de date invalide (YYYY-MM attendu)'
+        }
+      },
+      endDate: { 
+        type: String, // Format YYYY-MM, optionnel (en cours si vide)
+        validate: {
+          validator: function(v) {
+            // Permettre les chaînes vides ou le format YYYY-MM
+            return !v || /^\d{4}-\d{2}$/.test(v);
+          },
+          message: 'Format de date invalide (YYYY-MM attendu)'
+        }
+      },
+      description: { 
+        type: String, 
+        trim: true,
+        maxlength: [500, 'La description ne peut pas dépasser 500 caractères']
+      }
+    }],
+    
     // Documents
     documents: {
       licensePhoto: { type: String },

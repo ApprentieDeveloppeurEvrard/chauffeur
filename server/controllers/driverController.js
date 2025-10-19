@@ -1,14 +1,65 @@
 const Driver = require('../models/Driver');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+
+// Fonction pour notifier les employeurs d'une mise à jour de profil
+const notifyEmployersOfProfileUpdate = async (driver) => {
+  try {
+    // Récupérer tous les employeurs actifs
+    const employers = await User.find({ 
+      role: 'employer', 
+      isActive: true 
+    }).select('_id firstName lastName');
+
+    if (employers.length === 0) return;
+
+    // Créer une notification pour chaque employeur
+    const notifications = employers.map(employer => ({
+      userId: employer._id,
+      type: 'driver_profile_updated',
+      title: 'Profil chauffeur mis à jour',
+      message: `${driver.firstName} ${driver.lastName} a mis à jour son profil. Consultez les nouvelles informations.`,
+      data: {
+        driverId: driver._id,
+        driverName: `${driver.firstName} ${driver.lastName}`,
+        updateTime: new Date()
+      },
+      unread: true
+    }));
+
+    // Insérer toutes les notifications en une fois
+    await Notification.insertMany(notifications);
+    
+    console.log(`Notifications envoyées à ${employers.length} employeurs pour la mise à jour du profil de ${driver.firstName} ${driver.lastName}`);
+  } catch (error) {
+    console.error('Erreur lors de l\'envoi des notifications aux employeurs:', error);
+    // Ne pas faire échouer la mise à jour du profil si les notifications échouent
+  }
+};
 
 // Obtenir le profil du chauffeur connecté
 const getDriverProfile = async (req, res) => {
   try {
+    console.log('=== RÉCUPÉRATION PROFIL CHAUFFEUR ===');
+    console.log('req.user:', req.user);
+    
     const userId = req.user.sub;
+    console.log('Recherche profil pour userId:', userId);
     
     let driver = await Driver.findOne({ userId })
       .populate('userId', 'email firstName lastName phone isActive')
       .lean();
+      
+    console.log('Driver trouvé:', driver ? 'oui' : 'non');
+    if (driver) {
+      console.log('Driver data:', {
+        _id: driver._id,
+        firstName: driver.firstName,
+        lastName: driver.lastName,
+        workExperience: driver.workExperience?.length || 0
+      });
+      console.log('workExperience récupéré:', driver.workExperience);
+    }
 
     // Si le profil n'existe pas, retourner les données de base de l'utilisateur
     if (!driver) {
@@ -44,30 +95,54 @@ const getDriverProfile = async (req, res) => {
 // Mettre à jour le profil du chauffeur
 const updateDriverProfile = async (req, res) => {
   try {
+    console.log('=== MISE À JOUR PROFIL CHAUFFEUR ===');
+    console.log('req.user:', req.user);
+    console.log('req.body:', req.body);
+    
     const userId = req.user.sub;
     const updateData = req.body;
+    
+    console.log('userId:', userId);
+    console.log('updateData keys:', Object.keys(updateData));
 
     // Champs autorisés à être mis à jour
     const allowedFields = [
       'firstName', 'lastName', 'email', 'phone', 'licenseType', 'licenseNumber', 
       'licenseDate', 'vtcCard', 'experience', 'vehicleType', 'vehicleBrand', 
       'vehicleModel', 'vehicleYear', 'vehicleSeats', 'workZone', 'specialties',
-      'isAvailable', 'notifications'
+      'isAvailable', 'notifications', 'workExperience'
     ];
 
     // Filtrer les champs autorisés
     const filteredData = {};
     Object.keys(updateData).forEach(key => {
       if (allowedFields.includes(key)) {
-        filteredData[key] = updateData[key];
+        let value = updateData[key];
+        
+        // Parser les champs JSON si ils arrivent sous forme de string (FormData)
+        if ((key === 'specialties' || key === 'workExperience') && typeof value === 'string') {
+          try {
+            value = JSON.parse(value);
+          } catch (e) {
+            console.error(`Erreur lors du parsing de ${key}:`, e);
+            // Garder la valeur originale en cas d'erreur
+          }
+        }
+        
+        filteredData[key] = value;
       }
     });
+
+    console.log('Données filtrées à sauvegarder:', filteredData);
+    console.log('workExperience à sauvegarder:', filteredData.workExperience);
 
     let driver = await Driver.findOneAndUpdate(
       { userId },
       filteredData,
       { new: true, runValidators: true }
     ).populate('userId', 'email firstName lastName phone');
+
+    console.log('Driver après mise à jour:', driver ? 'trouvé' : 'non trouvé');
 
     // Si le profil n'existe pas, le créer
     if (!driver) {
@@ -91,6 +166,17 @@ const updateDriverProfile = async (req, res) => {
       await User.findByIdAndUpdate(userId, userUpdateData);
     }
 
+    // Notifier les employeurs de la mise à jour du profil
+    await notifyEmployersOfProfileUpdate(driver);
+
+    console.log('=== PROFIL SAUVEGARDÉ AVEC SUCCÈS ===');
+    console.log('Driver final:', {
+      _id: driver._id,
+      firstName: driver.firstName,
+      lastName: driver.lastName,
+      workExperience: driver.workExperience?.length || 0
+    });
+
     res.json({
       message: 'Profil mis à jour avec succès',
       driver
@@ -98,8 +184,11 @@ const updateDriverProfile = async (req, res) => {
 
   } catch (error) {
     console.error('Erreur lors de la mise à jour du profil chauffeur:', error);
+    console.error('Type d\'erreur:', error.name);
+    console.error('Message d\'erreur:', error.message);
     
     if (error.name === 'ValidationError') {
+      console.error('Erreurs de validation:', error.errors);
       return res.status(400).json({ 
         error: 'Données invalides',
         details: Object.values(error.errors).map(err => err.message)
@@ -326,8 +415,59 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return Math.round(R * c * 100) / 100; // Distance en km, arrondie à 2 décimales
 }
 
+// Obtenir le profil d'un chauffeur spécifique par ID (pour les employeurs)
+const getDriverProfileById = async (req, res) => {
+  try {
+    console.log('=== RÉCUPÉRATION PROFIL CHAUFFEUR PAR ID ===');
+    const { driverId } = req.params;
+    console.log('driverId demandé:', driverId);
+    
+    const driver = await Driver.findById(driverId)
+      .populate('userId', 'email firstName lastName phone isActive')
+      .lean();
+      
+    console.log('Driver trouvé par ID:', driver ? 'oui' : 'non');
+    
+    if (!driver) {
+      return res.status(404).json({ 
+        error: 'Chauffeur non trouvé' 
+      });
+    }
+
+    // Retourner les données du chauffeur (sans informations sensibles)
+    const publicDriverData = {
+      _id: driver._id,
+      firstName: driver.firstName,
+      lastName: driver.lastName,
+      licenseType: driver.licenseType,
+      experience: driver.experience,
+      vehicleType: driver.vehicleType,
+      vehicleBrand: driver.vehicleBrand,
+      vehicleYear: driver.vehicleYear,
+      vehicleSeats: driver.vehicleSeats,
+      workZone: driver.workZone,
+      specialties: driver.specialties || [],
+      workExperience: driver.workExperience || [],
+      rating: driver.rating || 0,
+      totalRides: driver.totalRides || 0,
+      profilePhotoUrl: driver.profilePhotoUrl,
+      isAvailable: driver.isAvailable
+    };
+
+    console.log('Données publiques du chauffeur envoyées');
+    res.json(publicDriverData);
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération du profil chauffeur par ID:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la récupération du profil' 
+    });
+  }
+};
+
 module.exports = {
   getDriverProfile,
+  getDriverProfileById,
   updateDriverProfile,
   getAllDrivers,
   updateDriverStatus,
