@@ -19,15 +19,37 @@ const app = express();
 
 // Configuration CORS pour la production
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? [
-        process.env.CLIENT_URL,
-        process.env.ADMIN_URL,
-        process.env.API_URL || `https://${process.env.RENDER_SERVICE_NAME}.onrender.com`
-      ].filter(Boolean) // Supprime les valeurs undefined
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'],
+  origin: function (origin, callback) {
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? [
+          process.env.CLIENT_URL,
+          process.env.ADMIN_URL,
+          process.env.API_URL,
+          'https://chauffeur.onrender.com',
+          'https://admin-chauffeur.onrender.com',
+          'https://server-chauffeur.onrender.com'
+        ].filter(Boolean)
+      : [
+          'http://localhost:3000', 
+          'http://localhost:3001', 
+          'http://localhost:5173',
+          'http://localhost:4000'
+        ];
+    
+    // Permettre les requêtes sans origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 
 app.use(cors(corsOptions));
@@ -35,7 +57,32 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    cors: {
+      clientUrl: process.env.CLIENT_URL,
+      adminUrl: process.env.ADMIN_URL,
+      apiUrl: process.env.API_URL
+    }
+  });
+});
+
+// Endpoint de debug pour vérifier la configuration
+app.get('/debug/config', (req, res) => {
+  res.json({
+    environment: process.env.NODE_ENV,
+    port: process.env.PORT,
+    hasMongoUri: !!process.env.MONGO_URI,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    corsOrigins: {
+      clientUrl: process.env.CLIENT_URL,
+      adminUrl: process.env.ADMIN_URL,
+      apiUrl: process.env.API_URL
+    },
+    requestOrigin: req.get('Origin') || 'No origin header'
+  });
 });
 
 app.use('/api/auth', authRoutes);
