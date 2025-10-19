@@ -1,5 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
+// Configuration API
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -36,7 +39,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:4000/api/auth/login', {
+      console.log('Login attempt with API_BASE_URL:', API_BASE_URL);
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +70,8 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await fetch('http://localhost:4000/api/auth/register', {
+      console.log('Register attempt with API_BASE_URL:', API_BASE_URL);
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
