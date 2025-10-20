@@ -101,14 +101,22 @@ const offerSchema = new mongoose.Schema(
       type: Number,
       default: 50
     },
-    tags: [{
-      type: String,
-      trim: true
-    }],
     isUrgent: {
       type: Boolean,
       default: false
     },
+    isDirect: {
+      type: Boolean,
+      default: false
+    },
+    targetDriverId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Driver'
+    },
+    tags: [{
+      type: String,
+      trim: true
+    }],
     contactInfo: {
       phone: String,
       email: String,

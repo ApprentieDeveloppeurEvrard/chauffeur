@@ -7,7 +7,8 @@ const {
   getAllDrivers,
   updateDriverStatus,
   updateLocation,
-  findNearbyDrivers
+  findNearbyDrivers,
+  getDriversCount
 } = require('../controllers/driverController');
 
 const router = express.Router();
@@ -19,6 +20,7 @@ router.put('/profile/upload', requireAuth, updateDriverProfile); // Route pour u
 router.put('/location', requireAuth, updateLocation);
 
 // Routes publiques/client
+router.get('/count', getDriversCount); // Récupérer le nombre de chauffeurs
 router.get('/nearby', findNearbyDrivers);
 router.get('/:driverId', getDriverProfileById); // Récupérer le profil d'un chauffeur spécifique
 

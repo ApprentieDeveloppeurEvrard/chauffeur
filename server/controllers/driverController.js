@@ -415,30 +415,33 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   return Math.round(R * c * 100) / 100; // Distance en km, arrondie à 2 décimales
 }
 
-// Obtenir le profil d'un chauffeur spécifique par ID (pour les employeurs)
+// Obtenir le profil d'un chauffeur par son ID (pour les employeurs)
 const getDriverProfileById = async (req, res) => {
   try {
-    console.log('=== RÉCUPÉRATION PROFIL CHAUFFEUR PAR ID ===');
     const { driverId } = req.params;
-    console.log('driverId demandé:', driverId);
     
+    console.log('Recherche du profil pour driverId:', driverId);
+    
+    // Rechercher le chauffeur par son ID
     const driver = await Driver.findById(driverId)
-      .populate('userId', 'email firstName lastName phone isActive')
-      .lean();
-      
-    console.log('Driver trouvé par ID:', driver ? 'oui' : 'non');
+      .populate('userId', 'firstName lastName email phone')
+      .select('-__v -createdAt -updatedAt');
     
     if (!driver) {
-      return res.status(404).json({ 
-        error: 'Chauffeur non trouvé' 
-      });
+      console.log('Chauffeur non trouvé pour ID:', driverId);
+      return res.status(404).json({ message: 'Chauffeur non trouvé' });
     }
-
-    // Retourner les données du chauffeur (sans informations sensibles)
-    const publicDriverData = {
+    
+    console.log('Profil chauffeur trouvé:', driver.userId?.firstName, driver.userId?.lastName);
+    
+    // Construire la réponse avec les informations publiques
+    const publicProfile = {
       _id: driver._id,
-      firstName: driver.firstName,
-      lastName: driver.lastName,
+      userId: driver.userId?._id, // Ajouter l'ID utilisateur pour le chat
+      firstName: driver.userId?.firstName || 'Prénom non disponible',
+      lastName: driver.userId?.lastName || 'Nom non disponible',
+      email: driver.userId?.email,
+      phone: driver.userId?.phone,
       licenseType: driver.licenseType,
       experience: driver.experience,
       vehicleType: driver.vehicleType,
@@ -446,22 +449,29 @@ const getDriverProfileById = async (req, res) => {
       vehicleYear: driver.vehicleYear,
       vehicleSeats: driver.vehicleSeats,
       workZone: driver.workZone,
-      specialties: driver.specialties || [],
-      workExperience: driver.workExperience || [],
+      specialties: driver.specialties,
+      workExperience: driver.workExperience,
       rating: driver.rating || 0,
       totalRides: driver.totalRides || 0,
       profilePhotoUrl: driver.profilePhotoUrl,
       isAvailable: driver.isAvailable
     };
-
-    console.log('Données publiques du chauffeur envoyées');
-    res.json(publicDriverData);
-
+    
+    res.json(publicProfile);
   } catch (error) {
-    console.error('Erreur lors de la récupération du profil chauffeur par ID:', error);
-    res.status(500).json({ 
-      error: 'Erreur lors de la récupération du profil' 
-    });
+    console.error('Erreur lors de la récupération du profil du chauffeur:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
+// Obtenir le nombre total de chauffeurs
+const getDriversCount = async (req, res) => {
+  try {
+    const count = await Driver.countDocuments();
+    res.json({ count });
+  } catch (error) {
+    console.error('Erreur lors de la récupération du nombre de chauffeurs:', error);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -472,5 +482,6 @@ module.exports = {
   getAllDrivers,
   updateDriverStatus,
   updateLocation,
-  findNearbyDrivers
+  findNearbyDrivers,
+  getDriversCount
 };

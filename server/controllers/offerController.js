@@ -20,6 +20,50 @@ const getAllOffers = async (req, res) => {
     // Construire les filtres
     const filters = { status: 'active' };
     
+    // Filtrage des offres directes
+    if (req.user && req.user.sub) {
+      // Pour les chauffeurs, récupérer l'ID du profil Driver
+      const user = await User.findById(req.user.sub);
+      console.log('Utilisateur connecté:', { userId: req.user.sub, role: user?.role });
+      
+      if (user && user.role === 'driver') {
+        const Driver = require('../models/Driver');
+        const driver = await Driver.findOne({ userId: req.user.sub });
+        console.log('Profil chauffeur trouvé:', { driverId: driver?._id, name: driver?.firstName + ' ' + driver?.lastName });
+        
+        if (driver) {
+          // Chauffeur connecté : afficher les offres générales + ses offres directes
+          filters.$or = [
+            { targetDriverId: { $exists: false } }, // Offres générales
+            { targetDriverId: null }, // Offres générales (null explicite)
+            { targetDriverId: driver._id } // Offres directes pour ce chauffeur
+          ];
+          console.log('Filtres appliqués pour chauffeur:', JSON.stringify(filters, null, 2));
+        } else {
+          // Chauffeur sans profil : seulement les offres générales
+          filters.$or = [
+            { targetDriverId: { $exists: false } },
+            { targetDriverId: null }
+          ];
+          console.log('Chauffeur sans profil - filtres généraux appliqués');
+        }
+      } else {
+        // Utilisateur non-chauffeur : seulement les offres générales
+        filters.$or = [
+          { targetDriverId: { $exists: false } },
+          { targetDriverId: null }
+        ];
+        console.log('Utilisateur non-chauffeur - filtres généraux appliqués');
+      }
+    } else {
+      // Utilisateur non connecté : seulement les offres générales
+      filters.$or = [
+        { targetDriverId: { $exists: false } },
+        { targetDriverId: null }
+      ];
+      console.log('Utilisateur non connecté - filtres généraux appliqués');
+    }
+    
     if (type) filters.type = type;
     if (zone) filters['requirements.zone'] = new RegExp(zone, 'i');
     if (workType) filters['conditions.workType'] = workType;
@@ -40,6 +84,8 @@ const getAllOffers = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit))
       .lean();
+
+    console.log(`Offres trouvées: ${offers.length}, avec targetDriverId:`, offers.map(o => ({ id: o._id, targetDriverId: o.targetDriverId, title: o.title })));
 
     const total = await Offer.countDocuments(filters);
 
