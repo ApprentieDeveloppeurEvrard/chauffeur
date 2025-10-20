@@ -253,10 +253,15 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                   <div className="flex-1">
                     <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3 mb-2">
                       <h3 className="text-base lg:text-lg font-semibold text-gray-900">{offer.title}</h3>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-wrap">
                         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
                           {offer.type}
                         </span>
+                        {offer.isDirect && (
+                          <span className="px-2 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 text-xs rounded-full font-medium border border-purple-200">
+                            🎯 OFFRE DIRECTE
+                          </span>
+                        )}
                         {offer.isUrgent && (
                           <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">
                             Urgent

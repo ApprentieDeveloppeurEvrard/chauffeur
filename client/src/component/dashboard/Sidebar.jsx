@@ -1,4 +1,4 @@
-export default function Sidebar({ activeTab, setActiveTab, myOffers, availableDrivers, activeMissions, receivedApplications }) {
+export default function Sidebar({ activeTab, setActiveTab, myOffers, availableDrivers, activeMissions, receivedApplications, unreadMessagesCount = 0, onMessagesClick }) {
   const menuItems = [
     {
       id: 'dashboard',
@@ -53,6 +53,17 @@ export default function Sidebar({ activeTab, setActiveTab, myOffers, availableDr
       badge: activeMissions.length,
       badgeColor: 'bg-yellow-100 text-yellow-600'
     },
+    {
+      id: 'messages',
+      label: 'Messages',
+      icon: (
+        <svg className="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
+      badge: unreadMessagesCount,
+      badgeColor: 'bg-blue-100 text-blue-600'
+    },
   ];
 
   return (
@@ -62,7 +73,13 @@ export default function Sidebar({ activeTab, setActiveTab, myOffers, availableDr
           {menuItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                if (item.id === 'messages' && onMessagesClick) {
+                  onMessagesClick();
+                } else {
+                  setActiveTab(item.id);
+                }
+              }}
               className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                 activeTab === item.id 
                   ? 'bg-indigo-100 text-indigo-700' 

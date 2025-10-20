@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useAppData from '../hooks/useAppData';
+import useUnreadMessages from '../hooks/useUnreadMessages';
 
 // Import des composants du dashboard
 import Header from './dashboard/Header';
@@ -13,11 +14,19 @@ import Settings from './dashboard/Settings';
 import EmployerProfile from './dashboard/EmployerProfile';
 import Notifications from './dashboard/Notifications';
 import MobileBottomNav from './mobile/MobileBottomNav';
+import Chat from './chat/Chat';
+import EmbeddedChat from './chat/EmbeddedChat';
 
 export default function EmployerDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatConversationId, setChatConversationId] = useState(null);
+  const [chatOtherParticipant, setChatOtherParticipant] = useState(null);
+  
+  // Hook pour gérer les messages non lus
+  const { unreadCount: unreadMessagesCount } = useUnreadMessages();
   
   // Utilisation du hook pour les données dynamiques
   const {
@@ -41,6 +50,62 @@ export default function EmployerDashboard() {
     }
   }, [error]);
 
+  // Écouter les événements de création d'offre et de chat
+  useEffect(() => {
+    const handleOpenCreateOffer = (event) => {
+      console.log('Événement openCreateOffer reçu:', event.detail);
+      setActiveTab('my-offers');
+      setShowCreateForm(true);
+    };
+
+    const handleChangeTab = (event) => {
+      console.log('Événement changeTab reçu:', event.detail);
+      setActiveTab(event.detail.tab);
+      if (event.detail.showCreateForm) {
+        setShowCreateForm(true);
+      }
+    };
+
+    const handleOpenChat = (event) => {
+      console.log('Événement openChat reçu:', event.detail);
+      setChatConversationId(event.detail.conversationId);
+      setChatOtherParticipant(event.detail.otherParticipant);
+      setIsChatOpen(true);
+    };
+
+    const handleOpenMessages = () => {
+      console.log('Événement openMessages reçu');
+      setActiveTab('messages');
+    };
+
+    window.addEventListener('openCreateOffer', handleOpenCreateOffer);
+    window.addEventListener('changeTab', handleChangeTab);
+    window.addEventListener('openChat', handleOpenChat);
+    window.addEventListener('openMessages', handleOpenMessages);
+
+    return () => {
+      window.removeEventListener('openCreateOffer', handleOpenCreateOffer);
+      window.removeEventListener('changeTab', handleChangeTab);
+      window.removeEventListener('openChat', handleOpenChat);
+      window.removeEventListener('openMessages', handleOpenMessages);
+    };
+  }, []);
+
+  // Gérer l'URL avec hash pour l'onglet
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && hash !== activeTab) {
+      setActiveTab(hash);
+      if (hash === 'my-offers') {
+        // Vérifier s'il y a des données de recrutement
+        const recruitData = localStorage.getItem('recruitmentData');
+        if (recruitData) {
+          setShowCreateForm(true);
+        }
+      }
+    }
+  }, [activeTab]);
+
   // Fonction appelée après création d'une offre
   const handleOfferCreated = (newOffer) => {
     console.log('Nouvelle offre créée:', newOffer);
@@ -63,6 +128,11 @@ export default function EmployerDashboard() {
     setActiveTab('settings');
   };
 
+  // Fonction pour gérer le clic sur "Messages" - Aller à l'onglet messages
+  const handleMessagesClick = () => {
+    setActiveTab('messages');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -74,6 +144,8 @@ export default function EmployerDashboard() {
         onLogoClick={handleLogoClick}
         onProfileClick={handleProfileClick}
         onSettingsClick={handleSettingsClick}
+        onMessagesClick={handleMessagesClick}
+        unreadMessagesCount={unreadMessagesCount}
         userRole="client"
         loading={loading}
       />
@@ -88,6 +160,8 @@ export default function EmployerDashboard() {
             availableDrivers={availableDrivers || []}
             activeMissions={myMissions || []}
             receivedApplications={receivedApplications || []}
+            unreadMessagesCount={unreadMessagesCount}
+            onMessagesClick={handleMessagesClick}
           />
         </div>
 
@@ -159,6 +233,27 @@ export default function EmployerDashboard() {
           {activeTab === 'settings' && (
             <Settings />
           )}
+
+          {/* Messages */}
+          {activeTab === 'messages' && (
+            <div className="h-[500px] lg:h-[600px]">
+              <div className="bg-white rounded-lg shadow h-full flex flex-col">
+                {/* Header de la messagerie */}
+                <div className="p-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Messagerie</h2>
+                  <p className="text-sm text-gray-600">Vos conversations avec les chauffeurs</p>
+                </div>
+                
+                {/* Contenu du chat intégré */}
+                <div className="flex-1 flex">
+                  <EmbeddedChat
+                    initialConversationId={chatConversationId}
+                    initialOtherParticipant={chatOtherParticipant}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
@@ -220,6 +315,13 @@ export default function EmployerDashboard() {
         ]}
       />
 
+      {/* Composant Chat */}
+      <Chat
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        initialConversationId={chatConversationId}
+        initialOtherParticipant={chatOtherParticipant}
+      />
     </div>
   );
 }

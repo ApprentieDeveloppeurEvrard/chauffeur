@@ -4,7 +4,7 @@ import UserMenu from '../common/UserMenu';
 import NotificationDropdown from '../common/NotificationDropdown';
 import useNotifications from '../../hooks/useNotifications';
 
-export default function DriverHeader({ searchQuery, setSearchQuery, onLogoClick, onSettingsClick, onProfileClick }) {
+export default function DriverHeader({ searchQuery, setSearchQuery, onLogoClick, onSettingsClick, onProfileClick, onMessagesClick, unreadMessagesCount = 0 }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const { unreadCount } = useNotifications();
@@ -59,6 +59,21 @@ export default function DriverHeader({ searchQuery, setSearchQuery, onLogoClick,
             <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
+          </button>
+
+          {/* Messages - Mobile uniquement */}
+          <button 
+            onClick={onMessagesClick}
+            className="lg:hidden relative p-2 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            {unreadMessagesCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                {unreadMessagesCount}
+              </span>
+            )}
           </button>
 
           {/* Notifications */}

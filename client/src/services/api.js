@@ -200,6 +200,27 @@ export const vehiclesApi = {
   delete: (vehicleId) => api.delete(`/vehicles/${vehicleId}`),
 }
 
+// Service pour récupérer le nombre de chauffeurs
+export const driversService = {
+  getCount: () => api.get('/drivers/count'),
+}
+
+// Service pour le chat
+export const chatService = {
+  // Conversations
+  getConversations: () => api.get('/chat/conversations'),
+  createOrGetConversation: (targetUserId, context = {}) => 
+    api.post('/chat/conversations', { targetUserId, context }),
+  markConversationAsRead: (conversationId) => 
+    api.put(`/chat/conversations/${conversationId}/read`),
+  
+  // Messages
+  getMessages: (conversationId, page = 1, limit = 50) => 
+    api.get(`/chat/conversations/${conversationId}/messages?page=${page}&limit=${limit}`),
+  sendMessage: (conversationId, content, type = 'text', metadata = {}) => 
+    api.post(`/chat/conversations/${conversationId}/messages`, { content, type, metadata }),
+}
+
 export default api
 
 

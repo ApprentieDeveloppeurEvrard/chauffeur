@@ -1,8 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { driversService } from "../services/api";
 
 export default function HeroSection() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [driversCount, setDriversCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDriversCount = async () => {
+      try {
+        const response = await driversService.getCount();
+        setDriversCount(response.data.count);
+      } catch (error) {
+        console.error('Erreur lors de la récupération du nombre de chauffeurs:', error);
+        // Valeur par défaut en cas d'erreur
+        setDriversCount(2847);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDriversCount();
+  }, []);
 
   return (
     <div className="font-[Poppins] relative">
@@ -119,7 +139,9 @@ export default function HeroSection() {
                 alt="chauffeur2"
               />
             </div>
-            <p className="-translate-x-2">Rejoignez 5000+ professionnels connectés</p>
+            <p className="-translate-x-2">
+              Rejoignez {loading ? '...' : `${driversCount.toLocaleString()}+`} professionnels connectés
+            </p>
           </div>
 
           <h1 className="text-center md:text-left text-5xl leading-[68px] md:text-6xl md:leading-[84px] font-medium max-w-xl text-slate-900">
@@ -175,7 +197,9 @@ export default function HeroSection() {
           <div className="absolute -bottom-4 -left-4 bg-white p-4 rounded-lg shadow-lg border">
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-slate-700">2,847 chauffeurs disponibles</span>
+              <span className="text-sm font-medium text-slate-700">
+                {loading ? 'Chargement...' : `${driversCount.toLocaleString()} chauffeurs disponibles`}
+              </span>
             </div>
           </div>
         </div>

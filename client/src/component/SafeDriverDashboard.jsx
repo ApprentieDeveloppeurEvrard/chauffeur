@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useAppData from '../hooks/useAppData';
+import useUnreadMessages from '../hooks/useUnreadMessages';
 
 // Import des composants du dashboard chauffeur
 import DriverHeader from './driver/DriverHeader';
@@ -13,11 +14,19 @@ import DriverNotifications from './driver/DriverNotifications';
 import DriverSettings from './driver/DriverSettings';
 import DriverProfile from './driver/DriverProfile';
 import MobileBottomNav from './mobile/MobileBottomNav';
+import Chat from './chat/Chat';
+import EmbeddedChat from './chat/EmbeddedChat';
 
 export default function SafeDriverDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatConversationId, setChatConversationId] = useState(null);
+  const [chatOtherParticipant, setChatOtherParticipant] = useState(null);
+  
+  // Hook pour gérer les messages non lus
+  const { unreadCount: unreadMessagesCount } = useUnreadMessages();
   
   // Utilisation du hook pour les données dynamiques avec gestion d'erreur
   const hookData = useAppData();
@@ -42,6 +51,29 @@ export default function SafeDriverDashboard() {
       setError(hookError);
     }
   }, [hookError]);
+
+  // Écouter les événements de chat
+  useEffect(() => {
+    const handleOpenChat = (event) => {
+      console.log('Événement openChat reçu:', event.detail);
+      setChatConversationId(event.detail.conversationId);
+      setChatOtherParticipant(event.detail.otherParticipant);
+      setIsChatOpen(true);
+    };
+
+    const handleOpenMessages = () => {
+      console.log('Événement openMessages reçu');
+      setActiveTab('messages');
+    };
+
+    window.addEventListener('openChat', handleOpenChat);
+    window.addEventListener('openMessages', handleOpenMessages);
+
+    return () => {
+      window.removeEventListener('openChat', handleOpenChat);
+      window.removeEventListener('openMessages', handleOpenMessages);
+    };
+  }, []);
 
   // Calcul des revenus totaux depuis les stats
   const totalEarnings = stats?.summary?.totalEarnings || 0;
@@ -116,6 +148,11 @@ export default function SafeDriverDashboard() {
     setActiveTab('profile');
   };
 
+  // Fonction pour gérer le clic sur "Messages" - Aller à l'onglet messages
+  const handleMessagesClick = () => {
+    setActiveTab('messages');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -127,6 +164,8 @@ export default function SafeDriverDashboard() {
         onLogoClick={handleLogoClick}
         onSettingsClick={handleSettingsClick}
         onProfileClick={handleProfileClick}
+        onMessagesClick={handleMessagesClick}
+        unreadMessagesCount={unreadMessagesCount}
         loading={loading}
       />
 
@@ -140,6 +179,8 @@ export default function SafeDriverDashboard() {
             myApplications={myApplications || []}
             activeMissions={myMissions || []}
             notifications={notifications || []}
+            unreadMessagesCount={unreadMessagesCount}
+            onMessagesClick={handleMessagesClick}
           />
         </div>
 
@@ -210,6 +251,27 @@ export default function SafeDriverDashboard() {
           {activeTab === 'settings' && (
             <DriverSettings />
           )}
+
+          {/* Messages */}
+          {activeTab === 'messages' && (
+            <div className="h-[500px] lg:h-[600px]">
+              <div className="bg-white rounded-lg shadow h-full flex flex-col">
+                {/* Header de la messagerie */}
+                <div className="p-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Messagerie</h2>
+                  <p className="text-sm text-gray-600">Vos conversations avec les employeurs</p>
+                </div>
+                
+                {/* Contenu du chat intégré */}
+                <div className="flex-1 flex">
+                  <EmbeddedChat
+                    initialConversationId={chatConversationId}
+                    initialOtherParticipant={chatOtherParticipant}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
@@ -261,6 +323,13 @@ export default function SafeDriverDashboard() {
         ]}
       />
 
+      {/* Composant Chat */}
+      <Chat
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        initialConversationId={chatConversationId}
+        initialOtherParticipant={chatOtherParticipant}
+      />
     </div>
   );
 }
