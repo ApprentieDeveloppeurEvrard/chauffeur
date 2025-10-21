@@ -65,6 +65,9 @@ export default function EmbeddedChat({ initialConversationId = null, initialOthe
         setConversations(prev => prev.map(c => 
           c._id === conversation._id ? { ...c, unreadCount: 0 } : c
         ));
+        
+        // Déclencher l'événement pour mettre à jour les compteurs globaux
+        window.dispatchEvent(new CustomEvent('conversationMarkedAsRead'));
       }
     } catch (error) {
       console.error('Erreur lors du chargement des messages:', error);
@@ -195,7 +198,7 @@ export default function EmbeddedChat({ initialConversationId = null, initialOthe
                           ? 'bg-blue-100 text-blue-800' 
                           : 'bg-green-100 text-green-800'
                       }`}>
-                        {conversation.otherParticipant.role === 'driver' ? '🚗 Chauffeur' : '🏢 Employeur'}
+                        {conversation.otherParticipant.role === 'driver'}
                       </span>
                       <span className="text-xs text-gray-400 font-medium">
                         {conversation.lastMessage?.timestamp && formatTime(conversation.lastMessage.timestamp)}
@@ -311,12 +314,13 @@ export default function EmbeddedChat({ initialConversationId = null, initialOthe
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500">
-            <div className="text-center">
-              <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex-1 flex items-center justify-center text-gray-500 lg:mt-[-80px]">
+            <div className="text-center px-4">
+              <svg className="w-12 h-12 lg:w-16 lg:h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <p>Sélectionnez une conversation pour commencer</p>
+              <p className="text-sm lg:text-base">Sélectionnez une conversation pour commencer</p>
+              <p className="text-xs lg:text-sm text-gray-400 mt-2 hidden lg:block">Choisissez une conversation dans la liste de gauche pour voir les messages</p>
             </div>
           </div>
         )}

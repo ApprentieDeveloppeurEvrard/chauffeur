@@ -117,10 +117,10 @@ const useUnreadMessages = () => {
     // Demander la permission pour les notifications
     requestNotificationPermission();
 
-    // Configurer le polling
+    // Configurer le polling plus fréquent
     const interval = setInterval(() => {
       loadConversations();
-    }, 30000); // 30 secondes
+    }, 10000); // 10 secondes pour une meilleure réactivité
 
     // Écouter les événements de nouveaux messages
     const handleNewMessage = () => {
@@ -135,13 +135,28 @@ const useUnreadMessages = () => {
       }, 500); // Délai plus court pour les messages envoyés
     };
 
+    const handleConversationMarkedAsRead = () => {
+      setTimeout(() => {
+        loadConversations();
+      }, 200); // Délai très court pour la mise à jour immédiate
+    };
+
+    const handleForceRefresh = () => {
+      console.log('🔄 Force refresh des messages non lus');
+      loadConversations();
+    };
+
     window.addEventListener('newMessageReceived', handleNewMessage);
     window.addEventListener('newMessageSent', handleMessageSent);
+    window.addEventListener('conversationMarkedAsRead', handleConversationMarkedAsRead);
+    window.addEventListener('forceRefreshUnreadMessages', handleForceRefresh);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('newMessageReceived', handleNewMessage);
       window.removeEventListener('newMessageSent', handleMessageSent);
+      window.removeEventListener('conversationMarkedAsRead', handleConversationMarkedAsRead);
+      window.removeEventListener('forceRefreshUnreadMessages', handleForceRefresh);
     };
   }, [loadConversations, requestNotificationPermission]);
 
@@ -158,7 +173,8 @@ const useUnreadMessages = () => {
     markConversationAsRead,
     refresh,
     createTestNotification,
-    requestNotificationPermission
+    requestNotificationPermission,
+    loadConversations // Exposer pour debug
   };
 };
 

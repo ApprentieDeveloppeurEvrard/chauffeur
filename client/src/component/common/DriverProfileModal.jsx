@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Bell } from 'lucide-react';
 import { driversApi } from '../../services/api';
 import Modal from './Modal';
 
@@ -147,7 +148,7 @@ Je suis intéressé(e) par votre profil de chauffeur professionnel. Voici pourqu
 ✅ Votre évaluation : ${driver.rating || 'N/A'}/5 étoiles
 ✅ Vos courses effectuées : ${driver.totalRides || 0} missions
 
-🎯 OFFRE DIRECTE - Cette proposition vous est destinée exclusivement.
+ OFFRE DIRECTE - Cette proposition vous est destinée exclusivement.
 
 Je souhaiterais discuter avec vous d'une opportunité de collaboration. 
 
@@ -550,21 +551,6 @@ Cordialement`,
                       Message trop long
                     </span>
                   )}
-                </div>
-              </div>
-
-              <div className="bg-indigo-50 rounded-lg p-3 border border-indigo-200">
-                <div className="flex items-start">
-                  <svg className="w-5 h-5 text-indigo-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div className="text-sm">
-                    <p className="text-indigo-800 font-medium mb-1">Message direct</p>
-                    <p className="text-indigo-700">
-                      Ce message sera envoyé directement à {driver.firstName} dans sa messagerie. 
-                      Il pourra vous répondre via le système de chat intégré.
-                    </p>
-                  </div>
                 </div>
               </div>
             </>

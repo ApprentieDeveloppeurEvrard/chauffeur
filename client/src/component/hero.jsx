@@ -60,15 +60,15 @@ export default function HeroSection() {
           <a href="/" className="hover:text-slate-500 transition">
             Accueil
           </a>
-          <a href="#chauffeurs" className="hover:text-slate-500 transition">
+          <Link to="/chauffeurs" className="hover:text-slate-500 transition">
             Chauffeurs
-          </a>
-          <a href="#employeurs" className="hover:text-slate-500 transition">
+          </Link>
+          <Link to="/employeurs" className="hover:text-slate-500 transition">
             Employeurs
-          </a>
-          <a href="#comment-ca-marche" className="hover:text-slate-500 transition">
+          </Link>
+          <Link to="/comment-ca-marche" className="hover:text-slate-500 transition">
             Comment ça marche
-          </a>
+          </Link>
         </div>
 
         {/* Buttons */}
@@ -98,9 +98,9 @@ export default function HeroSection() {
         }`}
       >
         <a href="/">Accueil</a>
-        <a href="#chauffeurs">Chauffeurs</a>
-        <a href="#employeurs">Employeurs</a>
-        <a href="#comment-ca-marche">Comment ça marche</a>
+        <Link to="/chauffeurs">Chauffeurs</Link>
+        <Link to="/employeurs">Employeurs</Link>
+        <Link to="/comment-ca-marche">Comment ça marche</Link>
         <div className="flex flex-col gap-4 mt-4">
           <Link to="/auth?mode=login" className="px-6 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 transition-all rounded-full text-center">
             Se connecter
@@ -190,9 +190,9 @@ export default function HeroSection() {
 
         <div className="relative">
           <img
-            src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=600&h=400&auto=format&fit=crop"
+            src="/hero.jpg"
             alt="Chauffeur professionnel au volant"
-            className="max-w-xs sm:max-w-sm lg:max-w-md transition-all duration-300 rounded-lg shadow-2xl"
+            className="max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl transition-all duration-300 rounded-lg shadow-2xl"
           />
           <div className="absolute -bottom-4 -left-4 bg-white p-4 rounded-lg shadow-lg border">
             <div className="flex items-center gap-3">

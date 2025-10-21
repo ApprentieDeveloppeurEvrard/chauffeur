@@ -7,6 +7,9 @@ import Auth from './component/Auth.jsx'
 import EmployerDashboard from './component/EmployerDashboard.jsx'
 import DriverDashboard from './component/DriverDashboardMain.jsx'
 import SafeDriverDashboard from './component/SafeDriverDashboard.jsx'
+import ChauffeursPage from './pages/ChauffeursPage.jsx'
+import EmployeursPage from './pages/EmployeursPage.jsx'
+import CommentCaMarchePage from './pages/CommentCaMarchePage.jsx'
 import TestAPI from './pages/TestAPI.jsx'
 import TestConnection from './pages/TestConnection.jsx'
 
@@ -21,6 +24,11 @@ function App() {
             
             {/* Page d'authentification */}
             <Route path="/auth" element={<Auth />} />
+            
+            {/* Pages publiques */}
+            <Route path="/chauffeurs" element={<ChauffeursPage />} />
+            <Route path="/employeurs" element={<EmployeursPage />} />
+            <Route path="/comment-ca-marche" element={<CommentCaMarchePage />} />
             
             {/* Dashboard employeur */}
             <Route 

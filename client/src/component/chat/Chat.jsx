@@ -67,6 +67,9 @@ export default function Chat({ isOpen, onClose, initialConversationId = null, in
         setConversations(prev => prev.map(c => 
           c._id === conversation._id ? { ...c, unreadCount: 0 } : c
         ));
+        
+        // Déclencher l'événement pour mettre à jour les compteurs globaux
+        window.dispatchEvent(new CustomEvent('conversationMarkedAsRead'));
       }
     } catch (error) {
       console.error('Erreur lors du chargement des messages:', error);
@@ -103,6 +106,9 @@ export default function Chat({ isOpen, onClose, initialConversationId = null, in
             }
           : c
       ));
+      
+      // Déclencher l'événement pour mettre à jour les compteurs de messages non lus
+      window.dispatchEvent(new CustomEvent('newMessageSent'));
       
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error);

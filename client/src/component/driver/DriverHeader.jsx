@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { Bell } from 'lucide-react';
 import UserMenu from '../common/UserMenu';
 import NotificationDropdown from '../common/NotificationDropdown';
 import useNotifications from '../../hooks/useNotifications';
@@ -82,9 +83,7 @@ export default function DriverHeader({ searchQuery, setSearchQuery, onLogoClick,
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
               className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-5 5v-5zM4 19h10v-1a3 3 0 00-3-3H7a3 3 0 00-3 3v1z" />
-              </svg>
+              <Bell className="h-6 w-6" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
                   {unreadCount}
