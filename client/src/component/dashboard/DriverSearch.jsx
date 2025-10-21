@@ -264,161 +264,33 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
           {/* Version mobile */}
           <div className="lg:hidden grid grid-cols-2 gap-3">
             {availableDrivers.map(driver => (
-              <div key={driver._id || driver.id} className="card bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-xl">
-                {/* Figure mobile - Photo plus petite */}
-                <figure className="relative">
-                  <div className="relative">
-                    {driver.profilePhotoUrl ? (
-                      <img 
-                        src={driver.profilePhotoUrl} 
-                        alt={`${driver.firstName} ${driver.lastName}`}
-                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md mx-auto"
-                      />
-                    ) : (
-                      <img 
-                        src={`https://ui-avatars.com/api/?name=${driver.fullName ? 
-                          (() => {
-                            const names = driver.fullName.split(' ');
-                            if (names.length >= 2) {
-                              return `${names[0]} ${names[names.length - 1]}`;
-                            }
-                            return driver.fullName;
-                          })() :
-                          `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
-                        }&background=6366f1&color=fff`} 
-                        alt={driver.fullName ? 
-                          (() => {
-                            const names = driver.fullName.split(' ');
-                            if (names.length >= 2) {
-                              return `${names[0]} ${names[names.length - 1].charAt(0)}.`;
-                            }
-                            return driver.fullName;
-                          })() :
-                          `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
-                        }
-                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md mx-auto"
-                      />
-                    )}
-                    {driver.lastActive === 'En ligne' && (
-                      <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                    )}
-                  </div>
-                </figure>
-
-                {/* Card Body mobile - Plus compact */}
-                <div className="card-body p-2">
-                  {/* Card Title mobile */}
-                  <div className="text-center mb-2">
-                    <h2 className="text-sm font-bold text-gray-900 leading-tight">
-                      {driver.fullName ? 
+              <div 
+                key={driver._id || driver.id} 
+                onClick={() => handleViewProfile(driver._id || driver.id)}
+                className="card bg-base-100 shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-xl overflow-hidden cursor-pointer"
+              >
+                {/* Figure mobile - Photo en haut pleine largeur */}
+                <figure className="relative h-32 bg-gradient-to-br from-indigo-50 to-blue-100">
+                  {driver.profilePhotoUrl ? (
+                    <img 
+                      src={driver.profilePhotoUrl} 
+                      alt={`${driver.firstName} ${driver.lastName}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img 
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      driver.fullName ? 
                         (() => {
                           const names = driver.fullName.split(' ');
                           if (names.length >= 2) {
-                            return `${names[0]} ${names[names.length - 1].charAt(0)}.`;
+                            return `${names[0]} ${names[names.length - 1]}`;
                           }
                           return driver.fullName;
                         })() :
                         `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
-                      }
-                    </h2>
-                    <div className={`badge badge-xs ${driver.isAvailable ? 'badge-success' : 'badge-neutral'} mt-1`}>
-                      {driver.isAvailable ? 'Dispo' : 'Occupé'}
-                    </div>
-                  </div>
-
-                  {/* Rating mobile */}
-                  <div className="flex items-center justify-center mb-2">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <svg 
-                          key={i} 
-                          className={`w-2.5 h-2.5 ${i < Math.floor(driver.rating) ? 'text-yellow-400' : 'text-gray-300'}`} 
-                          fill="currentColor" 
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                      <span className="ml-1 text-xs font-medium text-gray-700">{driver.rating}</span>
-                    </div>
-                  </div>
-
-                  {/* Infos essentielles mobile */}
-                  <div className="space-y-1 text-xs text-gray-600 mb-2">
-                    <div className="flex justify-between">
-                      <span>Exp:</span>
-                      <span className="font-medium text-gray-900 truncate ml-1">{driver.experience || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Zone:</span>
-                      <span className="font-medium text-gray-900 truncate ml-1">{driver.workZone || 'N/A'}</span>
-                    </div>
-                  </div>
-
-                  {/* Petit bouton bleu centré */}
-                  <div className="flex justify-center">
-                    <button 
-                      onClick={() => handleViewProfile(driver._id || driver.id)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 px-3 rounded-md transition-colors duration-200"
-                    >
-                      Voir le profil
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Version desktop */}
-          <div className="hidden lg:grid lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {availableDrivers.map(driver => (
-              <div key={driver._id || driver.id} className="card bg-white shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-xl">
-                {/* Figure - Photo du chauffeur */}
-                <figure className="px-4 pt-4">
-                  <div className="relative">
-                    {driver.profilePhotoUrl ? (
-                      <img 
-                        src={driver.profilePhotoUrl} 
-                        alt={`${driver.firstName} ${driver.lastName}`}
-                        className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto"
-                      />
-                    ) : (
-                      <img 
-                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        driver.fullName ? 
-                          (() => {
-                            const names = driver.fullName.split(' ');
-                            if (names.length >= 2) {
-                              return `${names[0]} ${names[names.length - 1].charAt(0)}.`;
-                            }
-                            return driver.fullName;
-                          })() :
-                          `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
-                      )}&background=6366f1&color=fff`} 
-                      alt={driver.fullName ? 
-                        (() => {
-                          const names = driver.fullName.split(' ');
-                          if (names.length >= 2) {
-                            return `${names[0]} ${names[names.length - 1].charAt(0)}.`;
-                          }
-                          return driver.fullName;
-                        })() :
-                        `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
-                        }
-                        className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg mx-auto"
-                      />
-                    )}
-                    {driver.lastActive === 'En ligne' && (
-                      <div className="absolute top-2 right-2 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
-                    )}
-                  </div>
-                </figure>
-
-                {/* Card Body */}
-                <div className="card-body p-4">
-                  {/* Card Title avec badge */}
-                  <h2 className="card-title text-lg font-bold text-gray-900 justify-center text-center">
-                    {driver.fullName ? 
+                    )}&background=6366f1&color=fff&size=150`} 
+                    alt={driver.fullName ? 
                       (() => {
                         const names = driver.fullName.split(' ');
                         if (names.length >= 2) {
@@ -428,53 +300,120 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
                       })() :
                       `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
                     }
-                    <div className={`badge ${driver.isAvailable ? 'badge-success' : 'badge-neutral'} text-xs`}>
-                      {driver.isAvailable ? 'Disponible' : 'Occupé'}
-                    </div>
+                    className="w-full h-full object-cover"
+                    />
+                  )}
+                  {driver.lastActive === 'En ligne' && (
+                    <div className="absolute top-2 right-2 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-lg"></div>
+                  )}
+                </figure>
+
+                {/* Card Body mobile - Style DaisyUI */}
+                <div className="card-body p-3">
+                  {/* Nom et prénom complets mobile */}
+                  <h2 className="card-title text-sm font-bold text-gray-900 mb-2 leading-tight">
+                    {driver.fullName || `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || 'Nom non spécifié'}
                   </h2>
 
-                  {/* Rating */}
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <svg 
-                          key={i} 
-                          className={`w-4 h-4 ${i < Math.floor(driver.rating) ? 'text-yellow-400' : 'text-gray-300'}`} 
-                          fill="currentColor" 
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                      <span className="ml-2 text-sm font-medium text-gray-700">{driver.rating}</span>
+                  {/* Informations demandées mobile */}
+                  <div className="space-y-1 mb-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Exp:</span>
+                      <span className="font-medium text-gray-900 truncate ml-1">{driver.experience || 'Non spécifiée'}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Poste:</span>
+                      <span className="font-medium text-gray-900 truncate ml-1">Chauffeur {driver.vehicleType || 'pro'}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-600">Dispo:</span>
+                      <span className={`font-medium ${driver.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                        {driver.isAvailable ? 'Oui' : 'Non'}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Description - Informations du chauffeur */}
-                  <div className="space-y-2 text-sm text-gray-600 mb-4">
-                    <div className="flex justify-between">
-                      <span>Expérience:</span>
-                      <span className="font-medium text-gray-900">{driver.experience || 'Non spécifié'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Version desktop */}
+          <div className="hidden lg:grid lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {availableDrivers.map(driver => (
+              <div 
+                key={driver._id || driver.id} 
+                onClick={() => handleViewProfile(driver._id || driver.id)}
+                className="card bg-base-100 shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-xl overflow-hidden cursor-pointer"
+              >
+                {/* Figure - Photo du chauffeur en haut */}
+                <figure className="relative h-48 bg-gradient-to-br from-indigo-50 to-blue-100">
+                  {driver.profilePhotoUrl ? (
+                    <img 
+                      src={driver.profilePhotoUrl} 
+                      alt={`${driver.firstName} ${driver.lastName}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img 
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      driver.fullName ? 
+                        (() => {
+                          const names = driver.fullName.split(' ');
+                          if (names.length >= 2) {
+                            return `${names[0]} ${names[names.length - 1].charAt(0)}.`;
+                          }
+                          return driver.fullName;
+                        })() :
+                        `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
+                    )}&background=6366f1&color=fff&size=200`} 
+                    alt={driver.fullName ? 
+                      (() => {
+                        const names = driver.fullName.split(' ');
+                        if (names.length >= 2) {
+                          return `${names[0]} ${names[names.length - 1].charAt(0)}.`;
+                        }
+                        return driver.fullName;
+                      })() :
+                      `${driver.firstName || ''} ${driver.lastName ? driver.lastName.charAt(0) + '.' : ''}`.trim()
+                      }
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  {driver.lastActive === 'En ligne' && (
+                    <div className="absolute top-3 right-3 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-lg"></div>
+                  )}
+                </figure>
+
+                {/* Card Body */}
+                <div className="card-body p-4">
+                  {/* Nom et prénom complets */}
+                  <h2 className="card-title text-base font-bold text-gray-900 mb-3">
+                    {driver.fullName || `${driver.firstName || ''} ${driver.lastName || ''}`.trim() || 'Nom non spécifié'}
+                  </h2>
+
+                  {/* Informations demandées */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Expérience:</span>
+                      <span className="font-medium text-gray-900">{driver.experience || 'Non spécifiée'}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Zone:</span>
-                      <span className="font-medium text-gray-900">{driver.workZone || 'Non spécifié'}</span>
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Poste recherché:</span>
+                      <span className="font-medium text-gray-900">Chauffeur {driver.vehicleType || 'professionnel'}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Véhicule:</span>
-                      <span className="font-medium text-gray-900">{driver.vehicleType || 'Non spécifié'}</span>
+
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Disponibilité:</span>
+                      <span className={`font-medium ${driver.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                        {driver.isAvailable ? 'Disponible' : 'Occupé'}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Petit bouton bleu centré */}
-                  <div className="flex justify-center">
-                    <button 
-                      onClick={() => handleViewProfile(driver._id || driver.id)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200"
-                    >
-                      Voir le profil
-                    </button>
-                  </div>
                 </div>
               </div>
             ))}

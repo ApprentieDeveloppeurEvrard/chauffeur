@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { driversApi } from '../../services/api';
 import Modal from './Modal';
+import ConfirmationModal from '../../components/ConfirmationModal';
+import { useConfirmation } from '../../hooks/useConfirmation';
+import { CheckIcon, WarningIcon } from '../../components/ConfirmationIcons';
 
 // Style pour masquer la barre de défilement
 const scrollbarHideStyle = `
@@ -21,6 +24,9 @@ export default function DriverProfileModal({ isOpen, onClose, driverId }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageContent, setMessageContent] = useState('');
+  
+  // Hook pour les confirmations personnalisées
+  const { confirm, isOpen: isConfirmOpen, config, handleConfirm, handleCancel } = useConfirmation();
   const [sendingMessage, setSendingMessage] = useState(false);
 
   // Charger les données du chauffeur quand la modal s'ouvre
@@ -105,8 +111,15 @@ export default function DriverProfileModal({ isOpen, onClose, driverId }) {
       setShowMessageModal(false);
       handleClose();
       
-      // Afficher un message de succès
-      alert(`✅ Message envoyé à ${driver.firstName} ${driver.lastName} !\n\nIl/elle le recevra dans sa messagerie.`);
+      // Afficher un message de succès avec notre modal personnalisé (auto-fermeture)
+      await confirm({
+        title: "Message envoyé !",
+        message: `Votre message a été envoyé à ${driver.firstName} ${driver.lastName}. Il/elle le recevra dans sa messagerie.`,
+        type: "success",
+        icon: <CheckIcon />,
+        autoClose: true,
+        autoCloseDelay: 2500
+      });
       
     } catch (error) {
       console.error('Erreur détaillée lors de l\'envoi du message:', error);
@@ -120,7 +133,15 @@ export default function DriverProfileModal({ isOpen, onClose, driverId }) {
         errorMessage = error.message;
       }
       
-      alert(`❌ ${errorMessage}\n\nVeuillez réessayer ou contacter le support.`);
+      // Afficher l'erreur avec notre modal personnalisé
+      await confirm({
+        title: "Erreur d'envoi",
+        message: `${errorMessage}\n\nVeuillez réessayer ou contacter le support.`,
+        confirmText: "OK",
+        cancelText: "",
+        type: "danger",
+        icon: <WarningIcon color="#DC2626" />
+      });
     } finally {
       setSendingMessage(false);
     }
@@ -583,6 +604,14 @@ Cordialement`,
           </div>
         </div>
       </Modal>
+
+      {/* Modal de confirmation personnalisé */}
+      <ConfirmationModal
+        isOpen={isConfirmOpen}
+        onClose={handleCancel}
+        onConfirm={handleConfirm}
+        {...config}
+      />
     </>
   );
 }
