@@ -22,7 +22,7 @@ export default function TestConnection() {
   }
 
   const getStatusIcon = (status) => {
-    return status === 'success' ? '✅' : '❌'
+    return status === 'success' ? '✓' : '✗'
   }
 
   const getStatusColor = (status) => {
@@ -34,7 +34,7 @@ export default function TestConnection() {
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-md p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
-            🔍 Test de Connexion API
+            Test de Connexion API
           </h1>
           
           <div className="mb-6">
@@ -48,7 +48,7 @@ export default function TestConnection() {
               disabled={isLoading}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-6 py-2 rounded-md font-medium transition-colors"
             >
-              {isLoading ? '🔄 Test en cours...' : '🚀 Lancer les tests'}
+              {isLoading ? 'Test en cours...' : 'Lancer les tests'}
             </button>
           </div>
 
@@ -57,7 +57,7 @@ export default function TestConnection() {
               {/* Configuration */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">
-                  📋 Configuration
+                  Configuration
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
@@ -74,7 +74,7 @@ export default function TestConnection() {
               {/* Résultats des tests */}
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">
-                  📊 Résultats des Tests
+                  Résultats des Tests
                 </h2>
                 
                 {testResults.error && (
@@ -140,7 +140,7 @@ export default function TestConnection() {
               {/* Résumé */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h2 className="text-lg font-semibold text-blue-900 mb-2">
-                  📈 Résumé
+                  Résumé
                 </h2>
                 <div className="text-blue-800">
                   {testResults.tests.filter(t => t.status === 'success').length} / {testResults.tests.length} tests réussis
@@ -148,11 +148,11 @@ export default function TestConnection() {
                 
                 {testResults.tests.every(t => t.status === 'success') ? (
                   <div className="text-green-600 font-medium mt-2">
-                    🎉 Tous les tests sont passés ! La connexion API fonctionne.
+                    Tous les tests sont passés ! La connexion API fonctionne.
                   </div>
                 ) : (
                   <div className="text-orange-600 font-medium mt-2">
-                    ⚠️ Certains tests ont échoué. Vérifiez les erreurs ci-dessus.
+                    Certains tests ont échoué. Vérifiez les erreurs ci-dessus.
                   </div>
                 )}
               </div>
@@ -160,7 +160,7 @@ export default function TestConnection() {
               {/* Conseils de dépannage */}
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <h2 className="text-lg font-semibold text-yellow-900 mb-2">
-                  💡 Conseils de Dépannage
+                  Conseils de Dépannage
                 </h2>
                 <ul className="text-yellow-800 text-sm space-y-1">
                   <li>• Vérifiez que le serveur est déployé et en cours d'exécution</li>

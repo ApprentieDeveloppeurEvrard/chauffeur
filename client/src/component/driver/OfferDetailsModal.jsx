@@ -105,7 +105,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
               </span>
               {offer.isUrgent && (
                 <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full font-medium">
-                  🚨 Urgent
+                  Urgent
                 </span>
               )}
             </div>
@@ -118,14 +118,14 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
               
               {/* Description */}
               <div>
-                <h4 className="text-base lg:text-lg font-medium text-gray-900 mb-3">📝 Description</h4>
+                <h4 className="text-base lg:text-lg font-medium text-gray-900 mb-3">Description</h4>
                 <p className="text-sm lg:text-base text-gray-700 leading-relaxed">{offer.description}</p>
               </div>
 
               {/* Informations principales */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                 <div>
-                  <h4 className="text-base lg:text-lg font-medium text-gray-900 mb-3">📍 Localisation</h4>
+                  <h4 className="text-base lg:text-lg font-medium text-gray-900 mb-3">Localisation</h4>
                   <div className="space-y-2">
                     <div>
                       <span className="text-sm font-medium text-gray-600">Ville:</span>
@@ -145,7 +145,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
                 </div>
 
                 <div>
-                  <h4 className="text-base lg:text-lg font-medium text-gray-900 mb-3">💼 Conditions de travail</h4>
+                  <h4 className="text-base lg:text-lg font-medium text-gray-900 mb-3">Conditions de travail</h4>
                   <div className="space-y-2">
                     <div>
                       <span className="text-sm font-medium text-gray-600">Type:</span>
@@ -194,7 +194,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
               {/* Exigences */}
               {offer.requirements && (
                 <div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-3">✅ Exigences</h4>
+                  <h4 className="text-lg font-medium text-gray-900 mb-3">Exigences</h4>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -219,7 +219,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
               {/* Informations sur l'employeur */}
               {offer.employer && (
                 <div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-3">👤 Employeur</h4>
+                  <h4 className="text-lg font-medium text-gray-900 mb-3">Employeur</h4>
                   <div className="bg-blue-50 rounded-lg p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center">
@@ -241,7 +241,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
               {/* Informations de contact */}
               {offer.contactInfo && (
                 <div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-3">📞 Contact</h4>
+                  <h4 className="text-lg font-medium text-gray-900 mb-3">Contact</h4>
                   <div className="bg-green-50 rounded-lg p-4">
                     <div className="space-y-2">
                       <div>
@@ -270,7 +270,7 @@ export default function OfferDetailsModal({ offer, showModal, setShowModal, onAp
 
               {/* Informations supplémentaires */}
               <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-3">ℹ️ Informations supplémentaires</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-3">Informations supplémentaires</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">Publié le:</span>

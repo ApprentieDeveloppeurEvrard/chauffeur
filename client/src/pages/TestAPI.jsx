@@ -146,12 +146,12 @@ export default function TestAPI() {
               </div>
               {results.apiTest.success ? (
                 <div className="text-green-600">
-                  <strong>✅ Succès</strong> (Status: {results.apiTest.status})
+                  <strong>Succès</strong> (Status: {results.apiTest.status})
                   <pre className="mt-2 text-sm">{JSON.stringify(results.apiTest.data, null, 2)}</pre>
                 </div>
               ) : (
                 <div className="text-red-600">
-                  <strong>❌ Erreur:</strong> {results.apiTest.error}
+                  <strong>Erreur:</strong> {results.apiTest.error}
                 </div>
               )}
             </div>
@@ -176,11 +176,11 @@ export default function TestAPI() {
               </div>
               {results.loginTest.success ? (
                 <div className="text-green-600">
-                  <strong>✅ Endpoint accessible</strong> (Status: {results.loginTest.status})
+                  <strong>Endpoint accessible</strong> (Status: {results.loginTest.status})
                 </div>
               ) : (
                 <div className={results.loginTest.status === 401 ? "text-orange-600" : "text-red-600"}>
-                  <strong>{results.loginTest.status === 401 ? '⚠️ Endpoint accessible (erreur d\'auth normale)' : '❌ Erreur:'}</strong> 
+                  <strong>{results.loginTest.status === 401 ? 'Endpoint accessible (erreur d\'auth normale)' : 'Erreur:'}</strong> 
                   {results.loginTest.error || `Status ${results.loginTest.status}`}
                 </div>
               )}

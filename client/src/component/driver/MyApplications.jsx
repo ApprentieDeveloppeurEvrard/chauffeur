@@ -157,7 +157,7 @@ export default function MyApplications({ myApplications, loading }) {
                     </div>
                     {application.offer?.conditions?.salary && (
                       <div className="flex justify-between lg:block">
-                        <span className="text-gray-500">💰 Salaire:</span>
+                        <span className="text-gray-500">Salaire:</span>
                         <span className="ml-1 font-medium text-green-600">
                           {application.offer.conditions.salary} FCFA
                           {application.offer.conditions.salaryType && (

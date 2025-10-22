@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import EmptyState from '../common/EmptyState';
 import OfferDetailsModal from './OfferDetailsModal';
+import CustomSelect from '../common/CustomSelect';
 import { applicationsApi } from '../../services/api';
 
 export default function AvailableOffers({ availableOffers, loading, refreshData }) {
@@ -14,6 +15,39 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  
+  // États pour les filtres
+  const [selectedCity, setSelectedCity] = useState('all');
+  const [selectedType, setSelectedType] = useState('all');
+  const [selectedSchedule, setSelectedSchedule] = useState('all');
+  
+  // Filtrer les offres
+  const filteredOffers = availableOffers?.filter(offer => {
+    // Filtre par ville
+    if (selectedCity !== 'all') {
+      const offerCity = offer.location?.city || offer.requirements?.zone || '';
+      if (!offerCity.toLowerCase().includes(selectedCity.toLowerCase())) {
+        return false;
+      }
+    }
+    
+    // Filtre par type
+    if (selectedType !== 'all') {
+      if (offer.type !== selectedType) {
+        return false;
+      }
+    }
+    
+    // Filtre par horaire
+    if (selectedSchedule !== 'all') {
+      const workType = offer.conditions?.workType || '';
+      if (!workType.toLowerCase().includes(selectedSchedule.toLowerCase())) {
+        return false;
+      }
+    }
+    
+    return true;
+  }) || [];
 
   // Sauvegarder les offres postulées dans le localStorage quand elles changent
   useEffect(() => {
@@ -89,11 +123,11 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
 
   return (
     <div>
-      <div className="mb-6">
-        {/* Titre avec bouton filtres mobile */}
-        <div className="flex items-center justify-between lg:block">
+      {/* Version Mobile */}
+      <div className="lg:hidden mb-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-xl font-bold text-gray-900 mb-2">
               Offres disponibles
               {appliedOffers.size > 0 && (
                 <span className="ml-3 text-sm text-green-600">
@@ -101,7 +135,6 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                 </span>
               )}
             </h1>
-            <p className="text-sm lg:text-base text-gray-600 lg:block hidden">Découvrez les missions qui correspondent à votre profil</p>
             
             {/* Bouton de debug temporaire */}
             {appliedOffers.size > 0 && (
@@ -114,65 +147,166 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
             )}
           </div>
           
-          {/* Bouton filtres mobile - carré sur la même ligne */}
+          {/* Bouton filtres mobile */}
           <button 
             onClick={() => setShowFilters(!showFilters)}
-            className="lg:hidden flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
           >
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
           </button>
         </div>
-        <p className="text-sm text-gray-600 lg:hidden mt-2">Découvrez les missions qui correspondent à votre profil</p>
+        <p className="text-sm text-gray-600 mt-2">Découvrez les missions qui correspondent à votre profil</p>
       </div>
 
-      {/* Header avec bouton actualiser - Desktop seulement */}
-      <div className="hidden lg:flex lg:flex-row lg:justify-between lg:items-center gap-3 mb-6">
-        <div>
-          <p className="text-sm lg:text-base text-gray-600">
-            {availableOffers?.length || 0} offre{(availableOffers?.length || 0) !== 1 ? 's' : ''} disponible{(availableOffers?.length || 0) !== 1 ? 's' : ''}
+      {/* Version Desktop - Titre + Filtres + Bouton sur la même ligne */}
+      <div className="hidden lg:block mb-6">
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Offres disponibles
+              {appliedOffers.size > 0 && (
+                <span className="ml-3 text-sm text-green-600">
+                  ({appliedOffers.size} postulée{appliedOffers.size > 1 ? 's' : ''})
+                </span>
+              )}
+            </h1>
+          </div>
+          
+          {/* Filtres Desktop */}
+          <div className="flex items-center gap-3">
+            <div className="w-48">
+              <CustomSelect
+                value={selectedCity}
+                onChange={setSelectedCity}
+                placeholder="Toutes les villes"
+                options={[
+                  { value: 'all', label: 'Toutes les villes' },
+                  { value: 'Abidjan', label: 'Abidjan' },
+                  { value: 'Bouaké', label: 'Bouaké' },
+                  { value: 'Yamoussoukro', label: 'Yamoussoukro' },
+                  { value: 'San-Pédro', label: 'San-Pédro' },
+                  { value: 'Daloa', label: 'Daloa' },
+                  { value: 'Korhogo', label: 'Korhogo' },
+                  { value: 'Man', label: 'Man' },
+                  { value: 'Gagnoa', label: 'Gagnoa' },
+                  { value: 'Divo', label: 'Divo' },
+                  { value: 'Abengourou', label: 'Abengourou' }
+                ]}
+              />
+            </div>
+            <div className="w-56">
+              <CustomSelect
+                value={selectedType}
+                onChange={setSelectedType}
+                placeholder="Tous les types"
+                options={[
+                  { value: 'all', label: 'Tous les types' },
+                  { value: 'Chauffeur personnel', label: 'Chauffeur personnel' },
+                  { value: 'Livraison', label: 'Livraison' },
+                  { value: 'Transport VIP', label: 'Transport VIP' },
+                  { value: 'Transport scolaire', label: 'Transport scolaire' },
+                  { value: "Transport d'entreprise", label: "Transport d'entreprise" },
+                  { value: 'Taxi/VTC', label: 'Taxi/VTC' },
+                  { value: 'Transport de marchandises', label: 'Transport de marchandises' }
+                ]}
+              />
+            </div>
+            <div className="w-44">
+              <CustomSelect
+                value={selectedSchedule}
+                onChange={setSelectedSchedule}
+                placeholder="Tous les horaires"
+                options={[
+                  { value: 'all', label: 'Tous les horaires' },
+                  { value: 'Temps plein', label: 'Temps plein' },
+                  { value: 'Temps partiel', label: 'Temps partiel' },
+                  { value: 'Ponctuel', label: 'Ponctuel' },
+                  { value: 'Week-end', label: 'Week-end' },
+                  { value: 'Nuit', label: 'Nuit' },
+                  { value: 'Flexible', label: 'Flexible' }
+                ]}
+              />
+            </div>
+            
+            {/* Bouton actualiser */}
+            <button
+              onClick={refreshData}
+              disabled={loading}
+              className="px-4 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 transition-colors whitespace-nowrap"
+            >
+              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Actualiser
+            </button>
+          </div>
+        </div>
+        
+        {/* Sous-titre et compteur */}
+        <div className="flex items-center justify-between">
+          <p className="text-base text-gray-600">Découvrez les missions qui correspondent à votre profil</p>
+          <p className="text-sm text-gray-600">
+            {filteredOffers?.length || 0} offre{(filteredOffers?.length || 0) !== 1 ? 's' : ''} disponible{(filteredOffers?.length || 0) !== 1 ? 's' : ''}
+            {(selectedCity !== 'all' || selectedType !== 'all' || selectedSchedule !== 'all') && (
+              <span className="text-xs text-gray-500 ml-2">(sur {availableOffers?.length || 0} au total)</span>
+            )}
           </p>
         </div>
-        <button
-          onClick={refreshData}
-          disabled={loading}
-          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 w-full lg:w-auto justify-center lg:justify-start"
-        >
-          <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Actualiser
-        </button>
       </div>
 
       {/* Filtres conditionnels */}
       {showFilters && (
         <div className="lg:hidden bg-white rounded-lg shadow p-4 mb-6">
           <div className="space-y-3">
-            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
-              <option>Toutes villes</option>
-              <option>Abidjan</option>
-              <option>Bouaké</option>
-              <option>Yamoussoukro</option>
-              <option>San-Pédro</option>
-              <option>Daloa</option>
-            </select>
-            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
-              <option>Tous types</option>
-              <option>Personnel</option>
-              <option>Livraison</option>
-              <option>VTC</option>
-              <option>Transport</option>
-              <option>Autre</option>
-            </select>
-            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
-              <option>Tous horaires</option>
-              <option>Temps plein</option>
-              <option>Temps partiel</option>
-              <option>Ponctuel</option>
-              <option>Weekend</option>
-            </select>
+            <CustomSelect
+              value={selectedCity}
+              onChange={setSelectedCity}
+              placeholder="Toutes les villes"
+              options={[
+                { value: 'all', label: 'Toutes les villes' },
+                { value: 'Abidjan', label: 'Abidjan' },
+                { value: 'Bouaké', label: 'Bouaké' },
+                { value: 'Yamoussoukro', label: 'Yamoussoukro' },
+                { value: 'San-Pédro', label: 'San-Pédro' },
+                { value: 'Daloa', label: 'Daloa' },
+                { value: 'Korhogo', label: 'Korhogo' },
+                { value: 'Man', label: 'Man' },
+                { value: 'Gagnoa', label: 'Gagnoa' },
+                { value: 'Divo', label: 'Divo' },
+                { value: 'Abengourou', label: 'Abengourou' }
+              ]}
+            />
+            <CustomSelect
+              value={selectedType}
+              onChange={setSelectedType}
+              placeholder="Tous les types"
+              options={[
+                { value: 'all', label: 'Tous les types' },
+                { value: 'Chauffeur personnel', label: 'Chauffeur personnel' },
+                { value: 'Livraison', label: 'Livraison' },
+                { value: 'Transport VIP', label: 'Transport VIP' },
+                { value: 'Transport scolaire', label: 'Transport scolaire' },
+                { value: "Transport d'entreprise", label: "Transport d'entreprise" },
+                { value: 'Taxi/VTC', label: 'Taxi/VTC' },
+                { value: 'Transport de marchandises', label: 'Transport de marchandises' }
+              ]}
+            />
+            <CustomSelect
+              value={selectedSchedule}
+              onChange={setSelectedSchedule}
+              placeholder="Tous les horaires"
+              options={[
+                { value: 'all', label: 'Tous les horaires' },
+                { value: 'Temps plein', label: 'Temps plein' },
+                { value: 'Temps partiel', label: 'Temps partiel' },
+                { value: 'Ponctuel', label: 'Ponctuel' },
+                { value: 'Week-end', label: 'Week-end' },
+                { value: 'Nuit', label: 'Nuit' },
+                { value: 'Flexible', label: 'Flexible' }
+              ]}
+            />
             
             {/* Bouton actualiser mobile dans les filtres */}
             <button
@@ -189,34 +323,6 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
         </div>
       )}
 
-      {/* Filtres desktop - Inchangés */}
-      <div className="hidden lg:block bg-white rounded-lg shadow p-4 mb-6">
-        <div className="grid grid-cols-1 lg:flex lg:flex-wrap gap-4">
-          <select className="px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
-            <option>Toutes villes</option>
-            <option>Abidjan</option>
-            <option>Bouaké</option>
-            <option>Yamoussoukro</option>
-            <option>San-Pédro</option>
-            <option>Daloa</option>
-          </select>
-          <select className="px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
-            <option>Tous types</option>
-            <option>Personnel</option>
-            <option>Livraison</option>
-            <option>VTC</option>
-            <option>Transport</option>
-            <option>Autre</option>
-          </select>
-          <select className="px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
-            <option>Tous horaires</option>
-            <option>Temps plein</option>
-            <option>Temps partiel</option>
-            <option>Ponctuel</option>
-            <option>Weekend</option>
-          </select>
-        </div>
-      </div>
 
       {/* Liste des offres */}
       {loading ? (
@@ -244,9 +350,9 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
             </div>
           ))}
         </div>
-      ) : availableOffers?.length > 0 ? (
+      ) : filteredOffers?.length > 0 ? (
         <div className="space-y-4">
-          {availableOffers.map(offer => (
+          {filteredOffers.map(offer => (
             <div key={offer._id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
               <div className="p-4 lg:p-6">
                 <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
@@ -259,7 +365,7 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                         </span>
                         {offer.isDirect && (
                           <span className="px-2 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 text-xs rounded-full font-medium border border-purple-200">
-                            🎯 OFFRE DIRECTE
+                            OFFRE DIRECTE
                           </span>
                         )}
                         {offer.isUrgent && (
@@ -274,16 +380,16 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-2 lg:gap-4 text-sm">
                       <div className="flex justify-between lg:block">
-                        <span className="text-gray-500">📍 Zone:</span>
+                        <span className="text-gray-500">Zone:</span>
                         <span className="ml-1 font-medium">{offer.location?.city || offer.requirements?.zone}</span>
                       </div>
                       <div className="flex justify-between lg:block">
-                        <span className="text-gray-500">💼 Type:</span>
+                        <span className="text-gray-500">Type:</span>
                         <span className="ml-1 font-medium">{offer.conditions?.workType || 'Non spécifié'}</span>
                       </div>
                       {offer.conditions?.salary && (
                         <div className="flex justify-between lg:block">
-                          <span className="text-gray-500">💰 Salaire:</span>
+                          <span className="text-gray-500">Salaire:</span>
                           <span className="ml-1 font-medium text-green-600">
                             {offer.conditions.salary} FCFA
                             {offer.conditions.salaryType && (
@@ -298,7 +404,7 @@ export default function AvailableOffers({ availableOffers, loading, refreshData 
                         </div>
                       )}
                       <div className="flex justify-between lg:block">
-                        <span className="text-gray-500">📅 Publié:</span>
+                        <span className="text-gray-500">Publié:</span>
                         <span className="ml-1 font-medium">
                           {new Date(offer.createdAt).toLocaleDateString()}
                         </span>

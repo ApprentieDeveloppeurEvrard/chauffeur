@@ -221,6 +221,18 @@ export const chatService = {
     api.post(`/chat/conversations/${conversationId}/messages`, { content, type, metadata }),
 }
 
+// API pour les messages (système simplifié)
+export const messagesApi = {
+  // Envoyer un message
+  send: (data) => api.post('/messages/send', data),
+  // Récupérer les conversations
+  getConversations: () => api.get('/messages/conversations'),
+  // Récupérer les messages d'une conversation
+  getMessages: (conversationId) => api.get(`/messages/conversations/${conversationId}/messages`),
+  // Marquer une conversation comme lue
+  markAsRead: (conversationId) => api.put(`/messages/conversations/${conversationId}/read`),
+}
+
 export default api
 
 

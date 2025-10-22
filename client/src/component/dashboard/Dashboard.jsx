@@ -54,10 +54,10 @@ export default function Dashboard({ myOffers, activeMissions, notifications, rec
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900 mb-1">{offer.title}</h4>
                         <p className="text-sm text-gray-600 mb-1">
-                          📍 {offer.location?.city || offer.requirements?.zone} • {offer.type}
+                          {offer.location?.city || offer.requirements?.zone} • {offer.type}
                         </p>
                         <p className="text-sm text-indigo-600 font-medium">
-                          💼 {offer.conditions?.type || 'Conditions à négocier'}
+                          {offer.conditions?.type || 'Conditions à négocier'}
                         </p>
                         {offer.description && (
                           <p className="text-xs text-gray-500 mt-1 line-clamp-2">

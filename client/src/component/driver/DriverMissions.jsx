@@ -55,26 +55,26 @@ export default function DriverMissions({ activeMissions }) {
                   
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-4 text-xs lg:text-sm mb-4">
                     <div className="flex justify-between lg:block">
-                      <span className="text-gray-500">📅 Date:</span>
+                      <span className="text-gray-500">Date:</span>
                       <span className="ml-1 font-medium">{mission.date}</span>
                     </div>
                     <div className="flex justify-between lg:block">
-                      <span className="text-gray-500">🕒 Horaires:</span>
+                      <span className="text-gray-500">Horaires:</span>
                       <span className="ml-1 font-medium">{mission.time}</span>
                     </div>
                     <div className="flex justify-between lg:block">
-                      <span className="text-gray-500">💰 Rémunération:</span>
+                      <span className="text-gray-500">Rémunération:</span>
                       <span className="ml-1 font-medium text-green-600">{mission.payment}</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4 text-xs lg:text-sm mb-3">
                     <div className="flex justify-between lg:block">
-                      <span className="text-gray-500">📍 Départ:</span>
+                      <span className="text-gray-500">Départ:</span>
                       <span className="ml-1 font-medium truncate">{mission.startLocation}</span>
                     </div>
                     <div className="flex justify-between lg:block">
-                      <span className="text-gray-500">🎯 Destination:</span>
+                      <span className="text-gray-500">Destination:</span>
                       <span className="ml-1 font-medium truncate">{mission.endLocation}</span>
                     </div>
                   </div>

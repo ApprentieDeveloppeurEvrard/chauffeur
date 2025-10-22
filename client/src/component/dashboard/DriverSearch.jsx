@@ -7,6 +7,49 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedDriverId, setSelectedDriverId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // États pour les filtres
+  const [selectedZone, setSelectedZone] = useState('all');
+  const [selectedExperience, setSelectedExperience] = useState('all');
+  const [selectedVehicle, setSelectedVehicle] = useState('all');
+  const [selectedAvailability, setSelectedAvailability] = useState('all');
+  
+  // Filtrer les chauffeurs
+  const filteredDrivers = availableDrivers?.filter(driver => {
+    // Filtre par zone
+    if (selectedZone !== 'all') {
+      const driverZone = driver.workZone || '';
+      if (!driverZone.toLowerCase().includes(selectedZone.toLowerCase())) {
+        return false;
+      }
+    }
+    
+    // Filtre par expérience
+    if (selectedExperience !== 'all') {
+      const driverExp = driver.experience || '';
+      if (driverExp !== selectedExperience) {
+        return false;
+      }
+    }
+    
+    // Filtre par véhicule
+    if (selectedVehicle !== 'all') {
+      const driverVehicle = driver.vehicleType || '';
+      if (!driverVehicle.toLowerCase().includes(selectedVehicle.toLowerCase())) {
+        return false;
+      }
+    }
+    
+    // Filtre par disponibilité
+    if (selectedAvailability !== 'all') {
+      // Logique de disponibilité (peut être adaptée selon vos besoins)
+      if (selectedAvailability === 'Immédiate' && !driver.isAvailable) {
+        return false;
+      }
+    }
+    
+    return true;
+  }) || [];
 
   // Ouvrir la modal du profil
   const handleViewProfile = (driverId) => {
@@ -54,36 +97,65 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
                 {/* Filtres détaillés */}
                 <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50">
                   <div className="grid grid-cols-1 gap-3">
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white">
-                      <option>Toutes zones</option>
-                      <option>Paris</option>
-                      <option>Lyon</option>
-                      <option>Marseille</option>
-                      <option>Nice</option>
+                    <select 
+                      value={selectedZone}
+                      onChange={(e) => setSelectedZone(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
+                    >
+                      <option value="all">Toutes les zones</option>
+                      <option>Abidjan - Cocody</option>
+                      <option>Abidjan - Plateau</option>
+                      <option>Abidjan - Yopougon</option>
+                      <option>Abidjan - Abobo</option>
+                      <option>Abidjan - Marcory</option>
+                      <option>Bouaké</option>
+                      <option>Yamoussoukro</option>
+                      <option>San-Pédro</option>
+                      <option>Daloa</option>
+                      <option>Korhogo</option>
                     </select>
                     
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white">
-                      <option>Toute expérience</option>
-                      <option>1-3 ans</option>
-                      <option>3-5 ans</option>
-                      <option>5+ ans</option>
+                    <select 
+                      value={selectedExperience}
+                      onChange={(e) => setSelectedExperience(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
+                    >
+                      <option value="all">Toute expérience</option>
+                      <option value="Débutant (moins d'1 an)">Débutant (moins d'1 an)</option>
+                      <option value="1-3 ans">1-3 ans</option>
+                      <option value="3-5 ans">3-5 ans</option>
+                      <option value="5-10 ans">5-10 ans</option>
+                      <option value="Plus de 10 ans">Plus de 10 ans</option>
                     </select>
                     
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white">
-                      <option>Tous véhicules</option>
-                      <option>Berline</option>
-                      <option>SUV</option>
-                      <option>Utilitaire</option>
-                      <option>Moto</option>
-                      <option>Van</option>
+                    <select 
+                      value={selectedVehicle}
+                      onChange={(e) => setSelectedVehicle(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
+                    >
+                      <option value="all">Tous les véhicules</option>
+                      <option value="Berline">Berline</option>
+                      <option value="4x4">4x4/SUV</option>
+                      <option value="Pick-up">Pick-up</option>
+                      <option value="Minibus">Minibus</option>
+                      <option value="Utilitaire">Utilitaire</option>
+                      <option value="Moto">Moto</option>
+                      <option value="luxe">Véhicule de luxe</option>
                     </select>
                     
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white">
-                      <option>Toute disponibilité</option>
-                      <option>Temps plein</option>
-                      <option>Temps partiel</option>
-                      <option>Week-ends</option>
-                      <option>Ponctuel</option>
+                    <select 
+                      value={selectedAvailability}
+                      onChange={(e) => setSelectedAvailability(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
+                    >
+                      <option value="all">Toute disponibilité</option>
+                      <option value="Immédiate">Immédiate</option>
+                      <option value="Temps plein">Temps plein</option>
+                      <option value="Temps partiel">Temps partiel</option>
+                      <option value="Week-end">Week-end</option>
+                      <option value="Nuit">Nuit</option>
+                      <option value="Ponctuel">Ponctuel</option>
+                      <option value="Flexible">Flexible</option>
                     </select>
                   </div>
                 </div>
@@ -111,39 +183,68 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
               {/* Filtres */}
               <div className="flex-1 grid grid-cols-4 gap-3">
                 {/* Zone */}
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                  <option>Toutes zones</option>
-                  <option>Paris</option>
-                  <option>Lyon</option>
-                  <option>Marseille</option>
-                  <option>Nice</option>
+                <select 
+                  value={selectedZone}
+                  onChange={(e) => setSelectedZone(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
+                >
+                  <option value="all">Toutes les zones</option>
+                  <option>Abidjan - Cocody</option>
+                  <option>Abidjan - Plateau</option>
+                  <option>Abidjan - Yopougon</option>
+                  <option>Abidjan - Abobo</option>
+                  <option>Abidjan - Marcory</option>
+                  <option>Bouaké</option>
+                  <option>Yamoussoukro</option>
+                  <option>San-Pédro</option>
+                  <option>Daloa</option>
+                  <option>Korhogo</option>
                 </select>
 
                 {/* Expérience */}
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                  <option>Toute expérience</option>
-                  <option>1-3 ans</option>
-                  <option>3-5 ans</option>
-                  <option>5+ ans</option>
+                <select 
+                  value={selectedExperience}
+                  onChange={(e) => setSelectedExperience(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
+                >
+                  <option value="all">Toute expérience</option>
+                  <option value="Débutant (moins d'1 an)">Débutant (moins d'1 an)</option>
+                  <option value="1-3 ans">1-3 ans</option>
+                  <option value="3-5 ans">3-5 ans</option>
+                  <option value="5-10 ans">5-10 ans</option>
+                  <option value="Plus de 10 ans">Plus de 10 ans</option>
                 </select>
 
                 {/* Véhicule */}
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                  <option>Tous véhicules</option>
-                  <option>Berline</option>
-                  <option>SUV</option>
-                  <option>Utilitaire</option>
-                  <option>Moto</option>
-                  <option>Van</option>
+                <select 
+                  value={selectedVehicle}
+                  onChange={(e) => setSelectedVehicle(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
+                >
+                  <option value="all">Tous les véhicules</option>
+                  <option value="Berline">Berline</option>
+                  <option value="4x4">4x4/SUV</option>
+                  <option value="Pick-up">Pick-up</option>
+                  <option value="Minibus">Minibus</option>
+                  <option value="Utilitaire">Utilitaire</option>
+                  <option value="Moto">Moto</option>
+                  <option value="luxe">Véhicule de luxe</option>
                 </select>
 
                 {/* Disponibilité */}
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                  <option>Toute disponibilité</option>
-                  <option>Temps plein</option>
-                  <option>Temps partiel</option>
-                  <option>Week-ends</option>
-                  <option>Ponctuel</option>
+                <select 
+                  value={selectedAvailability}
+                  onChange={(e) => setSelectedAvailability(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
+                >
+                  <option value="all">Toute disponibilité</option>
+                  <option value="Immédiate">Immédiate</option>
+                  <option value="Temps plein">Temps plein</option>
+                  <option value="Temps partiel">Temps partiel</option>
+                  <option value="Week-end">Week-end</option>
+                  <option value="Nuit">Nuit</option>
+                  <option value="Ponctuel">Ponctuel</option>
+                  <option value="Flexible">Flexible</option>
                 </select>
               </div>
 
@@ -263,7 +364,7 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
         <>
           {/* Version mobile */}
           <div className="lg:hidden grid grid-cols-2 gap-3">
-            {availableDrivers.map(driver => (
+            {filteredDrivers.map(driver => (
               <div 
                 key={driver._id || driver.id} 
                 onClick={() => handleViewProfile(driver._id || driver.id)}
@@ -342,7 +443,7 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
 
           {/* Version desktop */}
           <div className="hidden lg:grid lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {availableDrivers.map(driver => (
+            {filteredDrivers.map(driver => (
               <div 
                 key={driver._id || driver.id} 
                 onClick={() => handleViewProfile(driver._id || driver.id)}

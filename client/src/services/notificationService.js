@@ -103,27 +103,27 @@ class NotificationService {
   getNotificationTitle(type) {
     switch (type) {
       case 'new_offer':
-        return '🚗 Nouvelle offre disponible';
+        return 'Nouvelle offre disponible';
       case 'urgent_offer':
-        return '🚨 Offre urgente !';
+        return 'Offre urgente !';
       case 'application_accepted':
-        return '✅ Candidature acceptée';
+        return 'Candidature acceptée';
       case 'application_rejected':
-        return '❌ Candidature rejetée';
+        return 'Candidature rejetée';
       case 'payment_received':
-        return '💰 Paiement reçu';
+        return 'Paiement reçu';
       case 'mission_update':
-        return '📋 Mission mise à jour';
+        return 'Mission mise à jour';
       case 'mission_completed':
-        return '🎉 Mission terminée';
+        return 'Mission terminée';
       case 'rating_received':
-        return '⭐ Nouvelle évaluation';
+        return 'Nouvelle évaluation';
       case 'document_expiring':
-        return '⚠️ Document bientôt expiré';
+        return 'Document bientôt expiré';
       case 'profile_validation':
-        return '✅ Profil validé';
+        return 'Profil validé';
       default:
-        return '🔔 Nouvelle notification';
+        return 'Nouvelle notification';
     }
   }
 

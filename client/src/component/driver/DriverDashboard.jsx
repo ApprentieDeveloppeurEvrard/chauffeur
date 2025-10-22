@@ -34,20 +34,20 @@ export default function DriverDashboard({ availableOffers, myApplications, activ
           <div className="p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold mb-2">🚗 Course en cours</h3>
+                <h3 className="text-lg font-semibold mb-2">Course en cours</h3>
                 <p className="text-blue-100 mb-1">
-                  📍 Destination: {activeMissions.find(m => m.status === 'En cours')?.destination}
+                  Destination: {activeMissions.find(m => m.status === 'En cours')?.destination}
                 </p>
                 <p className="text-blue-100">
-                  ⏱️ Durée estimée: {activeMissions.find(m => m.status === 'En cours')?.estimatedDuration || '25 min'}
+                  Durée estimée: {activeMissions.find(m => m.status === 'En cours')?.estimatedDuration || '25 min'}
                 </p>
               </div>
               <div className="flex flex-col gap-2">
                 <button className="px-4 py-2 bg-white text-blue-600 rounded-md hover:bg-blue-50 font-medium">
-                  📞 Contacter client
+                  Contacter client
                 </button>
                 <button className="px-4 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-800 font-medium">
-                  ✅ Terminer course
+                  Terminer course
                 </button>
               </div>
             </div>
@@ -96,10 +96,10 @@ export default function DriverDashboard({ availableOffers, myApplications, activ
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900 mb-1">{offer.title}</h4>
                         <p className="text-sm text-gray-600 mb-1">
-                          📍 {offer.location?.city || offer.requirements?.zone} • {offer.type}
+                          {offer.location?.city || offer.requirements?.zone} • {offer.type}
                         </p>
                         <p className="text-sm text-green-600 font-medium">
-                          💼 {offer.conditions?.type || 'Conditions à négocier'}
+                          {offer.conditions?.type || 'Conditions à négocier'}
                         </p>
                         {offer.description && (
                           <p className="text-xs text-gray-500 mt-1 line-clamp-2">

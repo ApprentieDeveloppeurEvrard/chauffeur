@@ -203,19 +203,19 @@ export default function Candidates({ receivedApplications, loading, refreshData 
                     
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-2 lg:gap-4 text-sm">
                       <div className="flex justify-between lg:block">
-                        <span className="text-gray-500">📧 Email:</span>
+                        <span className="text-gray-500">Email:</span>
                         <span className="ml-1 font-medium truncate">{application.driver?.email}</span>
                       </div>
                       <div className="flex justify-between lg:block">
-                        <span className="text-gray-500">📱 Téléphone:</span>
+                        <span className="text-gray-500">Téléphone:</span>
                         <span className="ml-1 font-medium">{application.driver?.phone || 'Non renseigné'}</span>
                       </div>
                       <div className="flex justify-between lg:block">
-                        <span className="text-gray-500">📍 Zone:</span>
+                        <span className="text-gray-500">Zone:</span>
                         <span className="ml-1 font-medium">{application.offer?.location?.city}</span>
                       </div>
                       <div className="flex justify-between lg:block">
-                        <span className="text-gray-500">📅 Postulé:</span>
+                        <span className="text-gray-500">Postulé:</span>
                         <span className="ml-1 font-medium">
                           {new Date(application.createdAt).toLocaleDateString()}
                         </span>
