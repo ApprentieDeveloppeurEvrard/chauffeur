@@ -2,7 +2,7 @@ const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
 const User = require('../models/User');
 const Driver = require('../models/Driver');
-const Notification = require('../models/Notification');
+const { createNotification } = require('../services/notificationService');
 
 // Envoyer un message
 exports.sendMessage = async (req, res) => {
@@ -97,17 +97,16 @@ exports.sendMessage = async (req, res) => {
     await newMessage.save();
 
     // Créer une notification pour le destinataire
-    await Notification.create({
-      userId: recipient._id,
-      type: 'new_message',
-      title: 'Nouveau message',
-      message: `${sender.firstName} ${sender.lastName} vous a envoyé un message`,
-      data: {
+    try {
+      await createNotification(recipient._id, 'new_message', {
+        senderName: `${sender.firstName} ${sender.lastName}`,
         conversationId: conversation._id,
-        messageId: newMessage._id,
-        senderName: `${sender.firstName} ${sender.lastName}`
-      }
-    });
+        messageId: newMessage._id
+      });
+    } catch (notifError) {
+      console.error('Erreur lors de l\'envoi de la notification:', notifError);
+      // Ne pas faire échouer la requête si la notification échoue
+    }
 
     res.status(201).json({
       success: true,

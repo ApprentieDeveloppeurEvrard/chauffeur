@@ -1,6 +1,7 @@
 const Offer = require('../models/Offer');
 const Application = require('../models/Application');
 const User = require('../models/User');
+const { createNotification } = require('../services/notificationService');
 
 // Récupérer toutes les offres actives
 const getAllOffers = async (req, res) => {
@@ -156,6 +157,36 @@ const createOffer = async (req, res) => {
     
     // Populer les informations de l'employeur
     await offer.populate('employer', 'firstName lastName email');
+
+    // Notifier tous les chauffeurs actifs de la nouvelle offre
+    try {
+      const drivers = await User.find({ 
+        role: 'driver', 
+        isActive: true 
+      }).select('_id');
+      
+      const driverIds = drivers.map(d => d._id);
+      
+      if (driverIds.length > 0) {
+        // Créer des notifications pour tous les chauffeurs
+        const notificationType = offer.urgent ? 'urgent_offer' : 'new_offer';
+        
+        await Promise.all(
+          driverIds.map(driverId => 
+            createNotification(driverId, notificationType, {
+              offerTitle: offer.title,
+              offerId: offer._id,
+              location: offer.location?.city || 'Non spécifié'
+            })
+          )
+        );
+        
+        console.log(`✅ ${driverIds.length} chauffeurs notifiés de la nouvelle offre`);
+      }
+    } catch (notifError) {
+      console.error('Erreur lors de l\'envoi des notifications:', notifError);
+      // Ne pas faire échouer la création de l'offre
+    }
 
     res.status(201).json({
       message: 'Offre créée avec succès',
@@ -341,6 +372,19 @@ const applyToOffer = async (req, res) => {
       { path: 'offer', select: 'title type' },
       { path: 'driver', select: 'firstName lastName email' }
     ]);
+
+    // Envoyer une notification à l'employeur
+    try {
+      await createNotification(offer.employerId, 'new_application', {
+        driverName: `${user.firstName} ${user.lastName}`,
+        offerTitle: offer.title,
+        applicationId: application._id,
+        offerId: offer._id
+      });
+    } catch (notifError) {
+      console.error('Erreur lors de l\'envoi de la notification:', notifError);
+      // Ne pas faire échouer la requête si la notification échoue
+    }
 
     res.status(201).json({
       message: 'Candidature envoyée avec succès',

@@ -10,14 +10,55 @@ const notificationSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: [
+        // Offres et candidatures
         'new_offer',
-        'application_status',
-        'mission_update',
-        'payment_received',
-        'profile_validation',
-        'system_message',
+        'urgent_offer',
+        'application_accepted',
+        'application_rejected',
+        'application_pending',
+        'new_application',
+        'application_withdrawn',
+        'application_reminder',
+        
+        // Messages et communication
+        'new_message',
+        'contact_request',
+        'interview_request',
+        'driver_response',
+        
+        // Profil et compte
+        'profile_validated',
+        'profile_incomplete',
+        'document_expiring',
+        'document_expired',
+        'update_required',
         'driver_profile_updated',
-        'new_message'
+        'new_driver_available',
+        'favorite_driver_available',
+        
+        // Missions
+        'mission_confirmed',
+        'mission_cancelled',
+        'mission_modified',
+        'mission_reminder',
+        'mission_completed',
+        'driver_late',
+        
+        // Paiements et évaluations
+        'payment_received',
+        'new_rating',
+        'rating_request',
+        
+        // Offres (employeur)
+        'offer_published',
+        'offer_expired',
+        'offer_no_applications',
+        
+        // Système
+        'system_message',
+        'security_alert',
+        'activity_reminder',
+        'promotion'
       ],
       required: true
     },
@@ -51,6 +92,11 @@ const notificationSchema = new mongoose.Schema(
     actionText: {
       type: String,
       trim: true
+    },
+    priority: {
+      type: String,
+      enum: ['urgent', 'important', 'info', 'reminder'],
+      default: 'info'
     }
   },
   {

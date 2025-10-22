@@ -1,6 +1,7 @@
 const Application = require('../models/Application');
 const User = require('../models/User');
 const Offer = require('../models/Offer');
+const { createNotification } = require('../services/notificationService');
 
 // Récupérer les candidatures du chauffeur connecté
 const getMyApplications = async (req, res) => {
@@ -78,6 +79,19 @@ const updateApplicationStatus = async (req, res) => {
       { path: 'driver', select: 'firstName lastName email' },
       { path: 'offer', select: 'title type' }
     ]);
+
+    // Envoyer une notification au chauffeur
+    try {
+      const notificationType = status === 'accepted' ? 'application_accepted' : 'application_rejected';
+      await createNotification(application.driverId, notificationType, {
+        offerTitle: application.offer.title,
+        applicationId: application._id,
+        offerId: application.offer._id
+      });
+    } catch (notifError) {
+      console.error('Erreur lors de l\'envoi de la notification:', notifError);
+      // Ne pas faire échouer la requête si la notification échoue
+    }
 
     res.json({
       message: `Candidature ${status === 'accepted' ? 'acceptée' : 'refusée'} avec succès`,
