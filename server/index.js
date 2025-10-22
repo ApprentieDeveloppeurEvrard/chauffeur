@@ -14,6 +14,7 @@ const missionRoutes = require('./routes/missions');
 const notificationRoutes = require('./routes/notifications');
 const adminRoutes = require('./routes/admin');
 const chatRoutes = require('./routes/chat');
+const messageRoutes = require('./routes/messages');
 
 const { connectToDatabase } = require('./db/connect');
 const app = express();
@@ -102,6 +103,7 @@ app.use('/api/missions', missionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Not found handler
 app.use((req, res) => {
