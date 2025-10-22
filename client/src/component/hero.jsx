@@ -52,7 +52,7 @@ export default function HeroSection() {
             <path d="M12 16L20 20L28 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="text-xl font-bold text-slate-800">ChauffeursConnect</span>
+          <span className="text-xl font-bold text-slate-800">GoDriver</span>
         </a>
 
         {/* Desktop Links */}

@@ -13,7 +13,7 @@ export default function EmployeursPage() {
             <path d="M12 16L20 20L28 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="text-xl font-bold text-slate-800">ChauffeursConnect</span>
+          <span className="text-xl font-bold text-slate-800">GoDriver</span>
         </Link>
 
         {/* Desktop Links */}
@@ -128,7 +128,7 @@ export default function EmployeursPage() {
                   <path d="M12 16L20 20L28 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span className="text-lg font-bold">ChauffeursConnect</span>
+                <span className="text-lg font-bold">GoDriver</span>
               </div>
               <p className="text-slate-400">
                 La plateforme de référence pour connecter chauffeurs et employeurs en Afrique.
@@ -164,7 +164,7 @@ export default function EmployeursPage() {
           </div>
           
           <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
-            <p>&copy; 2024 ChauffeursConnect. Tous droits réservés.</p>
+            <p>&copy; 2024 GoDriver. Tous droits réservés.</p>
           </div>
         </div>
       </footer>

@@ -29,7 +29,7 @@ export default function Header({ searchQuery, setSearchQuery, onLogoClick, onPro
             <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           <span className="hidden sm:inline text-lg font-bold text-slate-800">
-            {userRole === 'driver' ? 'ChauffeursConnect' : 'EmployeursConnect'}
+            GoDriver
           </span>
           {userRole === 'client' && (
             <span className="hidden md:inline text-sm bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full font-medium">Employeur</span>

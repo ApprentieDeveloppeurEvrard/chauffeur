@@ -28,7 +28,7 @@ export default function DriverHeader({ searchQuery, setSearchQuery, onLogoClick,
             <path d="M12 16L20 20L28 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="hidden sm:inline text-lg font-bold text-slate-800">ChauffeursConnect</span>
+          <span className="hidden sm:inline text-lg font-bold text-slate-800">GoDriver</span>
           <span className="hidden md:inline text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">Chauffeur</span>
         </Link>
 

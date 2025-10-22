@@ -13,7 +13,7 @@ export default function CommentCaMarchePage() {
             <path d="M12 16L20 20L28 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="text-xl font-bold text-slate-800">ChauffeursConnect</span>
+          <span className="text-xl font-bold text-slate-800">GoDriver</span>
         </Link>
 
         {/* Desktop Links */}
@@ -47,7 +47,7 @@ export default function CommentCaMarchePage() {
             Comment ça marche
           </h1>
           <p className="text-lg text-slate-600 leading-relaxed">
-            ChauffeursConnect met en relation les entreprises qui ont besoin de chauffeurs 
+            GoDriver met en relation les entreprises qui ont besoin de chauffeurs 
             avec des professionnels du transport qualifiés.
           </p>
         </div>
@@ -121,7 +121,7 @@ export default function CommentCaMarchePage() {
             <div>
               <h3 className="text-lg font-medium text-slate-900 mb-2">Est-ce gratuit ?</h3>
               <p className="text-slate-600">
-                Oui, ChauffeursConnect est entièrement gratuit. Aucune commission n'est prélevée sur les recrutements.
+                Oui, GoDriver est entièrement gratuit. Aucune commission n'est prélevée sur les recrutements.
               </p>
             </div>
             
@@ -154,7 +154,7 @@ export default function CommentCaMarchePage() {
                   <path d="M12 16L20 20L28 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span className="text-lg font-bold">ChauffeursConnect</span>
+                <span className="text-lg font-bold">GoDriver</span>
               </div>
               <p className="text-slate-400">
                 La plateforme de référence pour connecter chauffeurs et employeurs en Afrique.
@@ -190,7 +190,7 @@ export default function CommentCaMarchePage() {
           </div>
           
           <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
-            <p>&copy; 2024 ChauffeursConnect. Tous droits réservés.</p>
+            <p>&copy; 2024 GoDriver. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
