@@ -38,19 +38,34 @@ const corsOptions = {
           'http://localhost:4000'
         ];
     
-    // Permettre les requêtes sans origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
+    console.log('🔍 CORS Check - Origin:', origin);
+    console.log('🔍 Allowed origins:', allowedOrigins);
+    console.log('🔍 NODE_ENV:', process.env.NODE_ENV);
     
+    // Permettre les requêtes sans origin (mobile apps, Postman, etc.)
+    if (!origin) {
+      console.log('✅ No origin - allowing request');
+      return callback(null, true);
+    }
+    
+    // Vérifier si l'origin est autorisée
     if (allowedOrigins.indexOf(origin) !== -1) {
+      console.log('✅ Origin allowed:', origin);
       callback(null, true);
     } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+      console.log('❌ CORS blocked origin:', origin);
+      // En production, accepter temporairement toutes les origines .onrender.com
+      if (process.env.NODE_ENV === 'production' && origin.includes('.onrender.com')) {
+        console.log('⚠️ Allowing .onrender.com origin temporarily');
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
     }
   },
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 };
 
