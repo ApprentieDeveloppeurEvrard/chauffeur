@@ -6,6 +6,11 @@ export default function Candidates({ receivedApplications, loading, refreshData 
   const [processingApplication, setProcessingApplication] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  
+  // États pour les filtres
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedOffer, setSelectedOffer] = useState('all');
 
   const getStatusColor = (status) => {
     switch (status) {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import EmptyState from '../common/EmptyState';
 import DriverProfileModal from '../common/DriverProfileModal';
+import CustomSelect from '../common/CustomSelect';
 
 export default function DriverSearch({ availableDrivers, loading, refreshData }) {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -65,16 +66,13 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
   return (
     <div className="space-y-4 lg:space-y-6">
       <div className="mb-4 lg:mb-6">
-        {/* Titre avec bouton filtres mobile */}
-        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-4">
+        {/* Titre avec filtres et bouton actualiser sur la même ligne */}
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-4">
           <div className="flex-1">
             <div className="flex items-center justify-between lg:block">
-              <div>
-                <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Rechercher des chauffeurs</h1>
-                <p className="text-sm lg:text-base text-gray-600 lg:block hidden">Contactez directement les chauffeurs disponibles - Notre point fort !</p>
-              </div>
+              <h1 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">Rechercher des chauffeurs</h1>
               
-              {/* Bouton filtres mobile - carré sur la même ligne */}
+              {/* Bouton filtres mobile - carré sur la même ligne que le titre */}
               <button 
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                 className="lg:hidden flex items-center justify-center w-10 h-10 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
@@ -84,184 +82,140 @@ export default function DriverSearch({ availableDrivers, loading, refreshData })
                 </svg>
               </button>
             </div>
-            <p className="text-sm text-gray-600 lg:hidden mt-2">Contactez directement les chauffeurs disponibles - Notre point fort !</p>
+            <p className="text-sm lg:text-base text-gray-600 hidden lg:block">Contactez directement les chauffeurs disponibles - Notre point fort !</p>
+          </div>
+          
+          {/* Filtres et bouton actualiser desktop - sur la même ligne */}
+          <div className="hidden lg:flex items-center gap-3">
+            {/* Filtres avec CustomSelect */}
+            <div className="w-48">
+              <CustomSelect
+                value={selectedZone}
+                onChange={setSelectedZone}
+                placeholder="Toutes les zones"
+                options={[
+                  { value: 'all', label: 'Toutes les zones' },
+                  { value: 'Abidjan - Cocody', label: 'Abidjan - Cocody' },
+                  { value: 'Abidjan - Plateau', label: 'Abidjan - Plateau' },
+                  { value: 'Abidjan - Yopougon', label: 'Abidjan - Yopougon' },
+                  { value: 'Abidjan - Abobo', label: 'Abidjan - Abobo' },
+                  { value: 'Abidjan - Marcory', label: 'Abidjan - Marcory' },
+                  { value: 'Bouaké', label: 'Bouaké' },
+                  { value: 'Yamoussoukro', label: 'Yamoussoukro' },
+                  { value: 'San-Pédro', label: 'San-Pédro' },
+                  { value: 'Daloa', label: 'Daloa' },
+                  { value: 'Korhogo', label: 'Korhogo' }
+                ]}
+              />
+            </div>
+            
+            <div className="w-44">
+              <CustomSelect
+                value={selectedExperience}
+                onChange={setSelectedExperience}
+                placeholder="Toute expérience"
+                options={[
+                  { value: 'all', label: 'Toute expérience' },
+                  { value: 'Débutant (moins d\'1 an)', label: 'Débutant (moins d\'1 an)' },
+                  { value: '1-3 ans', label: '1-3 ans' },
+                  { value: '3-5 ans', label: '3-5 ans' },
+                  { value: '5-10 ans', label: '5-10 ans' },
+                  { value: 'Plus de 10 ans', label: 'Plus de 10 ans' }
+                ]}
+              />
+            </div>
+
+            <div className="w-48">
+              <CustomSelect
+                value={selectedAvailability}
+                onChange={setSelectedAvailability}
+                placeholder="Toute disponibilité"
+                options={[
+                  { value: 'all', label: 'Toute disponibilité' },
+                  { value: 'Immédiate', label: 'Immédiate' },
+                  { value: 'Temps plein', label: 'Temps plein' },
+                  { value: 'Temps partiel', label: 'Temps partiel' },
+                  { value: 'Week-end', label: 'Week-end' },
+                  { value: 'Nuit', label: 'Nuit' },
+                  { value: 'Ponctuel', label: 'Ponctuel' },
+                  { value: 'Flexible', label: 'Flexible' }
+                ]}
+              />
+            </div>
+
+            {/* Bouton actualiser */}
+            <button
+              onClick={refreshData}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm whitespace-nowrap"
+            >
+              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {loading ? 'Actualisation...' : 'Actualiser'}
+            </button>
           </div>
         </div>
+        
+        <p className="text-sm text-gray-600 lg:hidden mb-4">Contactez directement les chauffeurs disponibles - Notre point fort !</p>
 
-        {/* Filtres et bouton actualiser qui deviennent sticky */}
+        {/* Filtres mobiles - accordéon */}
         {showAdvancedFilters && (
-          <div className="sticky top-16 lg:top-20 z-10 bg-white border-b border-gray-200 shadow-sm">
-            <div className="p-3 lg:p-4">
-              {/* Version mobile - Filtres conditionnels */}
-              <div className="lg:hidden space-y-3">
-                {/* Filtres détaillés */}
-                <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50">
-                  <div className="grid grid-cols-1 gap-3">
-                    <select 
+          <div className="lg:hidden mb-4">
+            <div className="border border-gray-200 rounded-lg p-3 space-y-3 bg-gray-50">
+              <div className="grid grid-cols-1 gap-3">
+                    <CustomSelect
                       value={selectedZone}
-                      onChange={(e) => setSelectedZone(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
-                    >
-                      <option value="all">Toutes les zones</option>
-                      <option>Abidjan - Cocody</option>
-                      <option>Abidjan - Plateau</option>
-                      <option>Abidjan - Yopougon</option>
-                      <option>Abidjan - Abobo</option>
-                      <option>Abidjan - Marcory</option>
-                      <option>Bouaké</option>
-                      <option>Yamoussoukro</option>
-                      <option>San-Pédro</option>
-                      <option>Daloa</option>
-                      <option>Korhogo</option>
-                    </select>
+                      onChange={setSelectedZone}
+                      placeholder="Toutes les zones"
+                      options={[
+                        { value: 'all', label: 'Toutes les zones' },
+                        { value: 'Abidjan - Cocody', label: 'Abidjan - Cocody' },
+                        { value: 'Abidjan - Plateau', label: 'Abidjan - Plateau' },
+                        { value: 'Abidjan - Yopougon', label: 'Abidjan - Yopougon' },
+                        { value: 'Abidjan - Abobo', label: 'Abidjan - Abobo' },
+                        { value: 'Abidjan - Marcory', label: 'Abidjan - Marcory' },
+                        { value: 'Bouaké', label: 'Bouaké' },
+                        { value: 'Yamoussoukro', label: 'Yamoussoukro' },
+                        { value: 'San-Pédro', label: 'San-Pédro' },
+                        { value: 'Daloa', label: 'Daloa' },
+                        { value: 'Korhogo', label: 'Korhogo' }
+                      ]}
+                    />
                     
-                    <select 
+                    <CustomSelect
                       value={selectedExperience}
-                      onChange={(e) => setSelectedExperience(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
-                    >
-                      <option value="all">Toute expérience</option>
-                      <option value="Débutant (moins d'1 an)">Débutant (moins d'1 an)</option>
-                      <option value="1-3 ans">1-3 ans</option>
-                      <option value="3-5 ans">3-5 ans</option>
-                      <option value="5-10 ans">5-10 ans</option>
-                      <option value="Plus de 10 ans">Plus de 10 ans</option>
-                    </select>
+                      onChange={setSelectedExperience}
+                      placeholder="Toute expérience"
+                      options={[
+                        { value: 'all', label: 'Toute expérience' },
+                        { value: 'Débutant (moins d\'1 an)', label: 'Débutant (moins d\'1 an)' },
+                        { value: '1-3 ans', label: '1-3 ans' },
+                        { value: '3-5 ans', label: '3-5 ans' },
+                        { value: '5-10 ans', label: '5-10 ans' },
+                        { value: 'Plus de 10 ans', label: 'Plus de 10 ans' }
+                      ]}
+                    />
                     
-                    <select 
-                      value={selectedVehicle}
-                      onChange={(e) => setSelectedVehicle(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
-                    >
-                      <option value="all">Tous les véhicules</option>
-                      <option value="Berline">Berline</option>
-                      <option value="4x4">4x4/SUV</option>
-                      <option value="Pick-up">Pick-up</option>
-                      <option value="Minibus">Minibus</option>
-                      <option value="Utilitaire">Utilitaire</option>
-                      <option value="Moto">Moto</option>
-                      <option value="luxe">Véhicule de luxe</option>
-                    </select>
-                    
-                    <select 
+                    <CustomSelect
                       value={selectedAvailability}
-                      onChange={(e) => setSelectedAvailability(e.target.value)}
-                      className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
-                    >
-                      <option value="all">Toute disponibilité</option>
-                      <option value="Immédiate">Immédiate</option>
-                      <option value="Temps plein">Temps plein</option>
-                      <option value="Temps partiel">Temps partiel</option>
-                      <option value="Week-end">Week-end</option>
-                      <option value="Nuit">Nuit</option>
-                      <option value="Ponctuel">Ponctuel</option>
-                      <option value="Flexible">Flexible</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Bouton actualiser mobile */}
-                <button
-                  onClick={refreshData}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-                >
-                  <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  {loading ? 'Actualisation...' : 'Actualiser les résultats'}
-                </button>
+                      onChange={setSelectedAvailability}
+                      placeholder="Toute disponibilité"
+                      options={[
+                        { value: 'all', label: 'Toute disponibilité' },
+                        { value: 'Immédiate', label: 'Immédiate' },
+                        { value: 'Temps plein', label: 'Temps plein' },
+                        { value: 'Temps partiel', label: 'Temps partiel' },
+                        { value: 'Week-end', label: 'Week-end' },
+                        { value: 'Nuit', label: 'Nuit' },
+                        { value: 'Ponctuel', label: 'Ponctuel' },
+                        { value: 'Flexible', label: 'Flexible' }
+                      ]}
+                    />
               </div>
             </div>
           </div>
         )}
-
-        {/* Version desktop - Inchangée */}
-        <div className="hidden lg:block sticky top-16 lg:top-20 z-10 bg-white border-b border-gray-200 shadow-sm">
-          <div className="p-3 lg:p-4">
-            <div className="flex flex-row gap-4 items-center">
-              {/* Filtres */}
-              <div className="flex-1 grid grid-cols-4 gap-3">
-                {/* Zone */}
-                <select 
-                  value={selectedZone}
-                  onChange={(e) => setSelectedZone(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
-                >
-                  <option value="all">Toutes les zones</option>
-                  <option>Abidjan - Cocody</option>
-                  <option>Abidjan - Plateau</option>
-                  <option>Abidjan - Yopougon</option>
-                  <option>Abidjan - Abobo</option>
-                  <option>Abidjan - Marcory</option>
-                  <option>Bouaké</option>
-                  <option>Yamoussoukro</option>
-                  <option>San-Pédro</option>
-                  <option>Daloa</option>
-                  <option>Korhogo</option>
-                </select>
-
-                {/* Expérience */}
-                <select 
-                  value={selectedExperience}
-                  onChange={(e) => setSelectedExperience(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
-                >
-                  <option value="all">Toute expérience</option>
-                  <option value="Débutant (moins d'1 an)">Débutant (moins d'1 an)</option>
-                  <option value="1-3 ans">1-3 ans</option>
-                  <option value="3-5 ans">3-5 ans</option>
-                  <option value="5-10 ans">5-10 ans</option>
-                  <option value="Plus de 10 ans">Plus de 10 ans</option>
-                </select>
-
-                {/* Véhicule */}
-                <select 
-                  value={selectedVehicle}
-                  onChange={(e) => setSelectedVehicle(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
-                >
-                  <option value="all">Tous les véhicules</option>
-                  <option value="Berline">Berline</option>
-                  <option value="4x4">4x4/SUV</option>
-                  <option value="Pick-up">Pick-up</option>
-                  <option value="Minibus">Minibus</option>
-                  <option value="Utilitaire">Utilitaire</option>
-                  <option value="Moto">Moto</option>
-                  <option value="luxe">Véhicule de luxe</option>
-                </select>
-
-                {/* Disponibilité */}
-                <select 
-                  value={selectedAvailability}
-                  onChange={(e) => setSelectedAvailability(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-white border border-gray-500/30 text-gray-800/90 rounded-md font-medium text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer hover:border-gray-500/50"
-                >
-                  <option value="all">Toute disponibilité</option>
-                  <option value="Immédiate">Immédiate</option>
-                  <option value="Temps plein">Temps plein</option>
-                  <option value="Temps partiel">Temps partiel</option>
-                  <option value="Week-end">Week-end</option>
-                  <option value="Nuit">Nuit</option>
-                  <option value="Ponctuel">Ponctuel</option>
-                  <option value="Flexible">Flexible</option>
-                </select>
-              </div>
-
-              {/* Bouton actualiser desktop */}
-              <button
-                onClick={refreshData}
-                disabled={loading}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>{loading ? 'Actualisation...' : 'Actualiser'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Cards des chauffeurs */}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { offersApi } from '../../services/api';
 import Modal from '../common/Modal';
+import CustomSelect from '../common/CustomSelect';
 
 // Style pour masquer la barre de défilement
 const scrollbarHideStyle = `
@@ -77,6 +78,25 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
       setFormData(prev => ({
         ...prev,
         [name]: type === 'checkbox' ? checked : value
+      }));
+    }
+  };
+
+  // Helper pour CustomSelect (qui passe directement la valeur)
+  const handleSelectChange = (name) => (value) => {
+    if (name.includes('.')) {
+      const [section, field] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
       }));
     }
   };
@@ -243,35 +263,34 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 lg:mb-2">Type de mission *</label>
-                <select 
-                  name="type"
+                <CustomSelect
                   value={formData.type}
-                  onChange={handleInputChange}
-                  className={`w-full p-2 lg:p-3 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm lg:text-base ${errors.type ? 'border-red-500' : 'border-gray-300'}`}
-                  required
-                >
-                  <option value="">Sélectionner un type</option>
-                  <option value="Personnel">Transport personnel</option>
-                  <option value="Livraison">Livraison</option>
-                  <option value="VTC">VTC</option>
-                  <option value="Transport">Transport</option>
-                  <option value="Autre">Autre</option>
-                </select>
+                  onChange={handleSelectChange('type')}
+                  placeholder="Sélectionner un type"
+                  options={[
+                    { value: '', label: 'Sélectionner un type' },
+                    { value: 'Personnel', label: 'Transport personnel' },
+                    { value: 'Livraison', label: 'Livraison' },
+                    { value: 'VTC', label: 'VTC' },
+                    { value: 'Transport', label: 'Transport' },
+                    { value: 'Autre', label: 'Autre' }
+                  ]}
+                />
                 {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Type de travail</label>
-                <select 
-                  name="conditions.workType"
+                <CustomSelect
                   value={formData.conditions.workType}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  <option value="temps_plein">Temps plein</option>
-                  <option value="temps_partiel">Temps partiel</option>
-                  <option value="ponctuel">Ponctuel</option>
-                  <option value="weekend">Weekend</option>
-                </select>
+                  onChange={handleSelectChange('conditions.workType')}
+                  placeholder="Type de travail"
+                  options={[
+                    { value: 'temps_plein', label: 'Temps plein' },
+                    { value: 'temps_partiel', label: 'Temps partiel' },
+                    { value: 'ponctuel', label: 'Ponctuel' },
+                    { value: 'weekend', label: 'Weekend' }
+                  ]}
+                />
               </div>
             </div>
 
@@ -318,17 +337,19 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
                     placeholder="150000"
                     className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
-                  <select 
-                    name="conditions.salaryType"
-                    value={formData.conditions.salaryType}
-                    onChange={handleInputChange}
-                    className="w-16 p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-xs"
-                  >
-                    <option value="horaire">/h</option>
-                    <option value="journalier">/j</option>
-                    <option value="mensuel">/m</option>
-                    <option value="fixe">Fixe</option>
-                  </select>
+                  <div className="w-32">
+                    <CustomSelect
+                      value={formData.conditions.salaryType}
+                      onChange={handleSelectChange('conditions.salaryType')}
+                      placeholder="Type"
+                      options={[
+                        { value: 'horaire', label: '/h' },
+                        { value: 'journalier', label: '/j' },
+                        { value: 'mensuel', label: '/m' },
+                        { value: 'fixe', label: 'Fixe' }
+                      ]}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -378,48 +399,48 @@ export default function CreateOffer({ showCreateForm, setShowCreateForm, onOffer
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Permis requis</label>
-                  <select 
-                    name="requirements.licenseType"
+                  <CustomSelect
                     value={formData.requirements.licenseType}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="A">Permis A (moto)</option>
-                    <option value="B">Permis B (voiture)</option>
-                    <option value="C">Permis C (poids lourd)</option>
-                    <option value="D">Permis D (transport en commun)</option>
-                  </select>
+                    onChange={handleSelectChange('requirements.licenseType')}
+                    placeholder="Permis requis"
+                    options={[
+                      { value: 'A', label: 'Permis A (moto)' },
+                      { value: 'B', label: 'Permis B (voiture)' },
+                      { value: 'C', label: 'Permis C (poids lourd)' },
+                      { value: 'D', label: 'Permis D (transport en commun)' }
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Expérience</label>
-                  <select 
-                    name="requirements.experience"
+                  <CustomSelect
                     value={formData.requirements.experience}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="Débutant">Débutant</option>
-                    <option value="1-3 ans">1-3 ans</option>
-                    <option value="3-5 ans">3-5 ans</option>
-                    <option value="5+ ans">5+ ans</option>
-                  </select>
+                    onChange={handleSelectChange('requirements.experience')}
+                    placeholder="Expérience"
+                    options={[
+                      { value: 'Débutant', label: 'Débutant' },
+                      { value: '1-3 ans', label: '1-3 ans' },
+                      { value: '3-5 ans', label: '3-5 ans' },
+                      { value: '5+ ans', label: '5+ ans' }
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">Type de véhicule</label>
-                  <select 
-                    name="requirements.vehicleType"
+                  <CustomSelect
                     value={formData.requirements.vehicleType}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="">Aucune préférence</option>
-                    <option value="berline">Berline</option>
-                    <option value="suv">SUV</option>
-                    <option value="utilitaire">Utilitaire</option>
-                    <option value="moto">Moto</option>
-                    <option value="van">Van</option>
-                    <option value="autre">Autre</option>
-                  </select>
+                    onChange={handleSelectChange('requirements.vehicleType')}
+                    placeholder="Type de véhicule"
+                    options={[
+                      { value: '', label: 'Aucune préférence' },
+                      { value: 'berline', label: 'Berline' },
+                      { value: 'suv', label: 'SUV' },
+                      { value: 'utilitaire', label: 'Utilitaire' },
+                      { value: 'moto', label: 'Moto' },
+                      { value: 'van', label: 'Van' },
+                      { value: 'autre', label: 'Autre' }
+                    ]}
+                  />
                 </div>
               </div>
             </div>

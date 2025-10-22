@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { offersApi } from '../../services/api';
 import Modal from '../common/Modal';
+import CustomSelect from '../common/CustomSelect';
 
 // Style pour masquer la barre de défilement
 const scrollbarHideStyle = `
@@ -104,6 +105,25 @@ export default function EditOffer({ offer, showEditForm, setShowEditForm, onOffe
     }
   };
 
+  // Helper pour CustomSelect (qui passe directement la valeur)
+  const handleSelectChange = (name) => (value) => {
+    if (name.includes('.')) {
+      const [section, field] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -201,35 +221,34 @@ export default function EditOffer({ offer, showEditForm, setShowEditForm, onOffe
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 lg:mb-2">Type de mission *</label>
-                <select 
-                  name="type"
+                <CustomSelect
                   value={formData.type}
-                  onChange={handleInputChange}
-                  className={`w-full p-2 lg:p-3 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm lg:text-base ${errors.type ? 'border-red-500' : 'border-gray-300'}`}
-                  required
-                >
-                  <option value="">Sélectionner un type</option>
-                  <option value="Personnel">Transport personnel</option>
-                  <option value="Livraison">Livraison</option>
-                  <option value="VTC">VTC</option>
-                  <option value="Transport">Transport</option>
-                  <option value="Autre">Autre</option>
-                </select>
+                  onChange={handleSelectChange('type')}
+                  placeholder="Sélectionner un type"
+                  options={[
+                    { value: '', label: 'Sélectionner un type' },
+                    { value: 'Personnel', label: 'Transport personnel' },
+                    { value: 'Livraison', label: 'Livraison' },
+                    { value: 'VTC', label: 'VTC' },
+                    { value: 'Transport', label: 'Transport' },
+                    { value: 'Autre', label: 'Autre' }
+                  ]}
+                />
                 {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 lg:mb-2">Type de travail</label>
-                <select 
-                  name="conditions.workType"
+                <CustomSelect
                   value={formData.conditions.workType}
-                  onChange={handleInputChange}
-                  className="w-full p-2 lg:p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm lg:text-base"
-                >
-                  <option value="temps_plein">Temps plein</option>
-                  <option value="temps_partiel">Temps partiel</option>
-                  <option value="ponctuel">Ponctuel</option>
-                  <option value="weekend">Weekend</option>
-                </select>
+                  onChange={handleSelectChange('conditions.workType')}
+                  placeholder="Type de travail"
+                  options={[
+                    { value: 'temps_plein', label: 'Temps plein' },
+                    { value: 'temps_partiel', label: 'Temps partiel' },
+                    { value: 'ponctuel', label: 'Ponctuel' },
+                    { value: 'weekend', label: 'Weekend' }
+                  ]}
+                />
               </div>
             </div>
 
@@ -265,25 +284,24 @@ export default function EditOffer({ offer, showEditForm, setShowEditForm, onOffe
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1 lg:mb-2">Ville *</label>
-                <select 
-                  name="location.city"
+                <CustomSelect
                   value={formData.location.city}
-                  onChange={handleInputChange}
-                  className={`w-full p-2 lg:p-3 border rounded-md focus:ring-indigo-500 focus:border-indigo-500 text-sm lg:text-base ${errors.city ? 'border-red-500' : 'border-gray-300'}`}
-                  required
-                >
-                  <option value="">Sélectionner une ville</option>
-                  <option value="Abidjan">Abidjan</option>
-                  <option value="Bouaké">Bouaké</option>
-                  <option value="Daloa">Daloa</option>
-                  <option value="Yamoussoukro">Yamoussoukro</option>
-                  <option value="San-Pédro">San-Pédro</option>
-                  <option value="Korhogo">Korhogo</option>
-                  <option value="Man">Man</option>
-                  <option value="Divo">Divo</option>
-                  <option value="Gagnoa">Gagnoa</option>
-                  <option value="Abengourou">Abengourou</option>
-                </select>
+                  onChange={handleSelectChange('location.city')}
+                  placeholder="Sélectionner une ville"
+                  options={[
+                    { value: '', label: 'Sélectionner une ville' },
+                    { value: 'Abidjan', label: 'Abidjan' },
+                    { value: 'Bouaké', label: 'Bouaké' },
+                    { value: 'Daloa', label: 'Daloa' },
+                    { value: 'Yamoussoukro', label: 'Yamoussoukro' },
+                    { value: 'San-Pédro', label: 'San-Pédro' },
+                    { value: 'Korhogo', label: 'Korhogo' },
+                    { value: 'Man', label: 'Man' },
+                    { value: 'Divo', label: 'Divo' },
+                    { value: 'Gagnoa', label: 'Gagnoa' },
+                    { value: 'Abengourou', label: 'Abengourou' }
+                  ]}
+                />
                 {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
               </div>
             </div>

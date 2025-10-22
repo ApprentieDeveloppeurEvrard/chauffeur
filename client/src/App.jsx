@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './component/ProtectedRoute'
+import PublicRoute from './component/PublicRoute'
 import HeroSection from './component/hero.jsx'
 import Auth from './component/Auth.jsx'
 import EmployerDashboard from './component/EmployerDashboard.jsx'
@@ -19,11 +20,25 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* Page d'accueil */}
-            <Route path="/" element={<HeroSection />} />
+            {/* Page d'accueil - redirige vers dashboard si connecté */}
+            <Route 
+              path="/" 
+              element={
+                <PublicRoute>
+                  <HeroSection />
+                </PublicRoute>
+              } 
+            />
             
-            {/* Page d'authentification */}
-            <Route path="/auth" element={<Auth />} />
+            {/* Page d'authentification - redirige vers dashboard si connecté */}
+            <Route 
+              path="/auth" 
+              element={
+                <PublicRoute>
+                  <Auth />
+                </PublicRoute>
+              } 
+            />
             
             {/* Pages publiques */}
             <Route path="/chauffeurs" element={<ChauffeursPage />} />
