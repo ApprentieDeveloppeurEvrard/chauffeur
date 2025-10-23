@@ -9,9 +9,13 @@ const useUnreadMessages = () => {
 
   // Fonction pour calculer le nombre total de messages non lus
   const calculateUnreadCount = useCallback((conversationsList) => {
+    console.log('🧮 Calcul du nombre de messages non lus pour:', conversationsList.length, 'conversations');
     const total = conversationsList.reduce((sum, conversation) => {
-      return sum + (conversation.unreadCount || 0);
+      const unread = conversation.unreadCount || 0;
+      console.log(`📝 Conversation ${conversation._id}: ${unread} messages non lus`);
+      return sum + unread;
     }, 0);
+    console.log('📊 Total calculé:', total);
     setUnreadCount(total);
     return total;
   }, []);
@@ -22,20 +26,24 @@ const useUnreadMessages = () => {
       setLoading(true);
       setError(null);
       
+      console.log('🔄 Chargement des conversations...');
       const response = await chatService.getConversations();
       const conversationsList = response.data || [];
       
+      console.log('📨 Conversations reçues:', conversationsList);
       setConversations(conversationsList);
       const total = calculateUnreadCount(conversationsList);
+      console.log('📊 Total messages non lus:', total);
       
       // Afficher une notification browser si il y a de nouveaux messages
       if (total > unreadCount && total > 0) {
+        console.log('🔔 Nouveaux messages détectés, affichage notification');
         showBrowserNotification(total);
       }
       
       return conversationsList;
     } catch (err) {
-      console.error('Erreur lors du chargement des conversations:', err);
+      console.error('❌ Erreur lors du chargement des conversations:', err);
       setError(err.message || 'Erreur lors du chargement des messages');
       return [];
     } finally {
@@ -109,7 +117,7 @@ const useUnreadMessages = () => {
     loadConversations();
   }, [loadConversations]);
 
-  // Polling automatique toutes les 30 secondes
+  // Polling automatique toutes les 5 secondes pour une meilleure réactivité
   useEffect(() => {
     // Charger immédiatement
     loadConversations();
@@ -117,25 +125,29 @@ const useUnreadMessages = () => {
     // Demander la permission pour les notifications
     requestNotificationPermission();
 
-    // Configurer le polling plus fréquent
+    // Configurer le polling très fréquent pour les tests
     const interval = setInterval(() => {
+      console.log('⏰ Polling automatique des messages...');
       loadConversations();
-    }, 10000); // 10 secondes pour une meilleure réactivité
+    }, 5000); // 5 secondes pour une meilleure réactivité
 
     // Écouter les événements de nouveaux messages
     const handleNewMessage = () => {
+      console.log('📨 Événement newMessageReceived détecté');
       setTimeout(() => {
         loadConversations();
       }, 1000); // Délai pour laisser le temps au message d'être sauvegardé
     };
 
     const handleMessageSent = () => {
+      console.log('📤 Événement newMessageSent détecté');
       setTimeout(() => {
         loadConversations();
       }, 500); // Délai plus court pour les messages envoyés
     };
 
     const handleConversationMarkedAsRead = () => {
+      console.log('✅ Événement conversationMarkedAsRead détecté');
       setTimeout(() => {
         loadConversations();
       }, 200); // Délai très court pour la mise à jour immédiate
@@ -146,10 +158,26 @@ const useUnreadMessages = () => {
       loadConversations();
     };
 
+    // Écouter les événements de focus de la fenêtre pour actualiser
+    const handleWindowFocus = () => {
+      console.log('👁️ Fenêtre mise au focus, actualisation des messages');
+      loadConversations();
+    };
+
+    // Écouter les événements de visibilité de la page
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('👀 Page visible, actualisation des messages');
+        loadConversations();
+      }
+    };
+
     window.addEventListener('newMessageReceived', handleNewMessage);
     window.addEventListener('newMessageSent', handleMessageSent);
     window.addEventListener('conversationMarkedAsRead', handleConversationMarkedAsRead);
     window.addEventListener('forceRefreshUnreadMessages', handleForceRefresh);
+    window.addEventListener('focus', handleWindowFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       clearInterval(interval);
@@ -157,6 +185,8 @@ const useUnreadMessages = () => {
       window.removeEventListener('newMessageSent', handleMessageSent);
       window.removeEventListener('conversationMarkedAsRead', handleConversationMarkedAsRead);
       window.removeEventListener('forceRefreshUnreadMessages', handleForceRefresh);
+      window.removeEventListener('focus', handleWindowFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [loadConversations, requestNotificationPermission]);
 
@@ -164,6 +194,20 @@ const useUnreadMessages = () => {
   const createTestNotification = useCallback(() => {
     showBrowserNotification(1);
   }, [showBrowserNotification]);
+
+  // Fonction pour forcer une actualisation immédiate
+  const forceRefresh = useCallback(() => {
+    console.log('🔄 Actualisation forcée des messages');
+    loadConversations();
+  }, [loadConversations]);
+
+  // Fonction pour tester le système de notifications
+  const testNotificationSystem = useCallback(() => {
+    console.log('🧪 Test du système de notifications');
+    console.log('📊 Messages non lus actuels:', unreadCount);
+    console.log('📨 Conversations:', conversations);
+    showBrowserNotification(unreadCount || 1);
+  }, [unreadCount, conversations, showBrowserNotification]);
 
   return {
     unreadCount,
@@ -174,7 +218,9 @@ const useUnreadMessages = () => {
     refresh,
     createTestNotification,
     requestNotificationPermission,
-    loadConversations // Exposer pour debug
+    loadConversations, // Exposer pour debug
+    forceRefresh, // Nouvelle fonction
+    testNotificationSystem // Nouvelle fonction
   };
 };
 

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Modal from '../common/Modal';
 import { useConfirmation } from '../../hooks/useConfirmation';
-import { CheckIcon, WarningIcon } from '../../components/ConfirmationIcons';
-import ConfirmationModal from '../../components/ConfirmationModal';
+import { CheckIcon, WarningIcon } from '../common/ConfirmationIcons';
+import ConfirmationModal from '../common/ConfirmationModal';
 import { contactService } from '../../services/api';
 
 export default function EmployerContactModal({ isOpen, onClose, employer }) {

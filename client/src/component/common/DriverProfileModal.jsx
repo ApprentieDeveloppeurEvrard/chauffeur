@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { driversApi } from '../../services/api';
 import Modal from './Modal';
-import ConfirmationModal from '../../components/ConfirmationModal';
+import ConfirmationModal from './ConfirmationModal';
 import { useConfirmation } from '../../hooks/useConfirmation';
-import { CheckIcon, WarningIcon } from '../../components/ConfirmationIcons';
+import { CheckIcon, WarningIcon } from './ConfirmationIcons';
 
 // Style pour masquer la barre de défilement
 const scrollbarHideStyle = `

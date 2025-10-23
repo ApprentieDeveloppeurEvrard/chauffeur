@@ -18,7 +18,7 @@ import Chat from './chat/Chat';
 import EmbeddedChat from './chat/EmbeddedChat';
 
 export default function EmployerDashboard() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('search-drivers');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -115,7 +115,7 @@ export default function EmployerDashboard() {
 
   // Fonction pour gérer le clic sur le logo
   const handleLogoClick = () => {
-    setActiveTab('dashboard');
+    setActiveTab('search-drivers');
   };
 
   // Fonction pour gérer le clic sur "Mon profil"
@@ -167,19 +167,6 @@ export default function EmployerDashboard() {
 
         {/* Contenu principal */}
         <main className="flex-1 lg:ml-64 p-4 lg:p-6 pb-32 lg:pb-6">
-          {/* Dashboard - Vue d'ensemble */}
-          {activeTab === 'dashboard' && (
-            <Dashboard 
-              myOffers={myOffers || []}
-              activeMissions={myMissions || []}
-              notifications={notifications || []}
-              receivedApplications={receivedApplications || []}
-              stats={stats}
-              loading={loading}
-              onTabChange={setActiveTab}
-            />
-          )}
-
           {/* Rechercher des chauffeurs */}
           {activeTab === 'search-drivers' && (
             <DriverSearch 
@@ -263,15 +250,6 @@ export default function EmployerDashboard() {
         setActiveTab={setActiveTab}
         userRole="client"
         menuItems={[
-          {
-            id: 'dashboard',
-            label: 'Accueil',
-            icon: (
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-              </svg>
-            )
-          },
           {
             id: 'search-drivers',
             label: 'Chauffeurs',
