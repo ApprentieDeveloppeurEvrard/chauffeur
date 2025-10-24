@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import Notification from "./common/Notification";
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(false);
   const [userType, setUserType] = useState('chauffeur'); // 'chauffeur' ou 'employeur'
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState(null);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     loginIdentifier: '', // Pour connexion (téléphone ou email)
+    email: '', // Pour inscription
     password: '',
     confirmPassword: '', // Pour confirmation mot de passe inscription
     firstName: '',
@@ -50,7 +51,8 @@ export default function Auth() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setNotification(null);
+    setError('');
+    setSuccess('');
 
     try {
       if (isLogin) {
@@ -58,37 +60,17 @@ export default function Auth() {
         const result = await login(formData.loginIdentifier, formData.password);
         
         if (result.success) {
-          setNotification({
-            type: 'success',
-            title: 'Connexion réussie !',
-            message: `Bienvenue ${result.user.firstName || result.user.email}`
-          });
-          
-          // Rediriger selon le rôle
+          setSuccess(`Bienvenue ${result.user.firstName || result.user.email}`);
           setTimeout(() => {
-            if (result.user.role === 'driver') {
-              navigate('/driver-dashboard');
-            } else if (result.user.role === 'client') {
-              navigate('/employer-dashboard');
-            } else {
-              navigate('/');
-            }
+            navigate('/');
           }, 1500);
         } else {
-          setNotification({
-            type: 'error',
-            title: 'Erreur de connexion',
-            message: result.error || 'Identifiants incorrects'
-          });
+          setError(result.error || 'Identifiants incorrects');
         }
       } else {
         // Inscription
         if (formData.password !== formData.confirmPassword) {
-          setNotification({
-            type: 'error',
-            title: 'Erreur de validation',
-            message: 'Les mots de passe ne correspondent pas'
-          });
+          setError('Les mots de passe ne correspondent pas');
           setLoading(false);
           return;
         }
@@ -116,39 +98,19 @@ export default function Auth() {
         const result = await register(userData);
         
         if (result.success) {
-          setNotification({
-            type: 'success',
-            title: 'Compte créé avec succès !',
-            message: userType === 'chauffeur' 
-              ? 'Votre profil chauffeur est en cours de validation'
-              : 'Vous pouvez maintenant accéder à votre tableau de bord'
-          });
-          
-          // Rediriger selon le rôle
+          setSuccess(userType === 'chauffeur' 
+            ? 'Compte créé ! Votre profil chauffeur est en cours de validation'
+            : 'Compte créé avec succès !');
           setTimeout(() => {
-            if (result.user.role === 'driver') {
-              navigate('/driver-dashboard');
-            } else if (result.user.role === 'client') {
-              navigate('/employer-dashboard');
-            } else {
-              navigate('/');
-            }
+            navigate('/');
           }, 2000);
         } else {
-          setNotification({
-            type: 'error',
-            title: 'Erreur lors de la création du compte',
-            message: result.error || 'Une erreur est survenue'
-          });
+          setError(result.error || 'Une erreur est survenue');
         }
       }
     } catch (error) {
       console.error('Erreur:', error);
-      setNotification({
-        type: 'error',
-        title: 'Erreur technique',
-        message: 'Une erreur technique est survenue. Veuillez réessayer.'
-      });
+      setError('Une erreur technique est survenue. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
@@ -174,15 +136,15 @@ export default function Auth() {
           {isLogin ? 'Se connecter' : 'Créer un compte'}
         </h1>
 
-        {/* Notification */}
-        {notification && (
-          <div className="mb-4">
-            <Notification
-              type={notification.type}
-              title={notification.title}
-              message={notification.message}
-              onClose={() => setNotification(null)}
-            />
+        {/* Messages d'erreur et de succès */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+            {success}
           </div>
         )}
 

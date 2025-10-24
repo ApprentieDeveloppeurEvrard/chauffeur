@@ -203,6 +203,7 @@ export const vehiclesApi = {
 // Service pour récupérer le nombre de chauffeurs
 export const driversService = {
   getCount: () => api.get('/drivers/count'),
+  getAll: () => api.get('/drivers'),
 }
 
 // Service pour le chat

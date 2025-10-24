@@ -13,13 +13,9 @@ export default function PublicRoute({ children }) {
     );
   }
 
-  // Si l'utilisateur est connecté, rediriger vers son dashboard
+  // Si l'utilisateur est connecté, rediriger vers la page d'accueil
   if (user) {
-    if (user.role === 'client') {
-      return <Navigate to="/employer-dashboard" replace />;
-    } else if (user.role === 'driver') {
-      return <Navigate to="/driver-dashboard" replace />;
-    }
+    return <Navigate to="/" replace />;
   }
 
   // Si pas connecté, afficher la page publique

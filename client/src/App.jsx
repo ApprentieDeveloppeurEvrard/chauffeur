@@ -1,17 +1,22 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
-import ProtectedRoute from './component/ProtectedRoute'
 import PublicRoute from './component/PublicRoute'
-import HeroSection from './component/hero.jsx'
+import HomePage from './pages/HomePage.jsx'
+import DriversPage from './pages/DriversPage.jsx'
+import DriverDetailPage from './pages/DriverDetailPage.jsx'
+import OffersPage from './pages/OffersPage.jsx'
+import OfferDetailPage from './pages/OfferDetailPage.jsx'
+import MarketingVentePage from './pages/MarketingVentePage.jsx'
+import ProductDetailPage from './pages/ProductDetailPage.jsx'
+import LoginPage from './pages/LoginPage.jsx'
+import RegisterPage from './pages/RegisterPage.jsx'
 import Auth from './component/Auth.jsx'
-import EmployerDashboard from './component/EmployerDashboard.jsx'
-import SafeDriverDashboard from './component/SafeDriverDashboard.jsx'
-import ChauffeursPage from './pages/ChauffeursPage.jsx'
-import EmployeursPage from './pages/EmployeursPage.jsx'
-import CommentCaMarchePage from './pages/CommentCaMarchePage.jsx'
-import TestAPI from './pages/TestAPI.jsx'
-import TestConnection from './pages/TestConnection.jsx'
+import TarifsPage from './pages/TarifsPage.jsx'
+import DevenirPartenairePage from './pages/DevenirPartenairePage.jsx'
+import FormationsPage from './pages/FormationsPage.jsx'
+import CertificationsPage from './pages/CertificationsPage.jsx'
+import CentreAidePage from './pages/CentreAidePage.jsx'
 
 function App() {
   return (
@@ -19,56 +24,80 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* Page d'accueil - redirige vers dashboard si connecté */}
+            {/* Page d'accueil publique - marketplace des chauffeurs */}
             <Route 
               path="/" 
+              element={<HomePage />} 
+            />
+
+            {/* Page des chauffeurs */}
+            <Route 
+              path="/chauffeurs" 
+              element={<DriversPage />} 
+            />
+            
+            {/* Page de détails chauffeur publique */}
+            <Route 
+              path="/driver/:id" 
+              element={<DriverDetailPage />} 
+            />
+
+            {/* Page des offres d'emploi publique */}
+            <Route 
+              path="/offres" 
+              element={<OffersPage />} 
+            />
+
+            {/* Page de détails offre publique */}
+            <Route 
+              path="/offre/:id" 
+              element={<OfferDetailPage />} 
+            />
+
+            {/* Page Marketing & Vente publique */}
+            <Route 
+              path="/marketing-vente" 
+              element={<MarketingVentePage />} 
+            />
+
+            {/* Page de détails produit publique */}
+            <Route 
+              path="/produit/:id" 
+              element={<ProductDetailPage />} 
+            />
+
+            {/* Page de connexion */}
+            <Route 
+              path="/login" 
               element={
                 <PublicRoute>
-                  <HeroSection />
+                  <LoginPage />
+                </PublicRoute>
+              } 
+            />
+
+            {/* Page d'inscription */}
+            <Route 
+              path="/register" 
+              element={
+                <PublicRoute>
+                  <RegisterPage />
                 </PublicRoute>
               } 
             />
             
-            {/* Page d'authentification - redirige vers dashboard si connecté */}
+            {/* Page d'authentification */}
             <Route 
               path="/auth" 
-              element={
-                <PublicRoute>
-                  <Auth />
-                </PublicRoute>
-              } 
+              element={<Auth />} 
             />
             
             {/* Pages publiques */}
-            <Route path="/chauffeurs" element={<ChauffeursPage />} />
-            <Route path="/employeurs" element={<EmployeursPage />} />
-            <Route path="/comment-ca-marche" element={<CommentCaMarchePage />} />
-            
-            {/* Dashboard employeur */}
-            <Route 
-              path="/employer-dashboard" 
-              element={
-                <ProtectedRoute requiredRole="client">
-                  <EmployerDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Dashboard chauffeur */}
-            <Route 
-              path="/driver-dashboard" 
-              element={
-                <ProtectedRoute requiredRole="driver">
-                  <SafeDriverDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Page de test API */}
-            <Route path="/test-api" element={<TestAPI />} />
-            
-            {/* Page de test de connexion */}
-            <Route path="/test-connection" element={<TestConnection />} />
+            <Route path="/tarifs" element={<TarifsPage />} />
+            <Route path="/devenir-partenaire" element={<DevenirPartenairePage />} />
+            <Route path="/formations" element={<FormationsPage />} />
+            <Route path="/certifications" element={<CertificationsPage />} />
+            <Route path="/centre-aide" element={<CentreAidePage />} />
           </Routes>
         </div>
       </Router>
