@@ -1,41 +1,5 @@
 const Driver = require('../models/Driver');
 const User = require('../models/User');
-const Notification = require('../models/Notification');
-
-// Fonction pour notifier les employeurs d'une mise à jour de profil
-const notifyEmployersOfProfileUpdate = async (driver) => {
-  try {
-    // Récupérer tous les employeurs actifs
-    const employers = await User.find({ 
-      role: 'employer', 
-      isActive: true 
-    }).select('_id firstName lastName');
-
-    if (employers.length === 0) return;
-
-    // Créer une notification pour chaque employeur
-    const notifications = employers.map(employer => ({
-      userId: employer._id,
-      type: 'driver_profile_updated',
-      title: 'Profil chauffeur mis à jour',
-      message: `${driver.firstName} ${driver.lastName} a mis à jour son profil. Consultez les nouvelles informations.`,
-      data: {
-        driverId: driver._id,
-        driverName: `${driver.firstName} ${driver.lastName}`,
-        updateTime: new Date()
-      },
-      unread: true
-    }));
-
-    // Insérer toutes les notifications en une fois
-    await Notification.insertMany(notifications);
-    
-    console.log(`Notifications envoyées à ${employers.length} employeurs pour la mise à jour du profil de ${driver.firstName} ${driver.lastName}`);
-  } catch (error) {
-    console.error('Erreur lors de l\'envoi des notifications aux employeurs:', error);
-    // Ne pas faire échouer la mise à jour du profil si les notifications échouent
-  }
-};
 
 // Obtenir le profil du chauffeur connecté
 const getDriverProfile = async (req, res) => {
@@ -166,8 +130,7 @@ const updateDriverProfile = async (req, res) => {
       await User.findByIdAndUpdate(userId, userUpdateData);
     }
 
-    // Notifier les employeurs de la mise à jour du profil
-    await notifyEmployersOfProfileUpdate(driver);
+    // Notification désactivée (système de notifications supprimé)
 
     console.log('=== PROFIL SAUVEGARDÉ AVEC SUCCÈS ===');
     console.log('Driver final:', {

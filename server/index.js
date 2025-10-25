@@ -5,16 +5,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const driverRoutes = require('./routes/drivers');
-const vehicleRoutes = require('./routes/vehicles');
-const rideRoutes = require('./routes/rides');
 const offerRoutes = require('./routes/offers');
-const applicationRoutes = require('./routes/applications');
-const statsRoutes = require('./routes/stats');
-const missionRoutes = require('./routes/missions');
-const notificationRoutes = require('./routes/notifications');
-const adminRoutes = require('./routes/admin');
-const chatRoutes = require('./routes/chat');
-const messageRoutes = require('./routes/messages');
 
 const { connectToDatabase } = require('./db/connect');
 const app = express();
@@ -109,16 +100,7 @@ app.get('/debug/config', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
-app.use('/api/vehicles', vehicleRoutes);
-app.use('/api/rides', rideRoutes);
 app.use('/api/offers', offerRoutes);
-app.use('/api/applications', applicationRoutes);
-app.use('/api/stats', statsRoutes);
-app.use('/api/missions', missionRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/messages', messageRoutes);
 
 // Not found handler
 app.use((req, res) => {

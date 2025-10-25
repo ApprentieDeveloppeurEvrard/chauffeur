@@ -1,7 +1,5 @@
 const Offer = require('../models/Offer');
-const Application = require('../models/Application');
 const User = require('../models/User');
-const { createNotification } = require('../services/notificationService');
 
 // Récupérer toutes les offres actives
 const getAllOffers = async (req, res) => {
