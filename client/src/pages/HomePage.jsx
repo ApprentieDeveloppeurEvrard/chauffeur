@@ -4,10 +4,13 @@ import { driversService, offersApi } from '../services/api';
 import SimpleHeader from '../component/common/SimpleHeader';
 import Footer from '../component/common/Footer';
 import OfferCard from '../component/common/OfferCard';
+import ProductCard from '../component/common/ProductCard';
+import api from '../services/api';
 
 export default function HomePage() {
   const [drivers, setDrivers] = useState([]);
   const [offers, setOffers] = useState([]);
+  const [products, setProducts] = useState([]);
   const [totalDrivers, setTotalDrivers] = useState(0);
   const [totalOffers, setTotalOffers] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -302,6 +305,31 @@ export default function HomePage() {
           setOffers(testOffers);
           setTotalOffers(testOffers.length);
         }
+
+        // Charger les produits (limité à 8 pour la page d'accueil)
+        try {
+          const productsResponse = await api.get('/offers', {
+            params: {
+              type: 'Autre',
+              status: 'active'
+            }
+          });
+          console.log('Produits reçus (HomePage):', productsResponse);
+          console.log('Structure produits:', productsResponse.data);
+          
+          if (productsResponse.data && (productsResponse.data.offers || productsResponse.data)) {
+            const allProducts = productsResponse.data.offers || productsResponse.data;
+            console.log('Nombre de produits:', allProducts.length);
+            console.log('Premier produit:', allProducts[0]);
+            setProducts(allProducts.slice(0, 8)); // Afficher seulement 8
+          } else {
+            console.log('Aucun produit API, utilisation des données de test');
+            setProducts(testProducts);
+          }
+        } catch (productError) {
+          console.error('Erreur lors du chargement des produits:', productError);
+          setProducts(testProducts);
+        }
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
         // Utiliser les données de test en cas d'erreur
@@ -309,6 +337,7 @@ export default function HomePage() {
         setTotalDrivers(testDrivers.length);
         setOffers(testOffers);
         setTotalOffers(testOffers.length);
+        setProducts(testProducts);
       } finally {
         setLoading(false);
       }
@@ -517,7 +546,7 @@ export default function HomePage() {
         <div className="mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl lg:text-2xl font-normal text-gray-900">
-              Marketing & Vente <span className="text-gray-500">({testProducts.length})</span>
+              Marketing & Vente <span className="text-gray-500">({products.length})</span>
             </h2>
             <Link 
               to="/marketing-vente"
@@ -528,51 +557,8 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-            {testProducts.map(product => (
-              <div 
-                key={product._id} 
-                className="bg-white border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer group"
-                onClick={() => navigate(`/produit/${product._id}`)}
-              >
-                {/* Image grande */}
-                <figure className="relative h-32 lg:h-48 bg-gray-100 overflow-hidden">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {/* Badge catégorie sur l'image */}
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold rounded shadow-sm">
-                      {product.category}
-                    </span>
-                  </div>
-                </figure>
-
-                {/* Contenu compact */}
-                <div className="p-2 lg:p-4">
-                  <h3 className="text-xs lg:text-base font-semibold text-gray-900 mb-1 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  
-                  <p className="text-sm lg:text-lg font-bold text-gray-900 mb-2">
-                    {product.price}
-                  </p>
-
-                  <div className="flex items-center gap-1 text-xs text-gray-600">
-                    <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                    </svg>
-                    <span className="truncate">{product.location.split(',')[0]}</span>
-                  </div>
-                  
-                  <div className="mt-1">
-                    <span className="px-1.5 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">
-                      {product.condition}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            {products.map(product => (
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         </div>

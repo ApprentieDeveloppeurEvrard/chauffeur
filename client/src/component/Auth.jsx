@@ -78,29 +78,16 @@ export default function Auth() {
         const userData = {
           email: formData.email,
           password: formData.password,
-          role: userType === 'chauffeur' ? 'driver' : 'client',
+          role: 'client', // Tous les utilisateurs sont des clients par défaut
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone || '', // Téléphone optionnel
         };
 
-        // Ajouter les champs spécifiques aux chauffeurs
-        if (userType === 'chauffeur') {
-          userData.licenseNumber = formData.licenseNumber;
-          userData.licenseType = 'B'; // Par défaut
-          userData.licenseDate = new Date().toISOString().split('T')[0]; // Date actuelle par défaut
-          userData.experience = formData.experience || '1-3';
-          userData.vehicleType = 'berline'; // Par défaut
-          userData.workZone = formData.zone || 'Paris';
-          userData.specialties = ['transport_personnel'];
-        }
-
         const result = await register(userData);
         
         if (result.success) {
-          setSuccess(userType === 'chauffeur' 
-            ? 'Compte créé ! Votre profil chauffeur est en cours de validation'
-            : 'Compte créé avec succès !');
+          setSuccess('Compte créé avec succès !');
           setTimeout(() => {
             navigate('/');
           }, 2000);
@@ -119,26 +106,14 @@ export default function Auth() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center py-8 px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center justify-center gap-2 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">GoDriver</h1>
-          </Link>
-        </div>
-
         {/* Carte principale */}
         <div className="bg-white rounded-2xl border border-gray-300">
           <div className="p-8">
             {/* Titre simple */}
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
               {isLogin ? 'Connexion' : 'Créer un compte'}
             </h2>
-            <p className="text-gray-600 text-sm mb-6">
+            <p className="text-gray-600 text-sm mb-6 text-center">
               {isLogin ? 'Accédez à votre espace personnel' : 'Rejoignez notre communauté de chauffeurs et employeurs'}
             </p>
 
@@ -160,49 +135,6 @@ export default function Auth() {
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <p className="text-sm text-green-700 font-medium">{success}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Sélecteur de type d'utilisateur (uniquement pour l'inscription) */}
-            {!isLogin && (
-              <div className="mb-5">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Je m'inscris en tant que
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setUserType('chauffeur')}
-                    className={`py-2.5 px-3 border rounded-lg text-sm font-semibold transition-all ${
-                      userType === 'chauffeur'
-                        ? 'border-orange-500 bg-orange-50 text-orange-600'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-1.5">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      <span>Chauffeur</span>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setUserType('employeur')}
-                    className={`py-2.5 px-3 border rounded-lg text-sm font-semibold transition-all ${
-                      userType === 'employeur'
-                        ? 'border-orange-500 bg-orange-50 text-orange-600'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-1.5">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      <span>Employeur</span>
-                    </div>
-                  </button>
                 </div>
               </div>
             )}
@@ -357,23 +289,6 @@ export default function Auth() {
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Champ spécifique pour les chauffeurs */}
-                  {userType === 'chauffeur' && (
-                    <div>
-                      <label htmlFor="licenseNumber" className="block text-sm font-semibold text-gray-700 mb-2">Numéro de permis de conduire</label>
-                      <input
-                        type="text"
-                        id="licenseNumber"
-                        name="licenseNumber"
-                        value={formData.licenseNumber}
-                        onChange={handleInputChange}
-                        placeholder="Ex: CI240001234"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 transition-all"
-                        required
-                      />
-                    </div>
-                  )}
                 </>
               )}
 

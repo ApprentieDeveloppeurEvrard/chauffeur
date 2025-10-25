@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SimpleHeader from '../component/common/SimpleHeader';
 import Footer from '../component/common/Footer';
+import ProductCard from '../component/common/ProductCard';
+import api from '../services/api';
 
 export default function MarketingVentePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -131,11 +134,29 @@ export default function MarketingVentePage() {
   ];
 
   useEffect(() => {
-    // Simuler le chargement
-    setTimeout(() => {
-      setProducts(testProducts);
-      setLoading(false);
-    }, 500);
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        // Récupérer les offres de type "Autre" (produits)
+        const response = await api.get('/offers', {
+          params: {
+            type: 'Autre',
+            status: 'active'
+          }
+        });
+        setProducts(response.data.offers || response.data);
+        setError(null);
+      } catch (err) {
+        console.error('Erreur lors du chargement des produits:', err);
+        setError('Impossible de charger les produits');
+        // Fallback sur les données de test en cas d'erreur
+        setProducts(testProducts);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   // Défilement automatique du carrousel
@@ -150,9 +171,9 @@ export default function MarketingVentePage() {
   // Filtrage simple par recherche
   const filteredProducts = products.filter(product =>
     searchQuery === '' ||
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.location.toLowerCase().includes(searchQuery.toLowerCase())
+    (product.title || product.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (product.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (product.location?.city || product.location || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -273,50 +294,7 @@ export default function MarketingVentePage() {
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {filteredProducts.map(product => (
-              <div 
-                key={product._id} 
-                className="bg-white border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer group"
-                onClick={() => navigate(`/produit/${product._id}`)}
-              >
-                {/* Image grande */}
-                <figure className="relative h-32 lg:h-48 bg-gray-100 overflow-hidden">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {/* Badge catégorie sur l'image */}
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold rounded shadow-sm">
-                      {product.category}
-                    </span>
-                  </div>
-                </figure>
-
-                {/* Contenu compact */}
-                <div className="p-2 lg:p-4">
-                  <h3 className="text-xs lg:text-base font-semibold text-gray-900 mb-1 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  
-                  <p className="text-sm lg:text-lg font-bold text-gray-900 mb-2">
-                    {product.price}
-                  </p>
-
-                  <div className="flex items-center gap-1 text-xs text-gray-600">
-                    <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                    </svg>
-                    <span className="truncate">{product.location.split(',')[0]}</span>
-                  </div>
-                  
-                  <div className="mt-1">
-                    <span className="px-1.5 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">
-                      {product.condition}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         ) : (
@@ -343,7 +321,7 @@ export default function MarketingVentePage() {
             <div className="absolute bottom-16 right-0 mb-2 space-y-3">
               {/* Option Marketing */}
               <Link
-                to="/register"
+                to="/publier-offre?type=product"
                 onClick={() => setShowFabMenu(false)}
                 className="flex items-center gap-3 bg-white rounded-full shadow-lg pl-4 pr-5 py-3 hover:bg-gray-50 transition-all animate-fade-in"
               >
@@ -358,7 +336,7 @@ export default function MarketingVentePage() {
 
               {/* Option Offre d'emploi */}
               <Link
-                to="/register"
+                to="/publier-offre?type=job"
                 onClick={() => setShowFabMenu(false)}
                 className="flex items-center gap-3 bg-white rounded-full shadow-lg pl-4 pr-5 py-3 hover:bg-gray-50 transition-all animate-fade-in"
               >

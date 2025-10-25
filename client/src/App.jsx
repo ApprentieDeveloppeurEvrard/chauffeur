@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import PublicRoute from './component/PublicRoute'
+import PrivateRoute from './component/PrivateRoute'
 import HomePage from './pages/HomePage.jsx'
 import DriversPage from './pages/DriversPage.jsx'
 import DriverDetailPage from './pages/DriverDetailPage.jsx'
@@ -10,8 +11,7 @@ import OfferDetailPage from './pages/OfferDetailPage.jsx'
 import CreateOfferPage from './pages/CreateOfferPage.jsx'
 import MarketingVentePage from './pages/MarketingVentePage.jsx'
 import ProductDetailPage from './pages/ProductDetailPage.jsx'
-import LoginPage from './pages/LoginPage.jsx'
-import RegisterPage from './pages/RegisterPage.jsx'
+import UserProfilePage from './pages/UserProfilePage.jsx'
 import Auth from './component/Auth.jsx'
 import TarifsPage from './pages/TarifsPage.jsx'
 import DevenirPartenairePage from './pages/DevenirPartenairePage.jsx'
@@ -38,10 +38,14 @@ function App() {
               element={<DriversPage />} 
             />
             
-            {/* Page de détails chauffeur publique */}
+            {/* Page de détails chauffeur protégée */}
             <Route 
               path="/driver/:id" 
-              element={<DriverDetailPage />} 
+              element={
+                <PrivateRoute>
+                  <DriverDetailPage />
+                </PrivateRoute>
+              } 
             />
 
             {/* Page des offres d'emploi publique */}
@@ -50,10 +54,14 @@ function App() {
               element={<OffersPage />} 
             />
 
-            {/* Page de détails offre publique */}
+            {/* Page de détails offre protégée */}
             <Route 
               path="/offre/:id" 
-              element={<OfferDetailPage />} 
+              element={
+                <PrivateRoute>
+                  <OfferDetailPage />
+                </PrivateRoute>
+              } 
             />
 
             {/* Page de création d'offre */}
@@ -68,36 +76,30 @@ function App() {
               element={<MarketingVentePage />} 
             />
 
-            {/* Page de détails produit publique */}
+            {/* Page de détails produit protégée */}
             <Route 
               path="/produit/:id" 
-              element={<ProductDetailPage />} 
-            />
-
-            {/* Page de connexion */}
-            <Route 
-              path="/login" 
               element={
-                <PublicRoute>
-                  <LoginPage />
-                </PublicRoute>
+                <PrivateRoute>
+                  <ProductDetailPage />
+                </PrivateRoute>
               } 
             />
 
-            {/* Page d'inscription */}
-            <Route 
-              path="/register" 
-              element={
-                <PublicRoute>
-                  <RegisterPage />
-                </PublicRoute>
-              } 
-            />
-            
             {/* Page d'authentification */}
             <Route 
               path="/auth" 
               element={<Auth />} 
+            />
+
+            {/* Page de profil utilisateur protégée */}
+            <Route 
+              path="/profile" 
+              element={
+                <PrivateRoute>
+                  <UserProfilePage />
+                </PrivateRoute>
+              } 
             />
             
             {/* Pages publiques */}

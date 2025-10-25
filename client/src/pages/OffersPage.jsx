@@ -293,7 +293,7 @@ export default function OffersPage() {
             <div className="absolute bottom-16 right-0 mb-2 space-y-3">
               {/* Option Marketing */}
               <Link
-                to="/register"
+                to="/publier-offre?type=product"
                 onClick={() => setShowFabMenu(false)}
                 className="flex items-center gap-3 bg-white rounded-full shadow-lg pl-4 pr-5 py-3 hover:bg-gray-50 transition-all animate-fade-in"
               >
@@ -308,7 +308,7 @@ export default function OffersPage() {
 
               {/* Option Offre d'emploi */}
               <Link
-                to="/register"
+                to="/publier-offre?type=job"
                 onClick={() => setShowFabMenu(false)}
                 className="flex items-center gap-3 bg-white rounded-full shadow-lg pl-4 pr-5 py-3 hover:bg-gray-50 transition-all animate-fade-in"
               >

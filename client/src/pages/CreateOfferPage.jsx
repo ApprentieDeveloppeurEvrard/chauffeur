@@ -1,15 +1,50 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import SimpleHeader from '../component/common/SimpleHeader';
 import JobOfferForm from '../component/forms/JobOfferForm';
 import ProductOfferForm from '../component/forms/ProductOfferForm';
 
 export default function CreateOfferPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const [offerType, setOfferType] = useState(null); // 'job' ou 'product'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showMobileFab, setShowMobileFab] = useState(false);
+  const [cameFromUrl, setCameFromUrl] = useState(false); // Pour savoir si on vient d'une URL avec paramètre
+
+  // Vérifier si l'utilisateur est connecté
+  useEffect(() => {
+    if (!user) {
+      // Rediriger vers la page d'authentification avec l'URL de retour
+      const currentPath = `/publier-offre${window.location.search}`;
+      navigate(`/auth?redirect=${encodeURIComponent(currentPath)}`);
+    }
+  }, [user, navigate]);
+
+  // Détecter le type depuis l'URL
+  useEffect(() => {
+    const typeFromUrl = searchParams.get('type');
+    if (typeFromUrl === 'job' || typeFromUrl === 'product') {
+      setOfferType(typeFromUrl);
+      setCameFromUrl(true); // On vient d'une URL avec paramètre
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [searchParams]);
+
+  // Afficher un loader pendant la vérification
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Vérification...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleJobSubmit = async (formData) => {
     setLoading(true);
@@ -32,12 +67,54 @@ export default function CreateOfferPage() {
     setError('');
 
     try {
-      console.log('Produit créé:', formData);
-      // TODO: Implémenter l'appel API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('Données du produit à envoyer:', formData);
+      
+      // Préparer les données pour l'API
+      const productData = {
+        title: formData.title,
+        description: formData.description,
+        type: 'Autre', // Type pour les produits
+        category: formData.category,
+        price: parseFloat(formData.price),
+        brand: formData.brand,
+        condition: formData.condition,
+        stock: parseInt(formData.stock),
+        location: {
+          city: formData.location || 'Abidjan'
+        },
+        contactInfo: formData.contactInfo,
+        requirementsList: formData.requirementsList || [],
+        benefits: formData.benefits || [],
+        images: formData.images || [],
+        mainImage: formData.mainImage || '',
+        tags: [formData.category.toLowerCase(), formData.brand?.toLowerCase()].filter(Boolean),
+        status: 'active',
+        // Champs requis par le modèle Offer
+        requirements: {
+          licenseType: 'B',
+          experience: '1-3 ans',
+          vehicleType: 'berline',
+          zone: formData.location || 'Abidjan'
+        },
+        conditions: {
+          salary: parseFloat(formData.price),
+          salaryType: 'mensuel',
+          workType: 'temps_plein',
+          startDate: new Date(),
+          schedule: 'Disponible immédiatement'
+        }
+      };
+
+      console.log('Données formatées:', productData);
+
+      // Appel API pour créer l'offre produit
+      const response = await offersApi.create(productData);
+      console.log('Produit créé avec succès:', response.data);
+      
       navigate('/marketing-vente');
     } catch (err) {
-      setError('Une erreur est survenue. Veuillez réessayer.');
+      console.error('Erreur lors de la création du produit:', err);
+      setError(err.response?.data?.error || 'Une erreur est survenue. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
@@ -52,7 +129,15 @@ export default function CreateOfferPage() {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => offerType ? setOfferType(null) : navigate(-1)}
+            onClick={() => {
+              if (offerType && !cameFromUrl) {
+                // Si on a sélectionné un type manuellement, retour à la sélection
+                setOfferType(null);
+              } else {
+                // Sinon, retour à l'accueil
+                navigate('/');
+              }
+            }}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,10 +145,10 @@ export default function CreateOfferPage() {
             </svg>
             Retour
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
             {!offerType ? 'Publier une offre' : offerType === 'job' ? 'Offre d\'emploi' : 'Produit Marketing & Vente'}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             {!offerType ? 'Choisissez le type d\'offre à publier' : offerType === 'job' ? 'Trouvez le chauffeur idéal pour votre entreprise' : 'Vendez vos produits et services'}
           </p>
         </div>
@@ -104,8 +189,9 @@ export default function CreateOfferPage() {
             </button>
           </div>
         ) : (
-          /* Card avec formulaire */
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 lg:p-8">
+          /* Card avec formulaire - Padding adapté mobile */
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+            {console.log('Affichage du formulaire pour:', offerType)}
             {offerType === 'job' ? (
               <JobOfferForm 
                 onSubmit={handleJobSubmit}
@@ -156,9 +242,11 @@ export default function CreateOfferPage() {
                 {/* Marketing & Vente */}
                 <button
                   onClick={() => {
+                    console.log('Marketing/Vente cliqué');
                     setOfferType('product');
                     setShowMobileFab(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                    console.log('offerType défini sur: product');
                   }}
                   className="flex items-center gap-3 bg-white rounded-full shadow-lg px-4 py-3 hover:shadow-xl transition-all"
                 >

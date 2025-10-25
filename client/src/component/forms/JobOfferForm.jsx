@@ -3,27 +3,56 @@ import { useState } from 'react';
 export default function JobOfferForm({ onSubmit, loading, error }) {
   const [formData, setFormData] = useState({
     title: '',
-    company: '',
-    type: '',
-    contractType: '',
     description: '',
-    address: '',
-    city: 'Abidjan',
-    licenseType: 'B',
-    experience: '',
-    vehicleType: '',
-    salaryMin: '',
-    salaryMax: '',
-    workType: '',
-    startDate: '',
-    contactEmail: '',
-    contactPhone: ''
+    type: 'Personnel',
+    
+    requirements: {
+      licenseType: 'B',
+      experience: '1-3 ans',
+      vehicleType: 'berline',
+      zone: ''
+    },
+    
+    conditions: {
+      salary: '',
+      salaryType: 'mensuel',
+      workType: 'temps_plein',
+      startDate: '',
+      schedule: ''
+    },
+    
+    location: {
+      address: '',
+      city: 'Abidjan'
+    },
+    
+    contactInfo: {
+      phone: '',
+      email: '',
+      preferredContact: 'platform'
+    },
+    
+    requirementsList: [],
+    benefits: []
   });
   const [currentStep, setCurrentStep] = useState(1);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Gérer les champs imbriqués (ex: requirements.licenseType)
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = (e) => {
@@ -43,12 +72,12 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
 
   return (
     <>
-      {/* Progress Steps */}
-      <div className="mb-8">
+      {/* Progress Steps - Adapté mobile */}
+      <div className="mb-6 sm:mb-8">
         <div className="flex items-center justify-between">
           {[1, 2, 3].map((step) => (
             <div key={step} className="flex items-center flex-1">
-              <div className={`flex items-center justify-center w-12 h-12 rounded-full font-semibold text-lg ${
+              <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full font-semibold text-base sm:text-lg ${
                 currentStep >= step 
                   ? 'bg-orange-500 text-white' 
                   : 'bg-gray-200 text-gray-500'
@@ -56,14 +85,14 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                 {step}
               </div>
               {step < 3 && (
-                <div className={`flex-1 h-1 mx-2 ${
+                <div className={`flex-1 h-1 mx-1 sm:mx-2 ${
                   currentStep > step ? 'bg-orange-500' : 'bg-gray-200'
                 }`} />
               )}
             </div>
           ))}
         </div>
-        <div className="flex justify-between mt-3 text-sm font-medium text-gray-600">
+        <div className="flex justify-between mt-2 sm:mt-3 text-xs sm:text-sm font-medium text-gray-600">
           <span>Informations</span>
           <span>Exigences</span>
           <span>Conditions</span>
@@ -76,7 +105,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Step 1: Informations générales */}
         {currentStep === 1 && (
           <>
@@ -97,16 +126,16 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nom de l'entreprise <span className="text-red-500">*</span>
+                Description du poste <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                name="company"
-                value={formData.company}
+              <textarea
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
                 required
+                rows="4"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                placeholder="Nom de votre entreprise"
+                placeholder="Décrivez les responsabilités et missions du poste..."
               />
             </div>
 
@@ -122,60 +151,42 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                 >
-                  <option value="">Sélectionnez</option>
-                  <option value="Personnel">Chauffeur personnel</option>
-                  <option value="VTC">VTC / Taxi</option>
-                  <option value="Livraison">Chauffeur livreur</option>
-                  <option value="Transport">Transport de personnes</option>
+                  <option value="Personnel">Personnel</option>
+                  <option value="Livraison">Livraison</option>
+                  <option value="VTC">VTC</option>
+                  <option value="Transport">Transport</option>
                   <option value="Autre">Autre</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Type de contrat <span className="text-red-500">*</span>
+                  Type de travail <span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="contractType"
-                  value={formData.contractType}
+                  name="conditions.workType"
+                  value={formData.conditions.workType}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                 >
-                  <option value="">Sélectionnez</option>
-                  <option value="CDI">CDI</option>
-                  <option value="CDD">CDD</option>
-                  <option value="Intérim">Intérim</option>
-                  <option value="Freelance">Freelance</option>
-                  <option value="Stage">Stage</option>
+                  <option value="temps_plein">Temps plein</option>
+                  <option value="temps_partiel">Temps partiel</option>
+                  <option value="ponctuel">Ponctuel</option>
+                  <option value="weekend">Weekend</option>
                 </select>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description du poste <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows="6"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
-                placeholder="Décrivez les missions, responsabilités et profil recherché..."
-              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Zone / Quartier <span className="text-red-500">*</span>
+                  Adresse <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  name="address"
-                  value={formData.address}
+                  name="location.address"
+                  value={formData.location.address}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
@@ -188,8 +199,8 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   Ville <span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="city"
-                  value={formData.city}
+                  name="location.city"
+                  value={formData.location.city}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
@@ -215,8 +226,8 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   Permis requis <span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="licenseType"
-                  value={formData.licenseType}
+                  name="requirements.licenseType"
+                  value={formData.requirements.licenseType}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
@@ -233,8 +244,8 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   Expérience requise <span className="text-red-500">*</span>
                 </label>
                 <select
-                  name="experience"
-                  value={formData.experience}
+                  name="requirements.experience"
+                  value={formData.requirements.experience}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
@@ -253,8 +264,8 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                 Type de véhicule <span className="text-red-500">*</span>
               </label>
               <select
-                name="vehicleType"
-                value={formData.vehicleType}
+                name="requirements.vehicleType"
+                value={formData.requirements.vehicleType}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
@@ -268,69 +279,91 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                 <option value="autre">Autre</option>
               </select>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Zone de travail <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="requirements.zone"
+                value={formData.requirements.zone}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                placeholder="Ex: Cocody, Plateau, Yopougon..."
+              />
+            </div>
           </>
         )}
 
         {/* Step 3: Conditions */}
         {currentStep === 3 && (
           <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Fourchette de salaire (FCFA) <span className="text-red-500">*</span>
-              </label>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Salaire (FCFA) <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="number"
-                  name="salaryMin"
-                  value={formData.salaryMin}
+                  name="conditions.salary"
+                  value={formData.conditions.salary}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                  placeholder="Minimum"
+                  placeholder="Ex: 150000"
                 />
-                <input
-                  type="number"
-                  name="salaryMax"
-                  value={formData.salaryMax}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type de salaire <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="conditions.salaryType"
+                  value={formData.conditions.salaryType}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                  placeholder="Maximum"
-                />
+                >
+                  <option value="horaire">Horaire</option>
+                  <option value="journalier">Journalier</option>
+                  <option value="mensuel">Mensuel</option>
+                  <option value="mission">Par mission</option>
+                </select>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Type de travail <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="workType"
-                value={formData.workType}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-              >
-                <option value="">Sélectionnez</option>
-                <option value="temps_plein">Temps plein</option>
-                <option value="temps_partiel">Temps partiel</option>
-                <option value="ponctuel">Ponctuel</option>
-                <option value="weekend">Week-end</option>
-              </select>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date de début souhaitée <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                name="startDate"
-                value={formData.startDate}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date de début <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="conditions.startDate"
+                  value={formData.conditions.startDate}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Horaires
+                </label>
+                <input
+                  type="text"
+                  name="conditions.schedule"
+                  value={formData.conditions.schedule}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  placeholder="Ex: 8h-17h, Lundi-Vendredi"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -340,8 +373,8 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                 </label>
                 <input
                   type="email"
-                  name="contactEmail"
-                  value={formData.contactEmail}
+                  name="contactInfo.email"
+                  value={formData.contactInfo.email}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
@@ -355,8 +388,8 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                 </label>
                 <input
                   type="tel"
-                  name="contactPhone"
-                  value={formData.contactPhone}
+                  name="contactInfo.phone"
+                  value={formData.contactInfo.phone}
                   onChange={handleChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
@@ -367,15 +400,16 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
           </>
         )}
 
-        {/* Navigation Buttons */}
-        <div className="flex gap-3 pt-6">
+        {/* Navigation Buttons - Adapté mobile */}
+        <div className="flex gap-2 sm:gap-3 pt-4 sm:pt-6">
           {currentStep > 1 && (
             <button
               type="button"
               onClick={prevStep}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="flex-1 px-4 sm:px-6 py-3 sm:py-3.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
             >
-              ← Précédent
+              <span className="hidden sm:inline">← Précédent</span>
+              <span className="sm:hidden">←</span>
             </button>
           )}
           
@@ -383,15 +417,16 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
             <button
               type="button"
               onClick={nextStep}
-              className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-500 transition-all font-medium shadow-md hover:shadow-lg"
+              className="flex-1 px-4 sm:px-6 py-3 sm:py-3.5 bg-orange-500 text-white rounded-lg hover:bg-orange-500 transition-all font-medium shadow-md hover:shadow-lg text-sm"
             >
-              Suivant →
+              <span className="hidden sm:inline">Suivant →</span>
+              <span className="sm:hidden">→</span>
             </button>
           ) : (
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-500 transition-all font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 sm:px-6 py-3 sm:py-3.5 bg-orange-500 text-white rounded-lg hover:bg-orange-500 transition-all font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
             >
               {loading ? (
                 <>

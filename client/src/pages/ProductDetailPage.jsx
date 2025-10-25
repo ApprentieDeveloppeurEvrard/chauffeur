@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import SimpleHeader from '../component/common/SimpleHeader';
+import api from '../services/api';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -10,7 +11,28 @@ export default function ProductDetailPage() {
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Produits de test (mêmes que MarketingVentePage)
+  // Récupérer le produit depuis l'API
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/offers/${id}`);
+        setProduct(response.data);
+        setError(null);
+      } catch (err) {
+        console.error('Erreur lors du chargement du produit:', err);
+        setError('Produit non trouvé');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  // Données de test en fallback (mêmes que MarketingVentePage)
   const testProducts = [
     {
       _id: '1',
@@ -249,28 +271,6 @@ export default function ProductDetailPage() {
     }
   ];
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        setLoading(true);
-        const foundProduct = testProducts.find(p => p._id === id);
-        
-        if (foundProduct) {
-          setProduct(foundProduct);
-        } else {
-          setError('Produit non trouvé');
-        }
-      } catch (err) {
-        console.error('Erreur:', err);
-        setError('Impossible de charger le produit');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [id]);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -366,39 +366,39 @@ export default function ProductDetailPage() {
           <div>
             {/* En-tête */}
             <div className="mb-6">
-              <h1 className="text-3xl lg:text-4xl font-semibold text-gray-900 mb-3">
-                {product.name}
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-3">
+                {product.title}
               </h1>
-              <p className="text-3xl font-bold text-gray-900 mb-4">
-                {product.price}
+              <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+                {product.price ? `${product.price.toLocaleString()} FCFA` : 'Prix sur demande'}
               </p>
               <div className="flex items-center gap-3 text-sm text-gray-600">
                 <div className="flex items-center gap-1.5">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
                   </svg>
-                  <span>{product.location}</span>
+                  <span>{product.location?.city || product.location || 'Non spécifié'}</span>
                 </div>
                 <span>•</span>
                 <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded font-medium">
-                  {product.condition}
+                  {product.condition || product.category || product.type}
                 </span>
               </div>
             </div>
 
             {/* Description */}
             <div className="mb-6 pb-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
-              <p className="text-gray-700 leading-relaxed">{product.description}</p>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Description</h2>
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{product.description}</p>
             </div>
 
             {/* Caractéristiques */}
-            {product.features && (
+            {product.requirementsList && product.requirementsList.length > 0 && (
               <div className="mb-6 pb-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Caractéristiques</h2>
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Caractéristiques</h2>
                 <ul className="grid grid-cols-1 gap-2">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2 text-gray-700">
+                  {product.requirementsList.map((feature, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm sm:text-base text-gray-700">
                       <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                       </svg>
@@ -409,28 +409,38 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* Spécifications */}
-            {product.specifications && (
+            {/* Avantages */}
+            {product.benefits && product.benefits.length > 0 && (
               <div className="mb-6 pb-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Spécifications</h2>
-                <div className="space-y-2">
-                  {Object.entries(product.specifications).map(([key, value]) => (
-                    <div key={key} className="flex justify-between py-2">
-                      <span className="text-sm text-gray-600">{key}</span>
-                      <span className="text-sm font-medium text-gray-900">{value}</span>
-                    </div>
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Avantages</h2>
+                <ul className="grid grid-cols-1 gap-2">
+                  {product.benefits.map((benefit, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm sm:text-base text-gray-700">
+                      <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                      </svg>
+                      <span>{benefit}</span>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             )}
 
-            {/* Vendeur */}
+            {/* Contact */}
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">Vendeur</h2>
-              <p className="text-gray-900 font-medium mb-2">{product.seller}</p>
-              <p className="text-sm text-gray-600 mb-4">{product.sellerPhone}</p>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Contact</h2>
+              {product.contactInfo?.email && (
+                <p className="text-sm text-gray-600 mb-2">
+                  <span className="font-medium">Email:</span> {product.contactInfo.email}
+                </p>
+              )}
+              {product.contactInfo?.phone && (
+                <p className="text-sm text-gray-600 mb-4">
+                  <span className="font-medium">Tél:</span> {product.contactInfo.phone}
+                </p>
+              )}
               <Link
-                to="/register"
+                to="/auth"
                 className="block w-full py-3 bg-orange-500 text-white text-center font-medium rounded-lg hover:bg-orange-600 transition-colors"
               >
                 Contacter le vendeur
@@ -439,7 +449,7 @@ export default function ProductDetailPage() {
 
             {/* Info */}
             <p className="text-xs text-gray-500 text-center">
-              Publié le {new Date(product.postedDate).toLocaleDateString('fr-FR')}
+              Publié le {new Date(product.createdAt || product.postedDate).toLocaleDateString('fr-FR')}
             </p>
           </div>
         </div>

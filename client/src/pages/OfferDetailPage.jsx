@@ -268,10 +268,10 @@ export default function OfferDetailPage() {
           <div className="lg:col-span-2">
             {/* En-tête */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mb-6">
-              <h1 className="text-3xl lg:text-4xl font-semibold text-gray-900 mb-3">
+              <h1 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 mb-3">
                 {offer.title}
               </h1>
-              <p className="text-lg text-gray-600 mb-4">{offer.company}</p>
+              <p className="text-sm sm:text-base text-gray-600 mb-4">{offer.company}</p>
               <div className="flex flex-wrap items-center gap-3">
                 <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded">
                   {offer.contractType || offer.type || 'CDI'}
@@ -294,18 +294,18 @@ export default function OfferDetailPage() {
 
             {/* Description */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Description du poste</h2>
-              <p className="text-gray-700 leading-relaxed">{offer.description}</p>
+              <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-4">Description du poste</h2>
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{offer.description}</p>
             </div>
 
             {/* Exigences */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Profil recherché</h2>
+              <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-4">Profil recherché</h2>
               <ul className="space-y-2">
                 {/* Afficher les exigences selon la structure */}
                 {(offer.requirementsList && Array.isArray(offer.requirementsList)) ? (
                   offer.requirementsList.map((req, index) => (
-                    <li key={index} className="flex items-start gap-2 text-gray-700">
+                    <li key={index} className="flex items-start gap-2 text-sm sm:text-base text-gray-700">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                       </svg>
@@ -314,7 +314,7 @@ export default function OfferDetailPage() {
                   ))
                 ) : Array.isArray(offer.requirements) ? (
                   offer.requirements.map((req, index) => (
-                    <li key={index} className="flex items-start gap-2 text-gray-700">
+                    <li key={index} className="flex items-start gap-2 text-sm sm:text-base text-gray-700">
                       <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                       </svg>
@@ -363,7 +363,7 @@ export default function OfferDetailPage() {
             {/* Avantages */}
             {offer.benefits && Array.isArray(offer.benefits) && offer.benefits.length > 0 && (
               <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Avantages</h2>
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Avantages</h2>
                 <ul className="space-y-2">
                   {offer.benefits.map((benefit, index) => (
                   <li key={index} className="flex items-start gap-2 text-gray-700">
@@ -383,7 +383,7 @@ export default function OfferDetailPage() {
             <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-24">
               {/* Informations clés */}
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Informations</h3>
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Localisation</p>
