@@ -465,6 +465,85 @@ const getPublicDrivers = async (req, res) => {
   }
 };
 
+// Devenir chauffeur (créer un profil chauffeur pour un utilisateur client)
+const becomeDriver = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const {
+      firstName,
+      lastName,
+      phone,
+      licenseNumber,
+      licenseType,
+      experience,
+      vehicleType,
+      vehicleBrand,
+      vehicleModel,
+      vehicleYear,
+      vehicleSeats,
+      workZone,
+      specialties
+    } = req.body;
+
+    // Vérifier si l'utilisateur existe
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    // Vérifier si l'utilisateur n'est pas déjà chauffeur
+    const existingDriver = await Driver.findOne({ userId });
+    if (existingDriver) {
+      return res.status(400).json({ error: 'Vous avez déjà un profil chauffeur' });
+    }
+
+    // Vérifier que le numéro de permis est fourni
+    if (!licenseNumber) {
+      return res.status(400).json({ error: 'Le numéro de permis est requis' });
+    }
+
+    // Créer le profil chauffeur
+    const driverData = {
+      userId,
+      firstName: firstName || user.firstName,
+      lastName: lastName || user.lastName,
+      phone: phone || user.phone,
+      email: user.email,
+      licenseNumber,
+      licenseType: licenseType || 'B',
+      licenseDate: new Date(),
+      experience: experience || '1-3',
+      vehicleType: vehicleType || 'berline',
+      vehicleBrand: vehicleBrand || '',
+      vehicleModel: vehicleModel || '',
+      vehicleYear: vehicleYear ? parseInt(vehicleYear) : new Date().getFullYear(),
+      vehicleSeats: vehicleSeats ? parseInt(vehicleSeats) : 5,
+      workZone: workZone || 'Abidjan',
+      specialties: specialties || ['transport_personnel'],
+      status: 'approved',
+      isAvailable: true
+    };
+
+    const driver = await Driver.create(driverData);
+
+    // Mettre à jour le rôle de l'utilisateur
+    user.role = 'driver';
+    await user.save();
+
+    res.status(201).json({
+      message: 'Profil chauffeur créé avec succès',
+      driver
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la création du profil chauffeur:', error);
+    res.status(500).json({ 
+      error: 'Erreur lors de la création du profil chauffeur',
+      details: error.message
+    });
+  }
+};
+
 module.exports = {
   getDriverProfile,
   getDriverProfileById,
@@ -474,5 +553,6 @@ module.exports = {
   updateDriverStatus,
   updateLocation,
   findNearbyDrivers,
-  getDriversCount
+  getDriversCount,
+  becomeDriver
 };

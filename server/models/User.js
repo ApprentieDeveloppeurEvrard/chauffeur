@@ -29,7 +29,13 @@ const userSchema = new mongoose.Schema(
     phone: { 
       type: String, 
       trim: true,
-      match: [/^[0-9\s\-\+\(\)]+$/, 'Format de téléphone invalide']
+      validate: {
+        validator: function(v) {
+          // Accepter les chaînes vides ou les numéros valides
+          return !v || v === '' || /^[0-9\s\-\+\(\)]+$/.test(v);
+        },
+        message: 'Format de téléphone invalide'
+      }
     },
     isActive: { 
       type: Boolean, 

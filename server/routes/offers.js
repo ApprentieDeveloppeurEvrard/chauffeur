@@ -22,7 +22,7 @@ router.use(requireAuth);
 // Gestion des offres
 router.get('/my', getMyOffers); // Mes offres
 router.post('/', createOffer); // Créer une offre
-router.get('/:offerId', getOfferById); // Récupérer une offre spécifique
+router.get('/:offerId', getOfferById); // Récupérer une offre spécifique (protégé)
 router.put('/:offerId', updateOffer); // Mettre à jour une offre
 router.delete('/:offerId', deleteOffer); // Supprimer une offre
 

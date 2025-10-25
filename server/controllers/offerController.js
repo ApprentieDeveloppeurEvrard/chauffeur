@@ -1,5 +1,6 @@
 const Offer = require('../models/Offer');
 const User = require('../models/User');
+const Application = require('../models/Application');
 
 // Récupérer toutes les offres actives
 const getAllOffers = async (req, res) => {
@@ -213,7 +214,7 @@ const getOfferById = async (req, res) => {
     const { offerId } = req.params;
     
     const offer = await Offer.findById(offerId)
-      .populate('employer', 'firstName lastName email phone')
+      .populate('employerId', 'firstName lastName email phone')
       .lean();
 
     if (!offer) {
@@ -233,7 +234,8 @@ const getOfferById = async (req, res) => {
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'offre:', error);
     res.status(500).json({ 
-      error: 'Erreur lors de la récupération de l\'offre' 
+      error: 'Erreur lors de la récupération de l\'offre',
+      details: error.message 
     });
   }
 };

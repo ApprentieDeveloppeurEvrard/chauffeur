@@ -133,6 +133,14 @@ const offerSchema = new mongoose.Schema(
         enum: ['phone', 'email', 'platform'],
         default: 'platform'
       }
+    },
+    images: [{
+      type: String,
+      trim: true
+    }],
+    mainImage: {
+      type: String,
+      trim: true
     }
   },
   {

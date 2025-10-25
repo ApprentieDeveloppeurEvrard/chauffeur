@@ -79,9 +79,9 @@ const register = async (req, res) => {
       email: email.toLowerCase(),
       passwordHash,
       role,
-      firstName,
-      lastName,
-      phone
+      firstName: firstName || '',
+      lastName: lastName || '',
+      phone: phone || ''
     };
 
     const user = await User.create(userData);
