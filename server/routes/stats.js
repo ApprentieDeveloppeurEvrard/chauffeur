@@ -1,19 +1,13 @@
 const express = require('express');
-const { requireAuth } = require('../middleware/auth');
-const {
-  getEmployerStats,
-  getDriverStats,
-  getGeneralStats
-} = require('../controllers/statsController');
-
 const router = express.Router();
+const statsController = require('../controllers/statsController');
+const { requireAuth } = require('../middleware/auth');
 
-// Toutes les routes nécessitent une authentification
-router.use(requireAuth);
+// Route publique pour les statistiques générales
+router.get('/public', statsController.getPublicStats);
 
-// Routes pour les statistiques
-router.get('/employer', getEmployerStats); // Stats employeur
-router.get('/driver', getDriverStats); // Stats chauffeur
-router.get('/general', getGeneralStats); // Stats générales
+// Routes protégées pour les statistiques utilisateur
+router.get('/employer', requireAuth, statsController.getEmployerStats);
+router.get('/driver', requireAuth, statsController.getDriverStats);
 
 module.exports = router;

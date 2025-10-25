@@ -117,6 +117,14 @@ const offerSchema = new mongoose.Schema(
       type: String,
       trim: true
     }],
+    requirementsList: [{
+      type: String,
+      trim: true
+    }],
+    benefits: [{
+      type: String,
+      trim: true
+    }],
     contactInfo: {
       phone: String,
       email: String,

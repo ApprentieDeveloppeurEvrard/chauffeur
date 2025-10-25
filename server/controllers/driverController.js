@@ -438,11 +438,39 @@ const getDriversCount = async (req, res) => {
   }
 };
 
+// Obtenir les chauffeurs publics (pour la page d'accueil)
+const getPublicDrivers = async (req, res) => {
+  try {
+    const { limit = 50 } = req.query;
+
+    // Récupérer uniquement les chauffeurs actifs
+    const drivers = await Driver.find({ isActive: true })
+      .select('firstName lastName rating totalRides experience vehicleType vehicleBrand workZone specialties isAvailable profilePhotoUrl')
+      .sort({ rating: -1, totalRides: -1 })
+      .limit(parseInt(limit))
+      .lean();
+
+    res.json({
+      success: true,
+      data: drivers
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la récupération des chauffeurs publics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors de la récupération des chauffeurs',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getDriverProfile,
   getDriverProfileById,
   updateDriverProfile,
   getAllDrivers,
+  getPublicDrivers,
   updateDriverStatus,
   updateLocation,
   findNearbyDrivers,
