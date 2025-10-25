@@ -98,7 +98,7 @@ export default function DriverDetailPage() {
         setLoading(true);
         // Essayer de charger depuis l'API
         const response = await driversService.getAll();
-        let foundDriver = response.data?.find(d => d._id === id);
+        let foundDriver = response.data?.data?.find(d => d._id === id);
         
         // Si pas trouvé dans l'API, chercher dans les chauffeurs de test
         if (!foundDriver) {

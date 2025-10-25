@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import SubNavigation from './SubNavigation';
 
-export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearchChange = () => {}, readOnly = false }) {
+export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearchChange = () => {}, readOnly = false, hideSubNav = false }) {
   const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   return (
@@ -36,7 +36,7 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
           {/* Boutons d'action */}
           <div className="flex items-center gap-3">
             <Link
-              to="/register"
+              to="/publier-offre"
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors hidden lg:inline-block"
             >
               Publier une offre
@@ -157,7 +157,7 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
       </div>
 
       {/* Sous-menu */}
-      <SubNavigation activeTab={activeTab} />
+      {!hideSubNav && <SubNavigation activeTab={activeTab} />}
     </header>
   );
 }

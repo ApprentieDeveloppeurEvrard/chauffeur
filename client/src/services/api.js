@@ -180,12 +180,14 @@ export const notificationsApi = {
 
 // API pour les statistiques
 export const statsApi = {
+  // Statistiques publiques (pas d'authentification requise)
+  public: () => api.get('/stats/public'),
   // Statistiques du dashboard employeur
   employerStats: () => api.get('/stats/employer'),
   // Statistiques du dashboard chauffeur
   driverStats: () => api.get('/stats/driver'),
-  // Statistiques générales
-  general: () => api.get('/stats/general'),
+  // Statistiques générales (alias pour compatibilité)
+  general: () => api.get('/stats/public'),
 }
 
 // API pour les véhicules
@@ -203,7 +205,8 @@ export const vehiclesApi = {
 // Service pour récupérer le nombre de chauffeurs
 export const driversService = {
   getCount: () => api.get('/drivers/count'),
-  getAll: () => api.get('/drivers'),
+  getAll: () => api.get('/drivers/public'), // Route publique sans authentification
+  getAllAdmin: () => api.get('/drivers'), // Route admin avec authentification
 }
 
 // Service pour le chat

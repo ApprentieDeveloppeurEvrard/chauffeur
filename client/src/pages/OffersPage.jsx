@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SimpleHeader from '../component/common/SimpleHeader';
 import Footer from '../component/common/Footer';
+import OfferCard from '../component/common/OfferCard';
+import { offersApi } from '../services/api';
 
 export default function OffersPage() {
   const [offers, setOffers] = useState([]);
@@ -107,11 +109,31 @@ export default function OffersPage() {
   ];
 
   useEffect(() => {
-    // Simuler le chargement
-    setTimeout(() => {
-      setOffers(testOffers);
-      setLoading(false);
-    }, 500);
+    const fetchOffers = async () => {
+      try {
+        setLoading(true);
+        
+        // Charger les offres depuis l'API
+        const response = await offersApi.list();
+        console.log('Offres API (OffersPage):', response);
+        
+        // L'API retourne {offers: [...]}
+        if (response.data && response.data.offers && response.data.offers.length > 0) {
+          setOffers(response.data.offers);
+        } else {
+          console.log('Aucune offre API, utilisation des données de test');
+          setOffers(testOffers);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des offres:', error);
+        // En cas d'erreur, utiliser les données de test
+        setOffers(testOffers);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOffers();
   }, []);
 
   // Défilement automatique du carrousel
@@ -244,38 +266,7 @@ export default function OffersPage() {
         ) : filteredOffers.length > 0 ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {filteredOffers.map(offer => (
-              <div 
-                key={offer._id} 
-                className="bg-white border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all duration-200 overflow-hidden cursor-pointer"
-                onClick={() => navigate(`/offre/${offer._id}`)}
-              >
-                {/* Contenu compact */}
-                <div className="p-3 lg:p-5">
-                  <h3 className="text-sm lg:text-base font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {offer.title}
-                  </h3>
-                  <p className="text-xs lg:text-sm text-gray-600 mb-3 truncate">{offer.company}</p>
-                  
-                  <div className="space-y-2 mb-3">
-                    <div className="flex items-center gap-1.5 text-xs lg:text-sm text-gray-600">
-                      <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                      </svg>
-                      <span className="truncate">{offer.location}</span>
-                    </div>
-                    
-                    <div className="text-sm lg:text-base font-semibold text-gray-900 truncate">
-                      {offer.salary}
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-1 flex-wrap">
-                    <span className="px-1.5 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">
-                      {offer.type}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <OfferCard key={offer._id} offer={offer} />
             ))}
           </div>
         ) : (

@@ -7,6 +7,7 @@ import DriversPage from './pages/DriversPage.jsx'
 import DriverDetailPage from './pages/DriverDetailPage.jsx'
 import OffersPage from './pages/OffersPage.jsx'
 import OfferDetailPage from './pages/OfferDetailPage.jsx'
+import CreateOfferPage from './pages/CreateOfferPage.jsx'
 import MarketingVentePage from './pages/MarketingVentePage.jsx'
 import ProductDetailPage from './pages/ProductDetailPage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
@@ -17,6 +18,7 @@ import DevenirPartenairePage from './pages/DevenirPartenairePage.jsx'
 import FormationsPage from './pages/FormationsPage.jsx'
 import CertificationsPage from './pages/CertificationsPage.jsx'
 import CentreAidePage from './pages/CentreAidePage.jsx'
+import StatsTestPage from './pages/StatsTestPage.jsx'
 
 function App() {
   return (
@@ -52,6 +54,12 @@ function App() {
             <Route 
               path="/offre/:id" 
               element={<OfferDetailPage />} 
+            />
+
+            {/* Page de création d'offre */}
+            <Route 
+              path="/publier-offre" 
+              element={<CreateOfferPage />} 
             />
 
             {/* Page Marketing & Vente publique */}
@@ -98,6 +106,9 @@ function App() {
             <Route path="/formations" element={<FormationsPage />} />
             <Route path="/certifications" element={<CertificationsPage />} />
             <Route path="/centre-aide" element={<CentreAidePage />} />
+            
+            {/* Page de test des statistiques */}
+            <Route path="/test-stats" element={<StatsTestPage />} />
           </Routes>
         </div>
       </Router>

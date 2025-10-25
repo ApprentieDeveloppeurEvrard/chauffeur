@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import SimpleHeader from '../component/common/SimpleHeader';
+import { offersApi } from '../services/api';
 
 export default function OfferDetailPage() {
   const { id } = useParams();
@@ -185,17 +186,47 @@ export default function OfferDetailPage() {
     const fetchOffer = async () => {
       try {
         setLoading(true);
-        // Chercher dans les offres de test
-        const foundOffer = testOffers.find(o => o._id === id);
+        console.log('Chargement de l\'offre avec ID:', id);
+        
+        // Essayer de charger depuis l'API
+        const response = await offersApi.list();
+        console.log('Réponse API complète:', response);
+        console.log('Offres dans la réponse:', response.data?.offers);
+        
+        let foundOffer = null;
+        
+        // L'API retourne {offers: [...]}
+        if (response.data && response.data.offers) {
+          foundOffer = response.data.offers.find(o => o._id === id);
+          console.log('Offre trouvée dans l\'API:', foundOffer);
+        }
+        
+        // Si pas trouvé dans l'API, chercher dans les offres de test
+        if (!foundOffer) {
+          console.log('Recherche dans les offres de test...');
+          foundOffer = testOffers.find(o => o._id === id);
+          console.log('Offre trouvée dans les tests:', foundOffer);
+        }
         
         if (foundOffer) {
+          console.log('Offre finale à afficher:', foundOffer);
           setOffer(foundOffer);
+          setError(null);
         } else {
+          console.error('Aucune offre trouvée avec l\'ID:', id);
           setError('Offre non trouvée');
         }
       } catch (err) {
-        console.error('Erreur:', err);
-        setError('Impossible de charger l\'offre');
+        console.error('Erreur lors du chargement:', err);
+        // En cas d'erreur API, utiliser les offres de test
+        const foundOffer = testOffers.find(o => o._id === id);
+        if (foundOffer) {
+          console.log('Utilisation de l\'offre de test après erreur:', foundOffer);
+          setOffer(foundOffer);
+          setError(null);
+        } else {
+          setError('Impossible de charger l\'offre');
+        }
       } finally {
         setLoading(false);
       }
@@ -242,14 +273,21 @@ export default function OfferDetailPage() {
               </h1>
               <p className="text-lg text-gray-600 mb-4">{offer.company}</p>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
-                  {offer.type}
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded">
+                  {offer.contractType || offer.type || 'CDI'}
                 </span>
-                <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
-                  {offer.workType}
-                </span>
+                {offer.type && (
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
+                    {offer.type}
+                  </span>
+                )}
+                {(offer.conditions?.workType || offer.workType) && (
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
+                    {offer.conditions?.workType?.replace('_', ' ') || offer.workType}
+                  </span>
+                )}
                 <span className="text-sm text-gray-500">
-                  Publié le {new Date(offer.postedDate).toLocaleDateString('fr-FR')}
+                  Publié le {new Date(offer.createdAt || offer.postedDate).toLocaleDateString('fr-FR')}
                 </span>
               </div>
             </div>
@@ -264,31 +302,80 @@ export default function OfferDetailPage() {
             <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mb-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Profil recherché</h2>
               <ul className="space-y-2">
-                {offer.requirements.map((req, index) => (
-                  <li key={index} className="flex items-start gap-2 text-gray-700">
-                    <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
-                    </svg>
-                    <span>{req}</span>
-                  </li>
-                ))}
+                {/* Afficher les exigences selon la structure */}
+                {(offer.requirementsList && Array.isArray(offer.requirementsList)) ? (
+                  offer.requirementsList.map((req, index) => (
+                    <li key={index} className="flex items-start gap-2 text-gray-700">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                      </svg>
+                      <span>{req}</span>
+                    </li>
+                  ))
+                ) : Array.isArray(offer.requirements) ? (
+                  offer.requirements.map((req, index) => (
+                    <li key={index} className="flex items-start gap-2 text-gray-700">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                      </svg>
+                      <span>{req}</span>
+                    </li>
+                  ))
+                ) : offer.requirements ? (
+                  <>
+                    {offer.requirements.licenseType && (
+                      <li className="flex items-start gap-2 text-gray-700">
+                        <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                        </svg>
+                        <span>Permis de conduire catégorie {offer.requirements.licenseType}</span>
+                      </li>
+                    )}
+                    {offer.requirements.experience && (
+                      <li className="flex items-start gap-2 text-gray-700">
+                        <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                        </svg>
+                        <span>Expérience: {offer.requirements.experience}</span>
+                      </li>
+                    )}
+                    {offer.requirements.vehicleType && (
+                      <li className="flex items-start gap-2 text-gray-700">
+                        <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                        </svg>
+                        <span>Véhicule: {offer.requirements.vehicleType}</span>
+                      </li>
+                    )}
+                    {offer.requirements.zone && (
+                      <li className="flex items-start gap-2 text-gray-700">
+                        <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                        </svg>
+                        <span>Zone: {offer.requirements.zone}</span>
+                      </li>
+                    )}
+                  </>
+                ) : null}
               </ul>
             </div>
 
             {/* Avantages */}
-            <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Avantages</h2>
-              <ul className="space-y-2">
-                {offer.benefits.map((benefit, index) => (
+            {offer.benefits && Array.isArray(offer.benefits) && offer.benefits.length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Avantages</h2>
+                <ul className="space-y-2">
+                  {offer.benefits.map((benefit, index) => (
                   <li key={index} className="flex items-start gap-2 text-gray-700">
                     <svg className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                     </svg>
                     <span>{benefit}</span>
                   </li>
-                ))}
-              </ul>
-            </div>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Colonne latérale - Informations et action */}
@@ -300,23 +387,35 @@ export default function OfferDetailPage() {
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Localisation</p>
-                    <p className="text-sm font-medium text-gray-900">{offer.location}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {offer.location?.address && offer.location?.city 
+                        ? `${offer.location.address}, ${offer.location.city}`
+                        : offer.location?.city || offer.location || 'Non spécifié'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Salaire</p>
-                    <p className="text-sm font-medium text-gray-900">{offer.salary}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {offer.salaryRange || (offer.conditions?.salary ? `${offer.conditions.salary.toLocaleString()} FCFA` : offer.salary || 'À négocier')}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Type de véhicule</p>
-                    <p className="text-sm font-medium text-gray-900">{offer.vehicleType}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {offer.requirements?.vehicleType || offer.vehicleType || 'Non spécifié'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Expérience requise</p>
-                    <p className="text-sm font-medium text-gray-900">{offer.experience}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {offer.requirements?.experience || offer.experience || 'Non spécifié'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Permis</p>
-                    <p className="text-sm font-medium text-gray-900">Permis {offer.licenseType}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      Permis {offer.requirements?.licenseType || offer.licenseType || 'B'}
+                    </p>
                   </div>
                 </div>
               </div>

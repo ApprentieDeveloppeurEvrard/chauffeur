@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { driversService } from '../services/api';
+import { driversService, offersApi } from '../services/api';
 import SimpleHeader from '../component/common/SimpleHeader';
 import Footer from '../component/common/Footer';
+import OfferCard from '../component/common/OfferCard';
 
 export default function HomePage() {
   const [drivers, setDrivers] = useState([]);
+  const [offers, setOffers] = useState([]);
+  const [totalDrivers, setTotalDrivers] = useState(0);
+  const [totalOffers, setTotalOffers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -18,21 +22,21 @@ export default function HomePage() {
       image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&h=400&fit=crop',
       title: 'Recrutez en toute confiance',
       subtitle: 'Des chauffeurs professionnels vérifiés',
-      link: '/auth' // Lien vers la page d'inscription
+      link: '/auth'
     },
     {
       id: 2,
       image: 'https://images.unsplash.com/photo-1485291571150-772bcfc10da5?w=1200&h=400&fit=crop',
       title: 'Trouvez votre chauffeur idéal',
       subtitle: 'Disponible 24/7 à Abidjan',
-      link: '/auth' // Lien vers la page d'inscription
+      link: '/auth'
     },
     {
       id: 3,
       image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&h=400&fit=crop',
       title: 'Service premium garanti',
       subtitle: 'Plus de 100 chauffeurs expérimentés',
-      link: '/comment-ca-marche' // Lien vers comment ça marche
+      link: '/chauffeurs'
     }
   ];
 
@@ -264,29 +268,53 @@ export default function HomePage() {
     }
   ];
 
-  // Charger les chauffeurs
+  // Charger les données
   useEffect(() => {
-    const fetchDrivers = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        // Essayer de charger depuis l'API
-        const response = await driversService.getAll();
-        if (response.data && response.data.length > 0) {
-          setDrivers(response.data);
+        
+        // Charger les chauffeurs (limité à 8 pour la page d'accueil)
+        const driversResponse = await driversService.getAll();
+        if (driversResponse.data && driversResponse.data.data && driversResponse.data.data.length > 0) {
+          const allDrivers = driversResponse.data.data;
+          setTotalDrivers(allDrivers.length); // Nombre total
+          setDrivers(allDrivers.slice(0, 8)); // Afficher seulement 8
         } else {
-          // Utiliser les chauffeurs de test si pas de données
           setDrivers(testDrivers);
+          setTotalDrivers(testDrivers.length);
+        }
+        
+        // Charger les offres (limité à 8 pour la page d'accueil)
+        const offersResponse = await offersApi.list();
+        console.log('Offres reçues (HomePage):', offersResponse);
+        console.log('Structure:', offersResponse.data);
+        
+        // L'API retourne {offers: [...]} et non {data: [...]}
+        if (offersResponse.data && offersResponse.data.offers && offersResponse.data.offers.length > 0) {
+          const allOffers = offersResponse.data.offers;
+          console.log('Nombre d\'offres:', allOffers.length);
+          console.log('Première offre:', allOffers[0]);
+          setTotalOffers(allOffers.length); // Nombre total
+          setOffers(allOffers.slice(0, 8)); // Afficher seulement 8
+        } else {
+          console.log('Aucune offre API, utilisation des données de test');
+          setOffers(testOffers);
+          setTotalOffers(testOffers.length);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement des chauffeurs:', error);
-        // Utiliser les chauffeurs de test en cas d'erreur
+        console.error('Erreur lors du chargement des données:', error);
+        // Utiliser les données de test en cas d'erreur
         setDrivers(testDrivers);
+        setTotalDrivers(testDrivers.length);
+        setOffers(testOffers);
+        setTotalOffers(testOffers.length);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDrivers();
+    fetchData();
   }, []);
 
   // Défilement automatique du carrousel
@@ -374,7 +402,7 @@ export default function HomePage() {
         {/* Titre section chauffeurs */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl lg:text-2xl font-normal text-gray-900">
-            Chauffeurs <span className="text-gray-500">({filteredDrivers.length})</span>
+            Chauffeurs <span className="text-gray-500">({totalDrivers})</span>
           </h2>
           <Link 
             to="/drivers" 
@@ -387,7 +415,7 @@ export default function HomePage() {
         {/* Liste des chauffeurs */}
         {loading ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4, 5, 6].map(i => (
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
               <div key={i} className="bg-white border border-gray-200 rounded-lg overflow-hidden animate-pulse">
                 <div className="h-48 bg-gray-200"></div>
                 <div className="p-4">
@@ -468,7 +496,7 @@ export default function HomePage() {
         <div className="mt-16">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl lg:text-2xl font-normal text-gray-900">
-              Offres d'emploi <span className="text-gray-500">({testOffers.length})</span>
+              Offres d'emploi <span className="text-gray-500">({totalOffers})</span>
             </h2>
             <Link 
               to="/offres"
@@ -479,38 +507,8 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-            {testOffers.map(offer => (
-              <div 
-                key={offer._id} 
-                className="bg-white border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all duration-200 overflow-hidden cursor-pointer"
-                onClick={() => navigate(`/offre/${offer._id}`)}
-              >
-                <div className="p-3 lg:p-5">
-                  <h3 className="text-sm lg:text-base font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {offer.title}
-                  </h3>
-                  <p className="text-xs lg:text-sm text-gray-600 mb-3 truncate">{offer.company}</p>
-                  
-                  <div className="space-y-2 mb-3">
-                    <div className="flex items-center gap-1.5 text-xs lg:text-sm text-gray-600">
-                      <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
-                      </svg>
-                      <span className="truncate">{offer.location}</span>
-                    </div>
-                    
-                    <div className="text-sm lg:text-base font-semibold text-gray-900 truncate">
-                      {offer.salary}
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-1 flex-wrap">
-                    <span className="px-1.5 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">
-                      {offer.type}
-                    </span>
-                  </div>
-                </div>
-              </div>
+            {offers.map(offer => (
+              <OfferCard key={offer._id} offer={offer} />
             ))}
           </div>
         </div>

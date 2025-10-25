@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { driversService } from '../services/api';
+import { driversService, statsApi } from '../services/api';
 import SimpleHeader from '../component/common/SimpleHeader';
 import Footer from '../component/common/Footer';
 
 export default function DriversPage() {
   const [drivers, setDrivers] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -32,8 +33,8 @@ export default function DriversPage() {
       id: 3,
       image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1200&h=400&fit=crop',
       title: 'Service premium garanti',
-      subtitle: 'Plus de 100 chauffeurs expérimentés',
-      link: '/comment-ca-marche' // Lien vers comment ça marche
+      subtitle: stats ? `${stats.overview.totalDrivers}+ chauffeurs expérimentés` : 'Plus de 100 chauffeurs expérimentés',
+      link: '/chauffeurs'
     }
   ];
 
@@ -113,29 +114,34 @@ export default function DriversPage() {
     }
   ];
 
-  // Charger les chauffeurs
+  // Charger les données
   useEffect(() => {
-    const fetchDrivers = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        // Essayer de charger depuis l'API
-        const response = await driversService.getAll();
-        if (response.data && response.data.length > 0) {
-          setDrivers(response.data);
+        
+        // Charger les statistiques publiques
+        const statsResponse = await statsApi.public();
+        if (statsResponse.data && statsResponse.data.data) {
+          setStats(statsResponse.data.data);
+        }
+        
+        // Charger tous les chauffeurs
+        const driversResponse = await driversService.getAll();
+        if (driversResponse.data && driversResponse.data.data && driversResponse.data.data.length > 0) {
+          setDrivers(driversResponse.data.data);
         } else {
-          // Utiliser les chauffeurs de test si pas de données
           setDrivers(testDrivers);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement des chauffeurs:', error);
-        // Utiliser les chauffeurs de test en cas d'erreur
+        console.error('Erreur lors du chargement des données:', error);
         setDrivers(testDrivers);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDrivers();
+    fetchData();
   }, []);
 
   // Défilement automatique du carrousel
