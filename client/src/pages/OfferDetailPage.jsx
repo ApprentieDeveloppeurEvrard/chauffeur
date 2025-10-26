@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import SimpleHeader from '../component/common/SimpleHeader';
-import { offersApi } from '../services/api';
+import { offersApi, applicationsApi } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function OfferDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [offer, setOffer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [applying, setApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
 
   // Offres de test (mêmes que OffersPage)
   const testOffers = [
@@ -235,6 +239,48 @@ export default function OfferDetailPage() {
     fetchOffer();
   }, [id]);
 
+  const handleApply = async () => {
+    if (!user || user.role !== 'driver') {
+      navigate('/auth');
+      return;
+    }
+
+    setApplying(true);
+    try {
+      console.log('Envoi de la candidature pour l\'offre:', id);
+      const response = await applicationsApi.apply(id, {
+        message: 'Je suis intéressé par cette offre'
+      });
+      console.log('Réponse de la candidature:', response);
+      setHasApplied(true);
+      alert('Votre candidature a été envoyée avec succès !');
+    } catch (error) {
+      console.error('Erreur complète:', error);
+      console.error('Réponse erreur:', error.response);
+      console.error('Message du serveur:', error.response?.data?.message);
+      console.error('Données complètes:', error.response?.data);
+      console.error('Détails de l\'erreur:', error.response?.data?.details);
+      
+      if (error.response?.status === 400 && error.response?.data?.message?.includes('déjà postulé')) {
+        setHasApplied(true);
+        alert('Vous avez déjà postulé à cette offre');
+      } else if (error.response?.status === 404) {
+        alert('Offre non trouvée. Elle a peut-être été supprimée.');
+      } else if (error.response?.status === 401) {
+        alert('Vous devez être connecté en tant que chauffeur pour postuler.');
+        navigate('/auth');
+      } else if (error.response?.data?.message) {
+        alert(`Erreur: ${error.response.data.message}`);
+      } else if (error.message === 'Network Error') {
+        alert('Erreur de connexion au serveur. Vérifiez que le serveur est démarré.');
+      } else {
+        alert('Erreur lors de l\'envoi de votre candidature. Veuillez réessayer.');
+      }
+    } finally {
+      setApplying(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -422,15 +468,43 @@ export default function OfferDetailPage() {
 
               {/* Bouton d'action */}
               <div className="space-y-3">
-                <Link
-                  to="/register"
-                  className="block w-full py-3 bg-orange-500 text-white text-center font-medium rounded-lg hover:bg-orange-600 transition-colors"
-                >
-                  Postuler à cette offre
-                </Link>
-                <p className="text-xs text-gray-500 text-center">
-                  Créez un compte gratuit pour postuler
-                </p>
+                {!user ? (
+                  <>
+                    <Link
+                      to="/auth"
+                      className="block w-full py-3 bg-orange-500 text-white text-center font-medium rounded-lg hover:bg-orange-600 transition-colors"
+                    >
+                      Postuler à cette offre
+                    </Link>
+                    <p className="text-xs text-gray-500 text-center">
+                      Connectez-vous pour postuler
+                    </p>
+                  </>
+                ) : user.role !== 'driver' ? (
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p className="text-xs text-yellow-800 text-center">
+                      Seuls les chauffeurs peuvent postuler aux offres
+                    </p>
+                  </div>
+                ) : hasApplied ? (
+                  <button
+                    disabled
+                    className="w-full py-3 bg-green-100 text-green-700 text-center font-medium rounded-lg cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                    </svg>
+                    Candidature envoyée
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleApply}
+                    disabled={applying}
+                    className="w-full py-3 bg-orange-500 text-white text-center font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {applying ? 'Envoi en cours...' : 'Postuler à cette offre'}
+                  </button>
+                )}
               </div>
             </div>
           </div>

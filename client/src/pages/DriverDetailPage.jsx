@@ -178,7 +178,7 @@ export default function DriverDetailPage() {
           {/* Colonne droite - Informations */}
           <div>
             {/* En-tête */}
-            <div className="mb-4 lg:mb-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mb-6">
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-2 lg:mb-3">
                 {driver.firstName} {driver.lastName}
               </h1>
@@ -193,7 +193,7 @@ export default function DriverDetailPage() {
             </div>
 
             {/* Informations principales */}
-            <div className="bg-gray-50 rounded-lg p-4 lg:p-6 mb-4 lg:mb-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mb-6">
               <div className="space-y-3 lg:space-y-4">
                 <div className="flex justify-between py-2 lg:py-3 border-b border-gray-200">
                   <span className="text-xs lg:text-sm text-gray-600">Expérience</span>
@@ -215,7 +215,7 @@ export default function DriverDetailPage() {
             </div>
 
             {/* Bouton d'action */}
-            <div className="space-y-3 lg:space-y-4">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-24">
               <Link
                 to="/register"
                 className="block w-full py-3 lg:py-4 bg-orange-500 text-white text-center text-sm lg:text-base font-medium rounded-lg hover:bg-orange-600 transition-colors"
@@ -230,7 +230,7 @@ export default function DriverDetailPage() {
         </div>
 
         {/* Section Expériences professionnelles */}
-        <div className="mt-8 lg:mt-12 pt-8 lg:pt-12 border-t border-gray-200">
+        <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mt-8">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 mb-4 lg:mb-6">Expériences professionnelles</h2>
           
           <div className="space-y-4 lg:space-y-6">

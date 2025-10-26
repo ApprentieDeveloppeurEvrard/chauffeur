@@ -24,15 +24,29 @@ export default function CreateOfferPage() {
     }
   }, [user, navigate]);
 
-  // Détecter le type depuis l'URL
+  // Détecter le type depuis l'URL et gérer les permissions
   useEffect(() => {
+    if (!user) return; // Attendre que l'utilisateur soit chargé
+    
     const typeFromUrl = searchParams.get('type');
+    
+    // Si c'est un chauffeur, TOUJOURS le rediriger vers offre marketing
+    if (user.role === 'driver') {
+      if (typeFromUrl === 'job') {
+        setError('Seuls les employeurs peuvent créer des offres d\'emploi');
+      }
+      setOfferType('product');
+      setCameFromUrl(false);
+      return;
+    }
+    
+    // Pour les employeurs, gérer normalement
     if (typeFromUrl === 'job' || typeFromUrl === 'product') {
       setOfferType(typeFromUrl);
-      setCameFromUrl(true); // On vient d'une URL avec paramètre
+      setCameFromUrl(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [searchParams]);
+  }, [searchParams, user]);
 
   // Afficher un loader pendant la vérification
   if (!user) {
@@ -130,8 +144,11 @@ export default function CreateOfferPage() {
         <div className="mb-8">
           <button
             onClick={() => {
-              if (offerType && !cameFromUrl) {
-                // Si on a sélectionné un type manuellement, retour à la sélection
+              // Pour les chauffeurs, toujours retourner à l'accueil
+              if (user?.role === 'driver') {
+                navigate('/');
+              } else if (offerType && !cameFromUrl) {
+                // Pour les employeurs, si type sélectionné manuellement, retour à la sélection
                 setOfferType(null);
               } else {
                 // Sinon, retour à l'accueil
@@ -146,33 +163,47 @@ export default function CreateOfferPage() {
             Retour
           </button>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-            {!offerType ? 'Publier une offre' : offerType === 'job' ? 'Offre d\'emploi' : 'Produit Marketing & Vente'}
+            {!offerType 
+              ? (user?.role === 'driver' ? 'Publier une offre marketing' : 'Publier une offre')
+              : offerType === 'job' 
+                ? 'Offre d\'emploi' 
+                : 'Produit Marketing & Vente'
+            }
           </h1>
           <p className="text-sm sm:text-base text-gray-600">
-            {!offerType ? 'Choisissez le type d\'offre à publier' : offerType === 'job' ? 'Trouvez le chauffeur idéal pour votre entreprise' : 'Vendez vos produits et services'}
+            {!offerType 
+              ? (user?.role === 'driver' 
+                  ? 'Vendez vos produits et services à la communauté' 
+                  : 'Choisissez le type d\'offre à publier')
+              : offerType === 'job' 
+                ? 'Trouvez le chauffeur idéal pour votre entreprise' 
+                : 'Vendez vos produits et services'
+            }
           </p>
         </div>
 
         {/* Sélection du type d'offre - Masqué sur mobile */}
         {!offerType ? (
-          <div className="hidden lg:grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Offre d'emploi */}
-            <button
-              onClick={() => setOfferType('job')}
-              className="group bg-white rounded-2xl shadow-sm border-2 border-gray-200 hover:border-orange-500 p-8 transition-all hover:shadow-md"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-500 transition-colors">
-                  <svg className="w-10 h-10 text-orange-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                  </svg>
+          <div className={`hidden lg:grid gap-6 ${user?.role === 'employer' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md mx-auto'}`}>
+            {/* Offre d'emploi - UNIQUEMENT pour les employeurs */}
+            {user?.role === 'employer' && (
+              <button
+                onClick={() => setOfferType('job')}
+                className="group bg-white rounded-2xl shadow-sm border-2 border-gray-200 hover:border-orange-500 p-8 transition-all hover:shadow-md"
+              >
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-500 transition-colors">
+                    <svg className="w-10 h-10 text-orange-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Offre d'emploi</h3>
+                  <p className="text-gray-600">Recrutez un chauffeur professionnel pour votre entreprise</p>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Offre d'emploi</h3>
-                <p className="text-gray-600">Recrutez un chauffeur professionnel pour votre entreprise</p>
-              </div>
-            </button>
+              </button>
+            )}
 
-            {/* Marketing & Vente */}
+            {/* Marketing & Vente - Pour TOUS les utilisateurs connectés */}
             <button
               onClick={() => setOfferType('product')}
               className="group bg-white rounded-2xl shadow-sm border-2 border-gray-200 hover:border-orange-500 p-8 transition-all hover:shadow-md"
@@ -184,7 +215,7 @@ export default function CreateOfferPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">Marketing & Vente</h3>
-                <p className="text-gray-600">Vendez vos produits et services aux chauffeurs</p>
+                <p className="text-gray-600">Vendez vos produits et services {user?.role === 'driver' ? 'à la communauté' : 'aux chauffeurs'}</p>
               </div>
             </button>
           </div>
@@ -209,8 +240,8 @@ export default function CreateOfferPage() {
         )}
       </main>
 
-      {/* Bouton FAB mobile - Affiché uniquement si aucun type n'est sélectionné */}
-      {!offerType && (
+      {/* Bouton FAB mobile - Affiché uniquement pour les employeurs si aucun type n'est sélectionné */}
+      {!offerType && user?.role === 'employer' && (
         <>
           {/* Bouton principal */}
           <button
@@ -237,16 +268,31 @@ export default function CreateOfferPage() {
                 onClick={() => setShowMobileFab(false)}
               />
               
-              {/* Options du menu */}
-              <div className="lg:hidden fixed bottom-24 right-6 z-50 space-y-3">
-                {/* Marketing & Vente */}
+              {/* Options du menu - Du bas vers le haut */}
+              <div className="lg:hidden fixed bottom-24 right-6 z-50 space-y-3 flex flex-col-reverse">
+                {/* Offre d'emploi - Affiché en haut */}
                 <button
                   onClick={() => {
-                    console.log('Marketing/Vente cliqué');
+                    setOfferType('job');
+                    setShowMobileFab(false);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="flex items-center gap-3 bg-white rounded-full shadow-lg px-4 py-3 hover:shadow-xl transition-all"
+                >
+                  <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                  <span className="font-medium text-gray-900 pr-2">Offre d'emploi</span>
+                </button>
+
+                {/* Marketing & Vente - Affiché en bas */}
+                <button
+                  onClick={() => {
                     setOfferType('product');
                     setShowMobileFab(false);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                    console.log('offerType défini sur: product');
                   }}
                   className="flex items-center gap-3 bg-white rounded-full shadow-lg px-4 py-3 hover:shadow-xl transition-all"
                 >
@@ -256,23 +302,6 @@ export default function CreateOfferPage() {
                     </svg>
                   </div>
                   <span className="font-medium text-gray-900 pr-2">Marketing/Vente</span>
-                </button>
-
-                {/* Offre d'emploi */}
-                <button
-                  onClick={() => {
-                    setOfferType('job');
-                    setShowMobileFab(false);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="flex items-center gap-3 bg-white rounded-full shadow-lg px-4 py-3 hover:shadow-xl transition-all"
-                >
-                  <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                    </svg>
-                  </div>
-                  <span className="font-medium text-gray-900 pr-2">Offre d'emploi</span>
                 </button>
               </div>
             </>

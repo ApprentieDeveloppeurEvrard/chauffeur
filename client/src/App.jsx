@@ -19,6 +19,11 @@ import FormationsPage from './pages/FormationsPage.jsx'
 import CertificationsPage from './pages/CertificationsPage.jsx'
 import CentreAidePage from './pages/CentreAidePage.jsx'
 import StatsTestPage from './pages/StatsTestPage.jsx'
+import MyCandidates from './pages/employer/MyCandidates.jsx'
+import MyOffers from './pages/employer/MyOffers.jsx'
+import MyProducts from './pages/employer/MyProducts.jsx'
+import DriverMyProducts from './pages/driver/MyProducts.jsx'
+import MyApplications from './pages/driver/MyApplications.jsx'
 
 function App() {
   return (
@@ -111,6 +116,50 @@ function App() {
             
             {/* Page de test des statistiques */}
             <Route path="/test-stats" element={<StatsTestPage />} />
+            
+            {/* Pages employeur protégées */}
+            <Route 
+              path="/employer/candidates" 
+              element={
+                <PrivateRoute>
+                  <MyCandidates />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/employer/offers" 
+              element={
+                <PrivateRoute>
+                  <MyOffers />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/employer/my-products" 
+              element={
+                <PrivateRoute>
+                  <MyProducts />
+                </PrivateRoute>
+              } 
+            />
+            
+            {/* Pages chauffeur protégées */}
+            <Route 
+              path="/driver/my-products" 
+              element={
+                <PrivateRoute>
+                  <DriverMyProducts />
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/driver/applications" 
+              element={
+                <PrivateRoute>
+                  <MyApplications />
+                </PrivateRoute>
+              } 
+            />
           </Routes>
         </div>
       </Router>

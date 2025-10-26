@@ -78,7 +78,7 @@ export default function Auth() {
         const userData = {
           email: formData.email,
           password: formData.password,
-          role: 'client', // Tous les utilisateurs sont des clients par défaut
+          role: userType === 'chauffeur' ? 'driver' : 'employer', // Rôle basé sur la sélection
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone || '', // Téléphone optionnel
@@ -170,6 +170,22 @@ export default function Auth() {
                         required
                       />
                     </div>
+                  </div>
+                  
+                  {/* Sélection du rôle */}
+                  <div>
+                    <label htmlFor="userType" className="block text-sm font-semibold text-gray-700 mb-2">Je suis</label>
+                    <select
+                      id="userType"
+                      name="userType"
+                      value={userType}
+                      onChange={(e) => setUserType(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 transition-all bg-white cursor-pointer"
+                      required
+                    >
+                      <option value="chauffeur">Chauffeur</option>
+                      <option value="employeur">Employeur</option>
+                    </select>
                   </div>
                   
                   <div>
