@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Driver = require('../models/Driver');
+const Employer = require('../models/Employer');
 
 // Générer un token JWT
 const generateToken = (user) => {
@@ -119,6 +120,27 @@ const register = async (req, res) => {
       }
     }
 
+    // Si c'est un employeur, créer aussi le profil employeur
+    if (role === 'employer') {
+      try {
+        const employerData = {
+          userId: user._id,
+          firstName,
+          lastName,
+          email: email.toLowerCase(),
+          phone: phone || '',
+          status: 'approved', // Approuvé directement
+          isActive: true
+        };
+
+        await Employer.create(employerData);
+        console.log(`✅ Profil employeur créé pour ${firstName} ${lastName}`);
+      } catch (employerError) {
+        console.error('❌ Erreur lors de la création du profil employeur:', employerError);
+        // Ne pas faire échouer l'inscription si la création du profil échoue
+      }
+    }
+
     // Générer le token
     const token = generateToken(user);
 
@@ -219,6 +241,12 @@ const getProfile = async (req, res) => {
       user.driverProfile = driverProfile;
     }
 
+    // Si c'est un employeur, récupérer aussi les infos du profil employeur
+    if (user.role === 'employer') {
+      const employerProfile = await Employer.findOne({ userId: user._id }).lean();
+      user.employerProfile = employerProfile;
+    }
+
     res.json({
       user: {
         id: user._id,
@@ -227,7 +255,8 @@ const getProfile = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
-        driverProfile: user.driverProfile
+        driverProfile: user.driverProfile,
+        employerProfile: user.employerProfile
       }
     });
 

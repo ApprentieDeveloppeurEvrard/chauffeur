@@ -138,14 +138,26 @@ const getMyOffers = async (req, res) => {
 const createOffer = async (req, res) => {
   try {
     const userId = req.user.sub;
+    const { type } = req.body; // 'job' pour emploi, 'product' pour marketing
     
-    // Vérifier que l'utilisateur est un client/employeur
+    // Vérifier que l'utilisateur existe
     const user = await User.findById(userId);
-    if (!user || user.role !== 'client') {
-      return res.status(403).json({ 
-        error: 'Seuls les employeurs peuvent créer des offres' 
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'Utilisateur non trouvé' 
       });
     }
+
+    // Vérification des permissions selon le type d'offre
+    if (type && !['Autre', 'product'].includes(type)) {
+      // C'est une offre d'emploi (type spécifique comme 'Chauffeur personnel', etc.)
+      if (user.role !== 'employer') {
+        return res.status(403).json({ 
+          error: 'Seuls les employeurs peuvent créer des offres d\'emploi' 
+        });
+      }
+    }
+    // Les offres marketing (type: 'Autre' ou 'product') sont accessibles à tous les utilisateurs connectés
 
     const offerData = {
       ...req.body,
@@ -360,7 +372,8 @@ const applyToOffer = async (req, res) => {
     const applicationData = {
       ...req.body,
       offerId,
-      driverId: userId
+      driverId: userId,
+      employerId: offer.employerId // Utiliser employerId au lieu de employer
     };
 
     const application = await Application.create(applicationData);

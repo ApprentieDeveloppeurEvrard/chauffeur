@@ -2,21 +2,37 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const Offer = require('../models/Offer');
+const User = require('../models/User');
 
 async function updateOffers() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ Connecté à MongoDB\n');
 
-    // Récupérer toutes les offres
-    const offers = await Offer.find();
-    console.log(`📊 ${offers.length} offres trouvées\n`);
+    // Trouver l'employeur
+    const employer = await User.findOne({ email: 'employeur1@gmail.com' });
+    if (!employer) {
+      console.log('❌ Employeur non trouvé: employeur1@gmail.com');
+      console.log('Veuillez d\'abord créer ce compte employeur');
+      return;
+    }
+    console.log(`✅ Employeur trouvé: ${employer.email} (ID: ${employer._id})\n`);
+
+    // Récupérer toutes les offres d'emploi (pas les produits)
+    const offers = await Offer.find({ type: { $ne: 'product' } });
+    console.log(`📊 ${offers.length} offres d'emploi trouvées\n`);
 
     let updated = 0;
 
     for (const offer of offers) {
       let needsUpdate = false;
       const updates = {};
+
+      // Assigner l'employeur si manquant ou différent
+      if (!offer.employer || offer.employer.toString() !== employer._id.toString()) {
+        updates.employer = employer._id;
+        needsUpdate = true;
+      }
 
       // Ajouter salary si manquant
       if (!offer.conditions || !offer.conditions.salary) {
@@ -81,6 +97,9 @@ async function updateOffers() {
         await Offer.findByIdAndUpdate(offer._id, { $set: updates });
         updated++;
         console.log(`✅ Offre mise à jour: ${offer.title}`);
+        if (updates.employer) {
+          console.log(`   Employeur assigné: ${employer.email}`);
+        }
         console.log(`   Salaire: ${updates['conditions.salary'] || offer.conditions?.salary || 'N/A'} FCFA`);
         console.log(`   Type: ${updates['conditions.workType'] || offer.conditions?.workType || 'N/A'}`);
         console.log(`   Entreprise: ${updates.company || offer.company || 'N/A'}\n`);
