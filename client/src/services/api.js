@@ -237,6 +237,12 @@ export const messagesApi = {
   markAsRead: (conversationId) => api.put(`/messages/conversations/${conversationId}/read`),
 }
 
+// Service de recherche intelligente
+export const searchService = {
+  // Recherche globale avec fuzzy matching
+  global: (query) => api.get('/search/global', { params: { query } }),
+  // Recherche rapide pour suggestions
+  quick: (query) => api.get('/search/quick', { params: { query } }),
+}
+
 export default api
-
-

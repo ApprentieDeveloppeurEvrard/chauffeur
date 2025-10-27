@@ -1,11 +1,89 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import SubNavigation from './SubNavigation';
+import SearchResults from './SearchResults';
+import { searchService } from '../../services/api';
 
 export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearchChange = () => {}, readOnly = false, hideSubNav = false }) {
   const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const searchTimeoutRef = useRef(null);
+  const searchContainerDesktopRef = useRef(null);
+  const searchContainerMobileRef = useRef(null);
+  
+  // Gestion de la recherche avec debounce
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (localSearchQuery.trim().length >= 2) {
+      setIsSearching(true);
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const response = await searchService.global(localSearchQuery);
+          if (response?.data?.results) {
+            setSearchResults(response.data.results);
+            setShowResults(true);
+          }
+        } catch (error) {
+          console.error('Erreur de recherche:', error);
+          console.error('Détails:', error.response?.data || error.message);
+          // Afficher un message d'erreur à l'utilisateur
+          setSearchResults({ drivers: [], offers: [], products: [], error: true });
+          setShowResults(true);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 500);
+    } else {
+      setSearchResults(null);
+      setShowResults(false);
+      setIsSearching(false);
+    }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [localSearchQuery]);
+
+  // Fermer les résultats au clic extérieur
+  useEffect(() => {
+    function handleClickOutside(event) {
+      const isOutsideDesktop = searchContainerDesktopRef.current && 
+        !searchContainerDesktopRef.current.contains(event.target);
+      const isOutsideMobile = searchContainerMobileRef.current && 
+        !searchContainerMobileRef.current.contains(event.target);
+      
+      if (isOutsideDesktop && isOutsideMobile) {
+        setShowResults(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearchChange = (value) => {
+    setLocalSearchQuery(value);
+    onSearchChange(value);
+  };
+
+  const handleCloseSearch = () => {
+    setShowMobileSearch(false);
+    setLocalSearchQuery('');
+    setSearchResults(null);
+    setShowResults(false);
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 lg:px-6 py-4">
@@ -22,19 +100,49 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
           </Link>
 
           {/* Barre de recherche desktop */}
-          <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
-            <input
-              type="text"
-              placeholder="Rechercher..."
-              value={searchQuery}
-              onChange={readOnly ? undefined : (e) => onSearchChange(e.target.value)}
-              readOnly={readOnly}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            />
+          <div ref={searchContainerDesktopRef} className="hidden lg:flex flex-1 max-w-2xl mx-8 relative">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Rechercher chauffeurs, offres, produits..."
+                value={localSearchQuery}
+                onChange={readOnly ? undefined : (e) => handleSearchChange(e.target.value)}
+                onFocus={() => localSearchQuery.length >= 2 && setShowResults(true)}
+                readOnly={readOnly}
+                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <svg className="animate-spin h-5 w-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              )}
+            </div>
+            {showResults && searchResults && (
+              <SearchResults 
+                results={searchResults} 
+                query={localSearchQuery}
+                onClose={() => setShowResults(false)}
+              />
+            )}
           </div>
 
           {/* Boutons d'action */}
           <div className="flex items-center gap-3">
+            {/* Icône de recherche mobile */}
+            {!readOnly && (
+              <button
+                onClick={() => setShowMobileSearch(!showMobileSearch)}
+                className="lg:hidden p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Rechercher"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
             <Link
               to="/publier-offre"
               className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors hidden lg:inline-block"
@@ -148,16 +256,43 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
           </div>
         </div>
 
-        {/* Barre de recherche mobile */}
-        {!readOnly && (
-          <div className="lg:hidden mt-4">
-            <input
-              type="text"
-              placeholder="Rechercher..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-            />
+        {/* Barre de recherche mobile - Affichée au clic */}
+        {!readOnly && showMobileSearch && (
+          <div ref={searchContainerMobileRef} className="lg:hidden mt-4 animate-fadeIn relative">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Rechercher chauffeurs, offres..."
+                value={localSearchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                autoFocus
+              />
+              <button
+                onClick={handleCloseSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Fermer la recherche"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              {isSearching && (
+                <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                  <svg className="animate-spin h-5 w-5 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              )}
+            </div>
+            {showResults && searchResults && (
+              <SearchResults 
+                results={searchResults} 
+                query={localSearchQuery}
+                onClose={handleCloseSearch}
+              />
+            )}
           </div>
         )}
       </div>
