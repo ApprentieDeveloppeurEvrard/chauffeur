@@ -42,7 +42,6 @@ const offerSchema = new mongoose.Schema(
       },
       zone: {
         type: String,
-        required: true,
         trim: true
       }
     },
@@ -62,8 +61,7 @@ const offerSchema = new mongoose.Schema(
         default: 'temps_plein'
       },
       startDate: {
-        type: Date,
-        required: true
+        type: Date
       },
       endDate: {
         type: Date
