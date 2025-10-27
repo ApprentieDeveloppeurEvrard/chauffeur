@@ -12,7 +12,7 @@ export default function MyCandidates() {
   const [filter, setFilter] = useState('all'); // all, pending, accepted, rejected
 
   useEffect(() => {
-    if (!user || user.role !== 'client') {
+    if (!user || user.role !== 'employer') {
       navigate('/auth');
       return;
     }

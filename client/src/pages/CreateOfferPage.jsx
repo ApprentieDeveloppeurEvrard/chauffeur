@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { offersApi } from '../services/api';
 import SimpleHeader from '../component/common/SimpleHeader';
 import JobOfferForm from '../component/forms/JobOfferForm';
 import ProductOfferForm from '../component/forms/ProductOfferForm';
@@ -65,12 +66,46 @@ export default function CreateOfferPage() {
     setError('');
 
     try {
-      console.log('Offre d\'emploi créée:', formData);
-      // TODO: Implémenter l'appel API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log('Données de l\'offre d\'emploi à envoyer:', formData);
+      
+      // Préparer les données pour l'API
+      const jobData = {
+        title: formData.title,
+        description: formData.description,
+        type: formData.type, // Personnel, Livraison, VTC, Transport, etc.
+        requirements: {
+          licenseType: formData.requirements.licenseType,
+          experience: formData.requirements.experience,
+          vehicleType: formData.requirements.vehicleType,
+          zone: formData.requirements.zone
+        },
+        conditions: {
+          salary: parseFloat(formData.conditions.salary),
+          salaryType: formData.conditions.salaryType,
+          workType: formData.conditions.workType,
+          startDate: new Date(formData.conditions.startDate),
+          schedule: formData.conditions.schedule
+        },
+        location: {
+          address: formData.location.address,
+          city: formData.location.city
+        },
+        contactInfo: formData.contactInfo,
+        requirementsList: formData.requirementsList || [],
+        benefits: formData.benefits || [],
+        status: 'active'
+      };
+
+      console.log('Données formatées:', jobData);
+
+      // Appel API pour créer l'offre d'emploi
+      const response = await offersApi.create(jobData);
+      console.log('Offre d\'emploi créée avec succès:', response.data);
+      
       navigate('/offres');
     } catch (err) {
-      setError('Une erreur est survenue. Veuillez réessayer.');
+      console.error('Erreur lors de la création de l\'offre:', err);
+      setError(err.response?.data?.error || 'Une erreur est survenue. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
@@ -89,29 +124,30 @@ export default function CreateOfferPage() {
         description: formData.description,
         type: 'Autre', // Type pour les produits
         category: formData.category,
-        price: parseFloat(formData.price),
+        price: parseFloat(formData.price) || 0,
         brand: formData.brand,
         condition: formData.condition,
-        stock: parseInt(formData.stock),
+        stock: parseInt(formData.stock) || 0,
         location: {
-          city: formData.location || 'Abidjan'
+          address: formData.location?.address || '',
+          city: formData.location?.city || 'Abidjan'
         },
         contactInfo: formData.contactInfo,
         requirementsList: formData.requirementsList || [],
         benefits: formData.benefits || [],
         images: formData.images || [],
         mainImage: formData.mainImage || '',
-        tags: [formData.category.toLowerCase(), formData.brand?.toLowerCase()].filter(Boolean),
+        tags: [formData.category?.toLowerCase(), formData.brand?.toLowerCase()].filter(Boolean),
         status: 'active',
         // Champs requis par le modèle Offer
         requirements: {
           licenseType: 'B',
           experience: '1-3 ans',
-          vehicleType: 'berline',
-          zone: formData.location || 'Abidjan'
+          vehicleType: 'autre',
+          zone: formData.location?.city || 'Abidjan'
         },
         conditions: {
-          salary: parseFloat(formData.price),
+          salary: parseFloat(formData.price) || 0,
           salaryType: 'mensuel',
           workType: 'temps_plein',
           startDate: new Date(),
@@ -184,12 +220,13 @@ export default function CreateOfferPage() {
 
         {/* Sélection du type d'offre - Masqué sur mobile */}
         {!offerType ? (
-          <div className={`hidden lg:grid gap-6 ${user?.role === 'employer' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 max-w-md mx-auto'}`}>
+          <div className={`hidden lg:grid gap-6 ${user?.role === 'employer' ? 'grid-cols-2' : 'grid-cols-1 max-w-md mx-auto'}`}>
+            {console.log('User role:', user?.role, 'Is employer:', user?.role === 'employer')}
             {/* Offre d'emploi - UNIQUEMENT pour les employeurs */}
             {user?.role === 'employer' && (
               <button
                 onClick={() => setOfferType('job')}
-                className="group bg-white rounded-2xl shadow-sm border-2 border-gray-200 hover:border-orange-500 p-8 transition-all hover:shadow-md"
+                className="group bg-white rounded-lg border border-gray-200 hover:border-orange-500 p-8 transition-all"
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-500 transition-colors">
@@ -206,7 +243,7 @@ export default function CreateOfferPage() {
             {/* Marketing & Vente - Pour TOUS les utilisateurs connectés */}
             <button
               onClick={() => setOfferType('product')}
-              className="group bg-white rounded-2xl shadow-sm border-2 border-gray-200 hover:border-orange-500 p-8 transition-all hover:shadow-md"
+              className="group bg-white rounded-lg border border-gray-200 hover:border-orange-500 p-8 transition-all"
             >
               <div className="flex flex-col items-center text-center">
                 <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-500 transition-colors">
@@ -221,7 +258,7 @@ export default function CreateOfferPage() {
           </div>
         ) : (
           /* Card avec formulaire - Padding adapté mobile */
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 lg:p-8">
             {console.log('Affichage du formulaire pour:', offerType)}
             {offerType === 'job' ? (
               <JobOfferForm 

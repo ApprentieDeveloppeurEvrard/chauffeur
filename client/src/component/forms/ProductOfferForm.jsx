@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-export default function ProductOfferForm({ onSubmit, loading, error }) {
-  const [formData, setFormData] = useState({
+export default function ProductOfferForm({ onSubmit, loading, error, initialData }) {
+  const [formData, setFormData] = useState(initialData || {
     title: '',
     description: '',
     type: 'Produit', // Type spécifique pour les produits
@@ -12,6 +12,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
     brand: '',
     condition: 'new',
     stock: '',
+    deliveryOptions: '', // Options de livraison
     
     location: {
       address: '',
@@ -52,20 +53,36 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length + imageFiles.length > 5) {
       alert('Vous ne pouvez ajouter que 5 images maximum');
       return;
     }
 
-    // Créer des URLs temporaires pour prévisualisation
-    const newImages = files.map(file => ({
-      file,
-      preview: URL.createObjectURL(file)
-    }));
+    // Convertir les images en base64
+    const imagePromises = files.map(file => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            file,
+            preview: URL.createObjectURL(file),
+            base64: reader.result // Data URL en base64
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    });
 
-    setImageFiles(prev => [...prev, ...newImages]);
+    try {
+      const newImages = await Promise.all(imagePromises);
+      setImageFiles(prev => [...prev, ...newImages]);
+    } catch (error) {
+      console.error('Erreur lors de la lecture des images:', error);
+      alert('Erreur lors du chargement des images');
+    }
   };
 
   const removeImage = (index) => {
@@ -80,14 +97,16 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // TODO: Uploader les images vers le serveur (Cloudinary, AWS S3, etc.)
-    // et récupérer les URLs avant de soumettre le formulaire
+    // Extraire les images en base64
+    const imagesBase64 = imageFiles.map(img => img.base64);
     
+    // Filtrer les lignes vides avant soumission
     const dataToSubmit = {
       ...formData,
-      // Les URLs des images seront ajoutées ici après upload
-      images: imageFiles.map(img => img.preview), // Temporaire - à remplacer par les vraies URLs
-      mainImage: imageFiles[0]?.preview || '' // Temporaire - à remplacer par la vraie URL
+      requirementsList: formData.requirementsList.filter(line => line.trim()),
+      benefits: formData.benefits.filter(line => line.trim()),
+      images: imagesBase64, // Envoyer les images en base64
+      mainImage: imagesBase64[0] || '' // Première image comme image principale
     };
     
     onSubmit(dataToSubmit);
@@ -125,7 +144,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
             </div>
           ))}
         </div>
-        <div className="flex justify-between mt-2 sm:mt-3 text-xs sm:text-sm font-medium text-gray-600">
+        <div className="flex justify-between mt-2 sm:mt-3 text-sm sm:text-base font-medium text-gray-600">
           <span>Informations produit</span>
           <span>Contact & Livraison</span>
         </div>
@@ -133,7 +152,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
-          <p className="text-sm text-red-700">{error}</p>
+          <p className="text-sm sm:text-base text-red-700">{error}</p>
         </div>
       )}
 
@@ -142,7 +161,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
         {currentStep === 1 && (
           <>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                 Nom du produit <span className="text-red-500">*</span>
               </label>
               <input
@@ -151,14 +170,14 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
                 value={formData.title}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 sm:py-3.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-base"
                 placeholder="Ex: Pneus Michelin, Huile moteur..."
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                   Catégorie <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -180,7 +199,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                   Prix (FCFA) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -196,7 +215,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                 Description <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -212,7 +231,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                   Marque
                 </label>
                 <input
@@ -226,7 +245,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                   État <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -245,7 +264,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                 Stock disponible <span className="text-red-500">*</span>
               </label>
               <input
@@ -261,45 +280,45 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
 
             {/* Caractéristiques */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                 Caractéristiques du produit
               </label>
               <textarea
                 name="characteristics"
                 value={formData.requirementsList.join('\n')}
                 onChange={(e) => {
-                  const lines = e.target.value.split('\n').filter(line => line.trim());
+                  const lines = e.target.value.split('\n');
                   setFormData(prev => ({ ...prev, requirementsList: lines }));
                 }}
                 rows="4"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
                 placeholder="Une caractéristique par ligne&#10;Ex:&#10;Garantie 2 ans&#10;Compatible tous véhicules&#10;Certifié ISO 9001"
               />
-              <p className="mt-1 text-xs text-gray-500">Une caractéristique par ligne</p>
+              <p className="mt-1 text-xs sm:text-sm text-gray-500">Une caractéristique par ligne</p>
             </div>
 
             {/* Avantages / Spécifications */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                 Avantages / Points forts
               </label>
               <textarea
                 name="benefits"
                 value={formData.benefits.join('\n')}
                 onChange={(e) => {
-                  const lines = e.target.value.split('\n').filter(line => line.trim());
+                  const lines = e.target.value.split('\n');
                   setFormData(prev => ({ ...prev, benefits: lines }));
                 }}
                 rows="4"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
                 placeholder="Un avantage par ligne&#10;Ex:&#10;Livraison rapide&#10;Prix compétitif&#10;Service après-vente"
               />
-              <p className="mt-1 text-xs text-gray-500">Un avantage par ligne</p>
+              <p className="mt-1 text-xs sm:text-sm text-gray-500">Un avantage par ligne</p>
             </div>
 
             {/* Upload d'images */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                 Photos du produit (max 5)
               </label>
               <input
@@ -318,7 +337,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
                   <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm sm:text-base text-gray-600">
                     Cliquez pour ajouter des images
                   </p>
                 </div>
@@ -361,7 +380,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                   Email de contact <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -376,7 +395,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                   Téléphone de contact <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -392,7 +411,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                 Ville <span className="text-red-500">*</span>
               </label>
               <select
@@ -412,7 +431,7 @@ export default function ProductOfferForm({ onSubmit, loading, error }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                 Options de livraison <span className="text-red-500">*</span>
               </label>
               <select

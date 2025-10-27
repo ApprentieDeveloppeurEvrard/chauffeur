@@ -70,7 +70,7 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
                       </div>
                       <ul className="flex flex-col gap-px">
                         <li className="flex items-center justify-between gap-3 bg-gray-500/20 cursor-pointer px-3 py-2 rounded hover:bg-gray-500/20 transition">
-                          <Link to={user.role === 'driver' ? '/driver/dashboard' : '/employer/dashboard'} onClick={() => setShowMenu(false)}>Tableau de bord</Link>
+                          <Link to={user.role === 'driver' ? '/driver/dashboard' : '/employer/candidates'} onClick={() => setShowMenu(false)}>Tableau de bord</Link>
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="#1F2937" fillOpacity=".8"/>
                           </svg>
@@ -81,7 +81,7 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#1F2937" fillOpacity=".8"/>
                           </svg>
                         </li>
-                        {user.role === 'client' && (
+                        {user.role === 'employer' && (
                           <>
                             <li className="flex items-center justify-between gap-3 cursor-pointer px-3 py-2 rounded hover:bg-gray-500/20 transition">
                               <Link to="/employer/candidates" onClick={() => setShowMenu(false)}>Mes candidatures</Link>

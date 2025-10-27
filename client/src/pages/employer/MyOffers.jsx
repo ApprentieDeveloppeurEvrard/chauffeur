@@ -12,7 +12,7 @@ export default function MyOffers() {
   const [filter, setFilter] = useState('all'); // all, active, closed
 
   useEffect(() => {
-    if (!user || user.role !== 'client') {
+    if (!user || user.role !== 'employer') {
       navigate('/auth');
       return;
     }

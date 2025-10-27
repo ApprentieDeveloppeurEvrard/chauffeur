@@ -5,6 +5,18 @@
   --font-poppins: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
 }
 
+html {
+  /* Taille de base augmentée pour mobile */
+  font-size: 16px;
+}
+
+/* Augmenter la taille de base sur mobile */
+@media (max-width: 768px) {
+  html {
+    font-size: 17px; /* 106% de la taille normale */
+  }
+}
+
 html, body, #root {
   font-family: var(--font-poppins);
 }
@@ -52,4 +64,83 @@ html, body {
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none;
+}
+
+/* Système de tailles de police cohérent pour mobile */
+
+/* Inputs et formulaires */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+input[type="file"],
+select,
+textarea {
+  font-size: 17px !important; /* Même taille que le texte normal sur mobile */
+}
+
+/* Titres principaux (h1) */
+h1 {
+  font-size: 1.5rem; /* 25.5px sur mobile */
+}
+
+/* Sous-titres (h2) */
+h2 {
+  font-size: 1.25rem; /* 21.25px sur mobile */
+}
+
+/* Titres tertiaires (h3) */
+h3 {
+  font-size: 1.125rem; /* 19.125px sur mobile */
+}
+
+/* Texte normal */
+p, span, div, label {
+  font-size: 1rem; /* 17px sur mobile */
+}
+
+/* Petits textes */
+.text-xs {
+  font-size: 0.75rem !important; /* 12.75px sur mobile */
+}
+
+.text-sm {
+  font-size: 0.875rem !important; /* 14.875px sur mobile */
+}
+
+/* Desktop - Retour aux tailles normales */
+@media (min-width: 640px) {
+  html {
+    font-size: 16px; /* Taille de base normale */
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  input[type="date"],
+  input[type="file"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  h1 {
+    font-size: 1.875rem; /* 30px */
+  }
+
+  h2 {
+    font-size: 1.5rem; /* 24px */
+  }
+
+  h3 {
+    font-size: 1.25rem; /* 20px */
+  }
+
+  p, span, div, label {
+    font-size: 1rem; /* 16px */
+  }
 }

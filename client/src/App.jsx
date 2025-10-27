@@ -11,6 +11,8 @@ import OfferDetailPage from './pages/OfferDetailPage.jsx'
 import CreateOfferPage from './pages/CreateOfferPage.jsx'
 import MarketingVentePage from './pages/MarketingVentePage.jsx'
 import ProductDetailPage from './pages/ProductDetailPage.jsx'
+import ViewOfferPage from './pages/ViewOfferPage.jsx'
+import EditOfferPage from './pages/EditOfferPage.jsx'
 import UserProfilePage from './pages/UserProfilePage.jsx'
 import Auth from './component/Auth.jsx'
 import TarifsPage from './pages/TarifsPage.jsx'
@@ -87,6 +89,26 @@ function App() {
               element={
                 <PrivateRoute>
                   <ProductDetailPage />
+                </PrivateRoute>
+              } 
+            />
+
+            {/* Page de visualisation d'offre (Mes offres) */}
+            <Route 
+              path="/view-offer/:id" 
+              element={
+                <PrivateRoute>
+                  <ViewOfferPage />
+                </PrivateRoute>
+              } 
+            />
+
+            {/* Page d'édition d'offre */}
+            <Route 
+              path="/edit-offer/:id" 
+              element={
+                <PrivateRoute>
+                  <EditOfferPage />
                 </PrivateRoute>
               } 
             />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { offersApi } from '../../services/api';
 import SimpleHeader from '../../component/common/SimpleHeader';
 
 export default function MyProducts() {
@@ -21,39 +22,29 @@ export default function MyProducts() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      // TODO: Appel API
-      // const response = await productsApi.getMyProducts();
-      // setProducts(response.data);
+      console.log('🔄 Récupération des offres...');
+      console.log('👤 Utilisateur:', user);
+      console.log('🔑 Token:', localStorage.getItem('token') ? 'Présent' : 'Absent');
       
-      // Données de test
-      setProducts([
-        {
-          id: 1,
-          title: 'Pneus Michelin neufs',
-          category: 'Pièces auto',
-          price: '45000',
-          condition: 'Neuf',
-          status: 'active',
-          image: null,
-          location: 'Abidjan, Yopougon',
-          createdDate: '2024-01-20',
-          viewsCount: 28
-        },
-        {
-          id: 2,
-          title: 'Kit d\'entretien complet',
-          category: 'Accessoires',
-          price: '15000',
-          condition: 'Neuf',
-          status: 'active',
-          image: null,
-          location: 'Abidjan, Cocody',
-          createdDate: '2024-01-18',
-          viewsCount: 15
-        }
-      ]);
+      // Récupérer les offres de l'utilisateur connecté de type "Autre" (produits)
+      const response = await offersApi.myOffers();
+      console.log('✅ Réponse API:', response);
+      console.log('📊 Données reçues:', response.data);
+      
+      // Filtrer uniquement les offres de type "Autre" (produits marketing)
+      const allOffers = Array.isArray(response.data) ? response.data : [];
+      console.log('📋 Total offres:', allOffers.length);
+      console.log('📋 Types d\'offres:', allOffers.map(o => ({ title: o.title, type: o.type })));
+      
+      const marketingOffers = allOffers.filter(offer => offer.type === 'Autre');
+      console.log('🛒 Offres marketing filtrées:', marketingOffers.length);
+      console.log('🛒 Détails:', marketingOffers);
+      
+      setProducts(marketingOffers);
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('❌ Erreur lors de la récupération des produits:', error);
+      console.error('❌ Détails:', error.response?.data);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -62,6 +53,22 @@ export default function MyProducts() {
   const filteredProducts = filter === 'all' 
     ? products 
     : products.filter(p => p.status === filter);
+
+  const handleDelete = async (offerId) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette offre ?')) {
+      return;
+    }
+
+    try {
+      await offersApi.delete(offerId);
+      console.log('✅ Offre supprimée');
+      // Rafraîchir la liste
+      fetchProducts();
+    } catch (error) {
+      console.error('❌ Erreur lors de la suppression:', error);
+      alert('Erreur lors de la suppression de l\'offre');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -136,13 +143,13 @@ export default function MyProducts() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
               <div
-                key={product.id}
+                key={product._id}
                 className="bg-white rounded-lg border border-gray-200 transition-all overflow-hidden group"
               >
                 {/* Image */}
                 <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 relative overflow-hidden">
-                  {product.image ? (
-                    <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
+                  {product.mainImage ? (
+                    <img src={product.mainImage} alt={product.title} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <svg className="w-16 h-16 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,34 +193,44 @@ export default function MyProducts() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      {product.location}
+                      {product.location?.city || 'Non spécifié'}
                     </div>
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                       </svg>
-                      {product.condition}
+                      {product.condition || 'Non spécifié'}
                     </div>
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      {product.viewsCount} vues
+                      {new Date(product.createdAt).toLocaleDateString('fr-FR')}
                     </div>
                   </div>
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <button className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
+                    <button 
+                      onClick={() => navigate(`/view-offer/${product._id}`)}
+                      className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                    >
                       Voir
                     </button>
-                    <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+                    <button 
+                      onClick={() => navigate(`/edit-offer/${product._id}`)}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                      title="Modifier"
+                    >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
-                    <button className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium">
+                    <button 
+                      onClick={() => handleDelete(product._id)}
+                      className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
+                      title="Supprimer"
+                    >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>

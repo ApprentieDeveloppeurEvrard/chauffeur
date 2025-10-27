@@ -166,30 +166,30 @@ export default function UserProfilePage() {
     <div className="min-h-screen bg-gray-50">
       <SimpleHeader />
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Mon Profil</h1>
+      <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Mon Profil</h1>
 
         {/* Messages */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
-            <p className="text-sm text-red-700">{error}</p>
+            <p className="text-sm sm:text-base text-red-700">{error}</p>
           </div>
         )}
 
         {success && (
           <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
-            <p className="text-sm text-green-700">{success}</p>
+            <p className="text-sm sm:text-base text-green-700">{success}</p>
           </div>
         )}
 
         {/* Informations personnelles */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations personnelles</h2>
+        <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Informations personnelles</h2>
           
           <form onSubmit={handleUpdateUserInfo} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">Prénom</label>
                 <input
                   type="text"
                   name="firstName"
@@ -200,7 +200,7 @@ export default function UserProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">Nom</label>
                 <input
                   type="text"
                   name="lastName"
@@ -211,7 +211,7 @@ export default function UserProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">Email</label>
                 <input
                   type="email"
                   name="email"
@@ -223,7 +223,7 @@ export default function UserProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">Téléphone</label>
                 <input
                   type="tel"
                   name="phone"
@@ -246,11 +246,11 @@ export default function UserProfilePage() {
 
         {/* Section Devenir Chauffeur */}
         {!isDriver && (
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Devenir Chauffeur</h2>
-                <p className="text-sm text-gray-600 mt-1">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Devenir Chauffeur</h2>
+                <p className="text-sm sm:text-base text-gray-600 mt-1">
                   Complétez vos informations pour apparaître dans la liste des chauffeurs
                 </p>
               </div>
@@ -258,7 +258,7 @@ export default function UserProfilePage() {
               {!showDriverForm && (
                 <button
                   onClick={() => setShowDriverForm(true)}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  className="px-4 sm:px-6 py-2.5 sm:py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 active:bg-orange-700 transition-colors text-sm sm:text-base font-medium touch-manipulation"
                 >
                   Commencer
                 </button>
@@ -269,7 +269,7 @@ export default function UserProfilePage() {
               <form onSubmit={handleBecomeDriver} className="space-y-4 mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Numéro de permis *
                     </label>
                     <input
@@ -284,7 +284,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Type de permis
                     </label>
                     <select
@@ -300,7 +300,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Date d'expiration du permis
                     </label>
                     <input
@@ -313,7 +313,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Expérience
                     </label>
                     <select
@@ -330,7 +330,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Type de véhicule
                     </label>
                     <select
@@ -347,7 +347,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Marque du véhicule
                     </label>
                     <input
@@ -361,7 +361,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Modèle
                     </label>
                     <input
@@ -375,7 +375,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Année
                     </label>
                     <input
@@ -391,7 +391,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Nombre de places
                     </label>
                     <input
@@ -406,7 +406,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Couleur du véhicule
                     </label>
                     <input
@@ -420,7 +420,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Numéro d'immatriculation
                     </label>
                     <input
@@ -434,7 +434,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Ville
                     </label>
                     <input
@@ -448,7 +448,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Adresse complète
                     </label>
                     <input
@@ -462,7 +462,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Zone de travail
                     </label>
                     <input
@@ -476,7 +476,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Spécialités
                     </label>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -488,7 +488,7 @@ export default function UserProfilePage() {
                             onChange={() => handleSpecialtyToggle(specialty)}
                             className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
                           />
-                          <span className="text-sm text-gray-700 capitalize">
+                          <span className="text-sm sm:text-base text-gray-700 capitalize">
                             {specialty.replace('_', ' ')}
                           </span>
                         </label>
@@ -498,7 +498,7 @@ export default function UserProfilePage() {
 
                   {/* Contact d'urgence */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Contact d'urgence (Nom)
                     </label>
                     <input
@@ -512,7 +512,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Téléphone d'urgence
                     </label>
                     <input
@@ -531,7 +531,7 @@ export default function UserProfilePage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents requis</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Photo de profil
                       </label>
                       <input
@@ -547,7 +547,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Pièce d'identité *
                       </label>
                       <input
@@ -564,7 +564,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Permis de conduire *
                       </label>
                       <input
@@ -581,7 +581,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Carte grise du véhicule
                       </label>
                       <input
@@ -645,7 +645,7 @@ export default function UserProfilePage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Permis de conduire</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Numéro de permis
                       </label>
                       <input
@@ -659,7 +659,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Type de permis
                       </label>
                       <select
@@ -675,7 +675,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Date d'expiration
                       </label>
                       <input
@@ -694,7 +694,7 @@ export default function UserProfilePage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Véhicule</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Type de véhicule
                       </label>
                       <select
@@ -711,7 +711,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Marque
                       </label>
                       <input
@@ -725,7 +725,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Modèle
                       </label>
                       <input
@@ -739,7 +739,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Année
                       </label>
                       <input
@@ -755,7 +755,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Couleur
                       </label>
                       <input
@@ -769,7 +769,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Immatriculation
                       </label>
                       <input
@@ -783,7 +783,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Nombre de places
                       </label>
                       <input
@@ -804,7 +804,7 @@ export default function UserProfilePage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Adresse et contacts</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Ville
                       </label>
                       <input
@@ -818,7 +818,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Zone de travail
                       </label>
                       <input
@@ -832,7 +832,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Adresse complète
                       </label>
                       <input
@@ -846,7 +846,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Contact d'urgence
                       </label>
                       <input
@@ -860,7 +860,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Téléphone d'urgence
                       </label>
                       <input
@@ -880,7 +880,7 @@ export default function UserProfilePage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Photo de profil
                       </label>
                       <input
@@ -896,7 +896,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Pièce d'identité
                       </label>
                       <input
@@ -912,7 +912,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Permis de conduire
                       </label>
                       <input
@@ -928,7 +928,7 @@ export default function UserProfilePage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                         Carte grise du véhicule
                       </label>
                       <input
@@ -964,7 +964,7 @@ export default function UserProfilePage() {
             <form className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                     Nom de l'entreprise *
                   </label>
                   <input
@@ -978,7 +978,7 @@ export default function UserProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                     Type d'entreprise
                   </label>
                   <select
@@ -997,7 +997,7 @@ export default function UserProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                     Numéro SIRET/RC
                   </label>
                   <input
@@ -1011,7 +1011,7 @@ export default function UserProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                     Ville
                   </label>
                   <input
@@ -1025,7 +1025,7 @@ export default function UserProfilePage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                     Adresse complète
                   </label>
                   <input
@@ -1039,7 +1039,7 @@ export default function UserProfilePage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                     Site web
                   </label>
                   <input
@@ -1053,7 +1053,7 @@ export default function UserProfilePage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                     Description de l'entreprise
                   </label>
                   <textarea
@@ -1072,7 +1072,7 @@ export default function UserProfilePage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents de l'entreprise</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Logo de l'entreprise
                     </label>
                     <input
@@ -1088,7 +1088,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Registre de commerce
                     </label>
                     <input
@@ -1104,7 +1104,7 @@ export default function UserProfilePage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
                       Pièce d'identité du gérant
                     </label>
                     <input

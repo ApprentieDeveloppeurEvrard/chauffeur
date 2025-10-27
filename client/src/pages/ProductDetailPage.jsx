@@ -1,15 +1,38 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { offersApi } from '../services/api';
 import SimpleHeader from '../component/common/SimpleHeader';
 import api from '../services/api';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Vérifier si l'utilisateur est le propriétaire de l'offre
+  const isOwner = user && product && product.employerId === user.sub;
+
+  // Fonction de suppression
+  const handleDelete = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette offre ?')) {
+      return;
+    }
+
+    try {
+      await offersApi.delete(id);
+      alert('Offre supprimée avec succès');
+      // Rediriger vers la page des offres marketing
+      navigate(user.role === 'driver' ? '/driver/my-products' : '/employer/my-products');
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      alert('Erreur lors de la suppression de l\'offre');
+    }
+  };
 
   // Récupérer le produit depuis l'API
   useEffect(() => {
@@ -366,9 +389,35 @@ export default function ProductDetailPage() {
           <div>
             {/* En-tête */}
             <div className="mb-6">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-3">
-                {product.title}
-              </h1>
+              <div className="flex items-start justify-between mb-3">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 flex-1">
+                  {product.title}
+                </h1>
+                
+                {/* Boutons d'action si propriétaire */}
+                {isOwner && (
+                  <div className="flex gap-2 ml-4">
+                    <button
+                      onClick={() => navigate(`/edit-offer/${product._id}`)}
+                      className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                      Modifier
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium flex items-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Supprimer
+                    </button>
+                  </div>
+                )}
+              </div>
               <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
                 {product.price ? `${product.price.toLocaleString()} FCFA` : 'Prix sur demande'}
               </p>
