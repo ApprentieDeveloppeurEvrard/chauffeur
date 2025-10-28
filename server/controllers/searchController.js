@@ -4,7 +4,7 @@ const User = require('../models/User');
 
 // Fonction pour calculer la similarité entre deux chaînes (Levenshtein distance simplifiée)
 function calculateSimilarity(str1, str2) {
-  if (!str1 || !str2) return 0;
+  if (!str1 || !str2 || typeof str1 !== 'string' || typeof str2 !== 'string') return 0;
   
   str1 = str1.toLowerCase().trim();
   str2 = str2.toLowerCase().trim();
@@ -49,7 +49,7 @@ function calculateSimilarity(str1, str2) {
 
 // Fonction pour normaliser le texte (enlever accents, etc.)
 function normalizeText(text) {
-  if (!text) return '';
+  if (!text || typeof text !== 'string') return '';
   return text
     .toLowerCase()
     .normalize('NFD')
