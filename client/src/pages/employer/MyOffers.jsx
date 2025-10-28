@@ -10,6 +10,8 @@ export default function MyOffers() {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, active, closed
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [offerToDelete, setOfferToDelete] = useState(null);
 
   useEffect(() => {
     if (!user || user.role !== 'employer') {
@@ -52,6 +54,35 @@ export default function MyOffers() {
   const filteredOffers = filter === 'all' 
     ? offers 
     : offers.filter(o => o.status === filter);
+
+  const handleEdit = (offerId) => {
+    navigate(`/edit-job-offer/${offerId}`);
+  };
+
+  const openDeleteModal = (offer) => {
+    setOfferToDelete(offer);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setOfferToDelete(null);
+  };
+
+  const handleDelete = async () => {
+    if (!offerToDelete) return;
+
+    try {
+      await offersApi.delete(offerToDelete.id);
+      // Rafraîchir la liste
+      await fetchOffers();
+      setShowDeleteModal(false);
+      setOfferToDelete(null);
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      alert('Impossible de supprimer l\'offre');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -194,15 +225,21 @@ export default function MyOffers() {
                     {/* Actions */}
                     <div className="flex lg:flex-col gap-2">
                       <button 
-                        onClick={() => navigate(`/offre/${offer.id}`)}
+                        onClick={() => navigate(`/view-offer/${offer.id}`)}
                         className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium whitespace-nowrap"
                       >
                         Voir détails
                       </button>
-                      <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium whitespace-nowrap">
+                      <button 
+                        onClick={() => handleEdit(offer.id)}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium whitespace-nowrap"
+                      >
                         Modifier
                       </button>
-                      <button className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium whitespace-nowrap">
+                      <button 
+                        onClick={() => openDeleteModal(offer)}
+                        className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium whitespace-nowrap"
+                      >
                         Supprimer
                       </button>
                     </div>
@@ -213,6 +250,53 @@ export default function MyOffers() {
           </div>
         )}
       </main>
+
+      {/* Modal de confirmation de suppression */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50"
+            onClick={closeDeleteModal}
+          ></div>
+          
+          {/* Modal Content */}
+          <div className="relative flex flex-col items-center bg-white shadow-md rounded-xl py-6 px-5 md:w-[460px] w-[370px] border border-gray-200">
+            {/* Icône */}
+            <div className="flex items-center justify-center p-4 bg-red-100 rounded-full">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+
+            {/* Titre */}
+            <h3 className="text-gray-900 font-semibold mt-4 text-xl">
+              Supprimer cette offre ?
+            </h3>
+
+            {/* Description */}
+            <p className="text-sm text-gray-600 mt-2 text-center">
+              Êtes-vous sûr de vouloir supprimer l'offre "{offerToDelete?.title}" ? Cette action est irréversible.
+            </p>
+
+            {/* Boutons */}
+            <div className="flex gap-3 mt-6 w-full">
+              <button
+                onClick={closeDeleteModal}
+                className="w-full md:w-36 h-10 rounded-md border border-gray-300 bg-white text-gray-600 font-medium text-sm hover:bg-gray-100 active:scale-95 transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleDelete}
+                className="w-full md:w-36 h-10 rounded-md text-white bg-red-600 font-medium text-sm hover:bg-red-700 active:scale-95 transition"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

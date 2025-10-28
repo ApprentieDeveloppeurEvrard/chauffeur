@@ -38,7 +38,15 @@ export default function ViewOfferPage() {
     try {
       await offersApi.delete(id);
       alert('Offre supprimée avec succès');
-      navigate(user.role === 'driver' ? '/driver/my-products' : '/employer/my-products');
+      
+      // Rediriger selon le type d'offre et le rôle
+      if (offer.type === 'Autre') {
+        // Offre marketing/produit
+        navigate(user.role === 'driver' ? '/driver/my-products' : '/employer/my-products');
+      } else {
+        // Offre d'emploi
+        navigate('/employer/offers');
+      }
     } catch (error) {
       console.error('Erreur:', error);
       alert('Erreur lors de la suppression');
@@ -76,7 +84,13 @@ export default function ViewOfferPage() {
 
           <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
             <button
-              onClick={() => navigate(`/edit-offer/${id}`)}
+              onClick={() => {
+                // Déterminer la route d'édition selon le type d'offre
+                const editRoute = offer.type === 'Autre' 
+                  ? `/edit-offer/${id}` 
+                  : `/edit-job-offer/${id}`;
+                navigate(editRoute);
+              }}
               className="flex-1 sm:flex-none px-4 sm:px-6 py-2.5 sm:py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 active:bg-orange-700 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,7 +112,7 @@ export default function ViewOfferPage() {
         </div>
 
         {/* Carte principale */}
-        <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           {/* Images */}
           {offer.images && offer.images.length > 0 && (
             <div className="relative">

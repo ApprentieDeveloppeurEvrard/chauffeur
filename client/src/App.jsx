@@ -13,6 +13,7 @@ import MarketingVentePage from './pages/MarketingVentePage.jsx'
 import ProductDetailPage from './pages/ProductDetailPage.jsx'
 import ViewOfferPage from './pages/ViewOfferPage.jsx'
 import EditOfferPage from './pages/EditOfferPage.jsx'
+import EditJobOfferPage from './pages/EditJobOfferPage.jsx'
 import UserProfilePage from './pages/UserProfilePage.jsx'
 import Auth from './component/Auth.jsx'
 import TarifsPage from './pages/TarifsPage.jsx'
@@ -104,12 +105,22 @@ function App() {
               } 
             />
 
-            {/* Page d'édition d'offre */}
+            {/* Page d'édition d'offre marketing */}
             <Route 
               path="/edit-offer/:id" 
               element={
                 <PrivateRoute>
                   <EditOfferPage />
+                </PrivateRoute>
+              } 
+            />
+
+            {/* Page d'édition d'offre d'emploi */}
+            <Route 
+              path="/edit-job-offer/:id" 
+              element={
+                <PrivateRoute>
+                  <EditJobOfferPage />
                 </PrivateRoute>
               } 
             />

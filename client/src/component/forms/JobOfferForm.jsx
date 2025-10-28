@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-export default function JobOfferForm({ onSubmit, loading, error }) {
-  const [formData, setFormData] = useState({
+export default function JobOfferForm({ onSubmit, loading, error, initialData }) {
+  const defaultData = {
     title: '',
     description: '',
     type: 'Personnel',
@@ -34,8 +34,33 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
     
     requirementsList: [],
     benefits: []
+  };
+
+  const [formData, setFormData] = useState({
+    ...defaultData,
+    ...initialData,
+    requirements: {
+      ...defaultData.requirements,
+      ...(initialData?.requirements || {})
+    },
+    conditions: {
+      ...defaultData.conditions,
+      ...(initialData?.conditions || {})
+    },
+    location: {
+      ...defaultData.location,
+      ...(initialData?.location || {})
+    },
+    contactInfo: {
+      ...defaultData.contactInfo,
+      ...(initialData?.contactInfo || {})
+    },
+    requirementsList: initialData?.requirementsList || [],
+    benefits: initialData?.benefits || []
   });
   const [currentStep, setCurrentStep] = useState(1);
+  const [newRequirement, setNewRequirement] = useState('');
+  const [newBenefit, setNewBenefit] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,6 +93,40 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
   const prevStep = () => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const addRequirement = () => {
+    if (newRequirement.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        requirementsList: [...prev.requirementsList, newRequirement.trim()]
+      }));
+      setNewRequirement('');
+    }
+  };
+
+  const removeRequirement = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      requirementsList: prev.requirementsList.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addBenefit = () => {
+    if (newBenefit.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        benefits: [...prev.benefits, newBenefit.trim()]
+      }));
+      setNewBenefit('');
+    }
+  };
+
+  const removeBenefit = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      benefits: prev.benefits.filter((_, i) => i !== index)
+    }));
   };
 
   return (
@@ -119,7 +178,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                 value={formData.title}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 placeholder="Ex: Chauffeur personnel, Chauffeur VIP..."
               />
             </div>
@@ -134,7 +193,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                 onChange={handleChange}
                 required
                 rows="4"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 placeholder="Décrivez les responsabilités et missions du poste..."
               />
             </div>
@@ -149,7 +208,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.type}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 >
                   <option value="Personnel">Personnel</option>
                   <option value="Livraison">Livraison</option>
@@ -168,7 +227,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.conditions.workType}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 >
                   <option value="temps_plein">Temps plein</option>
                   <option value="temps_partiel">Temps partiel</option>
@@ -189,7 +248,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.location.address}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                   placeholder="Ex: Cocody, Plateau..."
                 />
               </div>
@@ -203,7 +262,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.location.city}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 >
                   <option value="Abidjan">Abidjan</option>
                   <option value="Yamoussoukro">Yamoussoukro</option>
@@ -254,7 +313,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.requirements.licenseType}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 >
                   <option value="A">Permis A (Moto)</option>
                   <option value="B">Permis B (Voiture)</option>
@@ -272,7 +331,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.requirements.experience}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 >
                   <option value="">Sélectionnez</option>
                   <option value="Débutant">Débutant (moins d'1 an)</option>
@@ -292,7 +351,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                 value={formData.requirements.vehicleType}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
               >
                 <option value="">Sélectionnez</option>
                 <option value="berline">Berline</option>
@@ -314,9 +373,56 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                 value={formData.requirements.zone}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 placeholder="Ex: Cocody, Plateau, Yopougon..."
               />
+            </div>
+
+            {/* Profil recherché (Liste) */}
+            <div>
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
+                Profil recherché (Exigences détaillées)
+              </label>
+              <p className="text-xs lg:text-sm text-gray-500 mb-2">
+                Ajoutez les compétences et qualités requises pour le poste
+              </p>
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={newRequirement}
+                  onChange={(e) => setNewRequirement(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRequirement())}
+                  className="flex-1 px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
+                  placeholder="Ex: Excellente connaissance d'Abidjan"
+                />
+                <button
+                  type="button"
+                  onClick={addRequirement}
+                  className="px-4 py-2 bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </div>
+              {formData.requirementsList.length > 0 && (
+                <ul className="space-y-2">
+                  {formData.requirementsList.map((req, index) => (
+                    <li key={index} className="flex items-center justify-between gap-2 p-2 bg-gray-50 border border-gray-200">
+                      <span className="text-sm text-gray-700 flex-1">{req}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeRequirement(index)}
+                        className="p-1 text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </>
         )}
@@ -335,7 +441,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.conditions.salary}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                   placeholder="Ex: 150000"
                 />
               </div>
@@ -349,7 +455,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.conditions.salaryType}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 >
                   <option value="horaire">Horaire</option>
                   <option value="journalier">Journalier</option>
@@ -371,7 +477,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.conditions.startDate}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                 />
               </div>
 
@@ -384,7 +490,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   name="conditions.schedule"
                   value={formData.conditions.schedule}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                   placeholder="Ex: 8h-17h, Lundi-Vendredi"
                 />
               </div>
@@ -401,7 +507,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.contactInfo.email}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                   placeholder="contact@entreprise.com"
                 />
               </div>
@@ -416,10 +522,57 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   value={formData.contactInfo.phone}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                   placeholder="+225 XX XX XX XX XX"
                 />
               </div>
+            </div>
+
+            {/* Avantages (Liste) */}
+            <div>
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
+                Avantages du poste
+              </label>
+              <p className="text-xs lg:text-sm text-gray-500 mb-2">
+                Ajoutez les avantages offerts avec ce poste
+              </p>
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={newBenefit}
+                  onChange={(e) => setNewBenefit(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addBenefit())}
+                  className="flex-1 px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
+                  placeholder="Ex: Assurance santé, Véhicule de fonction"
+                />
+                <button
+                  type="button"
+                  onClick={addBenefit}
+                  className="px-4 py-2 bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </div>
+              {formData.benefits.length > 0 && (
+                <ul className="space-y-2">
+                  {formData.benefits.map((benefit, index) => (
+                    <li key={index} className="flex items-center justify-between gap-2 p-2 bg-gray-50 border border-gray-200">
+                      <span className="text-sm text-gray-700 flex-1">{benefit}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeBenefit(index)}
+                        className="p-1 text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </>
         )}

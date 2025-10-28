@@ -239,6 +239,7 @@ export const messagesApi = {
   getMessages: (conversationId, page = 1, limit = 50) => 
     api.get(`/messages/conversations/${conversationId}/messages?page=${page}&limit=${limit}`),
   send: (data) => api.post(`/messages/conversations/${data.conversationId}/messages`, data),
+  deleteMessage: (messageId) => api.delete(`/messages/${messageId}`),
   
   // Compteur non lus
   getUnreadCount: () => api.get('/messages/unread-count'),

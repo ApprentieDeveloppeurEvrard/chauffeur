@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { messagesApi } from '../../services/api';
 import { format } from 'date-fns';
@@ -10,6 +10,9 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [showMenuForMessage, setShowMenuForMessage] = useState(null);
+  const [deletedMessageIds, setDeletedMessageIds] = useState(new Set()); // Messages supprimés localement
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
@@ -21,25 +24,58 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
       fetchMessages();
       // Marquer comme lu
       markAsRead();
+      
+      // Polling automatique toutes les 15 secondes en mode silencieux (seulement si l'utilisateur ne tape pas)
+      const intervalId = setInterval(() => {
+        if (!isTyping) {
+          fetchMessages(true); // Mode silencieux - pas de loader
+        }
+      }, 15000);
+      
+      return () => clearInterval(intervalId);
     }
-  }, [conversation?._id]);
+  }, [conversation?._id, isTyping, deletedMessageIds]);
 
   // Auto-scroll vers le bas
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const fetchMessages = async () => {
+  // Fermer le menu quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMenuForMessage && !event.target.closest('.message-menu')) {
+        setShowMenuForMessage(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenuForMessage]);
+
+  const fetchMessages = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const response = await messagesApi.getMessages(conversation._id);
-      setMessages(response.data.messages || []);
+      const allMessages = response.data.messages || [];
+      
+      // Filtrer les messages supprimés localement
+      const filteredMessages = allMessages.filter(msg => !deletedMessageIds.has(msg._id));
+      
+      // Mise à jour silencieuse - comparer avant de mettre à jour pour éviter les re-renders inutiles
+      setMessages(prevMessages => {
+        // Si les messages sont identiques, ne pas mettre à jour
+        if (JSON.stringify(prevMessages) === JSON.stringify(filteredMessages)) {
+          return prevMessages;
+        }
+        return filteredMessages;
+      });
     } catch (error) {
       console.error('Erreur chargement messages:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
-  };
+  }, [conversation._id, deletedMessageIds]);
 
   const markAsRead = async () => {
     try {
@@ -83,6 +119,18 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
     } finally {
       setSending(false);
     }
+  };
+
+  const handleDeleteMessage = (messageId) => {
+    // Ajouter l'ID à la liste des messages supprimés
+    setDeletedMessageIds(prev => new Set([...prev, messageId]));
+    
+    // Retirer le message de la liste affichée
+    setMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+    setShowMenuForMessage(null);
+    
+    // TODO: Implémenter l'appel API côté serveur si nécessaire
+    // await messagesApi.deleteMessage(messageId);
   };
 
   const formatMessageTime = (date) => {
@@ -129,9 +177,9 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      {/* En-tête du chat - Style Jumli - Fixe en haut */}
-      <div className="flex-shrink-0 flex items-center gap-3 p-4 border-b border-gray-200 bg-gradient-to-r from-orange-50 to-white">
+    <div className="h-full bg-white relative">
+      {/* En-tête du chat - Position absolue fixe en haut */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center gap-1.5 xs:gap-2 sm:gap-3 p-2 xs:p-3 sm:p-4 border-b border-gray-200 bg-white">
         {/* Bouton retour (mobile) */}
         {onBack && (
           <button
@@ -150,10 +198,10 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
             <img
               src={otherUser.profilePhotoUrl}
               alt={`${otherUser.firstName} ${otherUser.lastName}`}
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-orange-200"
+              className="w-8 xs:w-10 sm:w-12 h-8 xs:h-10 sm:h-12 rounded-full object-cover"
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-semibold ring-2 ring-orange-200">
+            <div className="w-8 xs:w-10 sm:w-12 h-8 xs:h-10 sm:h-12 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold text-xs xs:text-sm sm:text-base">
               {getInitials(otherUser?.firstName, otherUser?.lastName)}
             </div>
           )}
@@ -161,23 +209,12 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
 
         {/* Infos utilisateur */}
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-gray-900 truncate">
+          <h2 className="font-semibold text-xs xs:text-sm sm:text-base text-gray-900 truncate">
             {otherUser?.firstName} {otherUser?.lastName}
           </h2>
-          <div className="flex items-center gap-2">
-            <span className={`
-              inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-              ${otherUser?.role === 'driver' 
-                ? 'bg-blue-100 text-blue-800' 
-                : 'bg-purple-100 text-purple-800'
-              }
-            `}>
-              {otherUser?.role === 'driver' ? 'Chauffeur' : 'Employeur'}
-            </span>
-            {otherUser?.companyName && (
-              <span className="text-xs text-gray-500">• {otherUser.companyName}</span>
-            )}
-          </div>
+          <p className="text-[10px] xs:text-xs sm:text-sm text-blue-600 truncate">
+            {otherUser?.role === 'driver' ? 'Chauffeur' : 'Employeur'}
+          </p>
         </div>
 
         {/* Actions */}
@@ -190,16 +227,16 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
         </div>
       </div>
 
-      {/* Zone de messages */}
+      {/* Zone de messages - Scroll avec padding pour en-tête et footer */}
       <div 
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-6 bg-gray-50"
+        className="absolute top-[57px] xs:top-[65px] sm:top-[73px] bottom-[72px] xs:bottom-[80px] sm:bottom-[88px] left-0 right-0 overflow-y-auto p-2 xs:p-3 sm:p-4 space-y-3 xs:space-y-4 sm:space-y-6 bg-gray-50"
       >
         {Object.entries(messageGroups).map(([date, msgs]) => (
           <div key={date}>
-            {/* Séparateur de date */}
-            <div className="flex items-center justify-center mb-4">
-              <div className="bg-white px-4 py-1 rounded-full shadow-sm border border-gray-200">
+            {/* Séparateur de date - Sticky sous l'en-tête */}
+            <div className="sticky top-0 z-10 flex items-center justify-center py-2">
+              <div className="bg-white px-4 py-1 rounded-full shadow-md border border-gray-200">
                 <span className="text-xs font-medium text-gray-600">{date}</span>
               </div>
             </div>
@@ -209,7 +246,8 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
               {msgs.map((message, index) => {
                 // Extraire l'ID de l'expéditeur (peut être un objet ou un string)
                 const senderId = typeof message.senderId === 'object' ? message.senderId._id : message.senderId;
-                const isOwn = senderId === user.sub;
+                // Vérifier plusieurs formats d'ID possibles
+                const isOwn = senderId === user.sub || senderId === user.id || senderId === user._id;
                 const isSystem = message.type === 'system';
 
                 if (isSystem) {
@@ -225,7 +263,7 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
                 return (
                   <div
                     key={message._id}
-                    className={`flex items-end gap-2 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}
+                    className={`flex items-end gap-2 group ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}
                   >
                     {/* Avatar (seulement pour les messages reçus) */}
                     {!isOwn && (
@@ -237,7 +275,7 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
                             className="w-8 h-8 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-xs font-semibold">
+                          <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-semibold">
                             {getInitials(otherUser?.firstName, otherUser?.lastName)}
                           </div>
                         )}
@@ -246,9 +284,9 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
 
                     {/* Bulle de message - Style Jumli */}
                     <div className={`
-                      max-w-[70%] px-4 py-2.5 rounded-2xl shadow-sm
+                      max-w-[90%] xs:max-w-[85%] sm:max-w-[70%] px-2.5 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-2.5 rounded-2xl shadow-sm relative text-sm xs:text-base
                       ${isOwn 
-                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-br-sm' 
+                        ? 'bg-orange-500 text-white rounded-br-sm' 
                         : 'bg-white text-gray-900 border border-gray-200 rounded-bl-sm'
                       }
                     `}>
@@ -266,6 +304,44 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
                           </svg>
                         )}
                       </div>
+
+                      {/* Menu déroulant - Positionné sur la bulle */}
+                      {showMenuForMessage === message._id && (
+                        <div className={`absolute z-20 top-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[180px] ${isOwn ? 'right-0' : 'left-0'}`}>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm('Supprimer ce message ? (uniquement pour vous)')) {
+                                handleDeleteMessage(message._id);
+                              } else {
+                                setShowMenuForMessage(null);
+                              }
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 whitespace-nowrap"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Supprimer pour moi
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bouton menu trois points */}
+                    <div className={`flex-shrink-0 message-menu ${isOwn ? 'order-first' : 'order-last'}`}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowMenuForMessage(showMenuForMessage === message._id ? null : message._id);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition-all"
+                        title="Options"
+                      >
+                        <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 );
@@ -276,9 +352,9 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Zone de saisie - Style Jumli - Fixe en bas */}
-      <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-white">
-        <form onSubmit={handleSendMessage} className="flex items-end gap-3">
+      {/* Zone de saisie - Position absolue fixe en bas */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 p-2 xs:p-3 sm:p-4 border-t border-gray-200 bg-white">
+        <form onSubmit={handleSendMessage} className="flex items-end gap-1.5 xs:gap-2 sm:gap-3">
           {/* Bouton pièce jointe (optionnel) */}
           <button
             type="button"
@@ -294,17 +370,22 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
           <div className="flex-1">
             <textarea
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                setIsTyping(true);
+              }}
+              onBlur={() => setIsTyping(false)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSendMessage(e);
+                  setIsTyping(false);
                 }
               }}
               placeholder="Tapez votre message..."
               rows={1}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none max-h-32"
-              style={{ minHeight: '48px' }}
+              className="w-full px-2.5 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none max-h-32"
+              style={{ minHeight: '36px' }}
             />
           </div>
 
@@ -313,9 +394,9 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
             type="submit"
             disabled={!newMessage.trim() || sending}
             className={`
-              flex-shrink-0 p-3 rounded-xl font-medium transition-all
+              flex-shrink-0 p-2 xs:p-2.5 sm:p-3 rounded-xl font-medium transition-all
               ${newMessage.trim() && !sending
-                ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:shadow-lg hover:scale-105'
+                ? 'bg-orange-500 text-white hover:bg-orange-600'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }
             `}

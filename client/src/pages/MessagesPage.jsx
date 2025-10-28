@@ -24,12 +24,21 @@ export default function MessagesPage() {
 
     fetchConversations();
 
+    // Polling automatique toutes les 20 secondes en mode silencieux
+    const intervalId = setInterval(() => {
+      fetchConversations(true); // Mode silencieux
+    }, 20000);
+
     // Gérer le redimensionnement
     const handleResize = () => {
       setIsMobileView(window.innerWidth < 1024);
     };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [user, navigate]);
 
   // Sélectionner une conversation depuis l'URL
@@ -43,15 +52,24 @@ export default function MessagesPage() {
     }
   }, [searchParams, conversations]);
 
-  const fetchConversations = async () => {
+  const fetchConversations = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const response = await messagesApi.getConversations();
-      setConversations(response.data.conversations || []);
+      const newConversations = response.data.conversations || [];
+      
+      // Mise à jour silencieuse - comparer avant de mettre à jour
+      setConversations(prevConversations => {
+        // Si les conversations sont identiques, ne pas mettre à jour
+        if (JSON.stringify(prevConversations) === JSON.stringify(newConversations)) {
+          return prevConversations;
+        }
+        return newConversations;
+      });
     } catch (error) {
       console.error('Erreur chargement conversations:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -86,10 +104,10 @@ export default function MessagesPage() {
     <div className="min-h-screen bg-gray-50">
       <SimpleHeader activeTab="messages" readOnly />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Conteneur principal - Style Jumli */}
-        <div className="bg-white border border-gray-200 overflow-hidden">
-          <div className="grid lg:grid-cols-3 h-[calc(100vh-240px)] min-h-[600px]">
+      <div className="max-w-7xl mx-auto px-0 sm:px-4 lg:px-8 py-0 sm:py-6">
+        {/* Conteneur principal - Plein écran sur mobile */}
+        <div className="bg-white border-0 sm:border border-gray-200 overflow-hidden h-[calc(100vh-80px)] sm:h-auto">
+          <div className="grid lg:grid-cols-3 h-full sm:h-[calc(100vh-240px)] min-h-[600px]">
             {/* Liste des conversations - Desktop toujours visible, Mobile conditionnelle */}
             <div className={`
               lg:col-span-1 border-r border-gray-200 
