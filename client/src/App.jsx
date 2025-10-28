@@ -26,6 +26,7 @@ import MyOffers from './pages/employer/MyOffers.jsx'
 import MyProducts from './pages/employer/MyProducts.jsx'
 import DriverMyProducts from './pages/driver/MyProducts.jsx'
 import MyApplications from './pages/driver/MyApplications.jsx'
+import MessagesPage from './pages/MessagesPage.jsx'
 
 function App() {
   return (
@@ -179,6 +180,16 @@ function App() {
               element={
                 <PrivateRoute>
                   <MyApplications />
+                </PrivateRoute>
+              } 
+            />
+            
+            {/* Page de messagerie protégée (tous les utilisateurs) */}
+            <Route 
+              path="/messages" 
+              element={
+                <PrivateRoute>
+                  <MessagesPage />
                 </PrivateRoute>
               } 
             />

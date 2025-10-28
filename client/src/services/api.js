@@ -207,6 +207,7 @@ export const driversService = {
   getCount: () => api.get('/drivers/count'),
   getAll: () => api.get('/drivers/public'), // Route publique sans authentification
   getAllAdmin: () => api.get('/drivers'), // Route admin avec authentification
+  getById: (driverId) => api.get(`/drivers/${driverId}`), // Récupérer un chauffeur spécifique
 }
 
 // Service pour le chat
@@ -225,16 +226,22 @@ export const chatService = {
     api.post(`/chat/conversations/${conversationId}/messages`, { content, type, metadata }),
 }
 
-// API pour les messages (système simplifié)
+// API pour les messages (système complet)
 export const messagesApi = {
-  // Envoyer un message
-  send: (data) => api.post('/messages/send', data),
-  // Récupérer les conversations
+  // Conversations
+  createOrGetConversation: (targetUserId, context = {}) => 
+    api.post('/messages/conversations', { targetUserId, context }),
   getConversations: () => api.get('/messages/conversations'),
-  // Récupérer les messages d'une conversation
-  getMessages: (conversationId) => api.get(`/messages/conversations/${conversationId}/messages`),
-  // Marquer une conversation comme lue
   markAsRead: (conversationId) => api.put(`/messages/conversations/${conversationId}/read`),
+  deleteConversation: (conversationId) => api.delete(`/messages/conversations/${conversationId}`),
+  
+  // Messages
+  getMessages: (conversationId, page = 1, limit = 50) => 
+    api.get(`/messages/conversations/${conversationId}/messages?page=${page}&limit=${limit}`),
+  send: (data) => api.post(`/messages/conversations/${data.conversationId}/messages`, data),
+  
+  // Compteur non lus
+  getUnreadCount: () => api.get('/messages/unread-count'),
 }
 
 // Service de recherche intelligente

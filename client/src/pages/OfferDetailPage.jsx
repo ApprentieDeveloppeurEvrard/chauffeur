@@ -192,33 +192,26 @@ export default function OfferDetailPage() {
         setLoading(true);
         console.log('Chargement de l\'offre avec ID:', id);
         
-        // Essayer de charger depuis l'API
-        const response = await offersApi.list();
-        console.log('Réponse API complète:', response);
-        console.log('Offres dans la réponse:', response.data?.offers);
+        // Charger directement l'offre par ID (optimisé)
+        const response = await offersApi.getById(id);
+        console.log('Réponse API:', response);
         
-        let foundOffer = null;
-        
-        // L'API retourne {offers: [...]}
-        if (response.data && response.data.offers) {
-          foundOffer = response.data.offers.find(o => o._id === id);
-          console.log('Offre trouvée dans l\'API:', foundOffer);
-        }
-        
-        // Si pas trouvé dans l'API, chercher dans les offres de test
-        if (!foundOffer) {
-          console.log('Recherche dans les offres de test...');
-          foundOffer = testOffers.find(o => o._id === id);
-          console.log('Offre trouvée dans les tests:', foundOffer);
-        }
-        
-        if (foundOffer) {
-          console.log('Offre finale à afficher:', foundOffer);
-          setOffer(foundOffer);
+        if (response.data) {
+          console.log('Offre trouvée:', response.data);
+          setOffer(response.data);
           setError(null);
         } else {
-          console.error('Aucune offre trouvée avec l\'ID:', id);
-          setError('Offre non trouvée');
+          // Si pas trouvé dans l'API, chercher dans les offres de test
+          console.log('Recherche dans les offres de test...');
+          const foundOffer = testOffers.find(o => o._id === id);
+          if (foundOffer) {
+            console.log('Offre trouvée dans les tests:', foundOffer);
+            setOffer(foundOffer);
+            setError(null);
+          } else {
+            console.error('Aucune offre trouvée avec l\'ID:', id);
+            setError('Offre non trouvée');
+          }
         }
       } catch (err) {
         console.error('Erreur lors du chargement:', err);

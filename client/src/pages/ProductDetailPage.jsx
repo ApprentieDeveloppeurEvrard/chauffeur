@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { offersApi } from '../services/api';
+import { offersApi, messagesApi } from '../services/api';
 import SimpleHeader from '../component/common/SimpleHeader';
 import api from '../services/api';
 
@@ -13,6 +13,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [contacting, setContacting] = useState(false);
 
   // Vérifier si l'utilisateur est le propriétaire de l'offre
   const isOwner = user && product && product.employerId === user.sub;
@@ -478,22 +479,48 @@ export default function ProductDetailPage() {
             {/* Contact */}
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
               <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Contact</h2>
-              {product.contactInfo?.email && (
-                <p className="text-xs lg:text-lg text-gray-600 mb-2">
-                  <span className="font-medium">Email:</span> {product.contactInfo.email}
-                </p>
-              )}
-              {product.contactInfo?.phone && (
+              {(product.employer || product.employerId) && (
                 <p className="text-xs lg:text-lg text-gray-600 mb-4">
-                  <span className="font-medium">Tél:</span> {product.contactInfo.phone}
+                  <span className="font-medium">Vendeur:</span> {(product.employer?.firstName || product.employerId?.firstName)} {(product.employer?.lastName || product.employerId?.lastName)}
+                  {(product.employer?.companyName || product.employerId?.companyName) && ` (${product.employer?.companyName || product.employerId?.companyName})`}
                 </p>
               )}
-              <Link
-                to="/auth"
-                className="block w-full py-3 bg-orange-500 text-white text-center font-medium rounded-lg hover:bg-orange-600 transition-colors"
-              >
-                Contacter le vendeur
-              </Link>
+              {user ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      setContacting(true);
+                      const employerId = product.employerId?._id || product.employerId;
+                      const response = await messagesApi.createOrGetConversation(
+                        employerId,
+                        { type: 'product_inquiry', offerId: product._id }
+                      );
+                      navigate(`/messages?conversation=${response.data.conversation._id}`);
+                    } catch (error) {
+                      console.error('Erreur:', error);
+                      alert('Erreur lors de la création de la conversation');
+                    } finally {
+                      setContacting(false);
+                    }
+                  }}
+                  disabled={contacting}
+                  className="block w-full py-3 bg-orange-500 text-white text-center font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                >
+                  {contacting ? 'Connexion...' : 'Envoyer un message'}
+                </button>
+              ) : (
+                <>
+                  <Link
+                    to="/auth"
+                    className="block w-full py-3 bg-orange-500 text-white text-center font-medium rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    Contacter le vendeur
+                  </Link>
+                  <p className="text-xs lg:text-sm text-gray-500 text-center mt-2">
+                    Créez un compte gratuit pour contacter le vendeur
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Info */}

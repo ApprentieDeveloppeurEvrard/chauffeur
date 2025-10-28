@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { driversService } from '../services/api';
+import { driversService, messagesApi } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import SimpleHeader from '../component/common/SimpleHeader';
 
 export default function DriverDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [driver, setDriver] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [contacting, setContacting] = useState(false);
 
   // Chauffeurs de test (mêmes que HomePage)
   const testDrivers = [
@@ -96,19 +99,21 @@ export default function DriverDetailPage() {
     const fetchDriver = async () => {
       try {
         setLoading(true);
-        // Essayer de charger depuis l'API
-        const response = await driversService.getAll();
-        let foundDriver = response.data?.data?.find(d => d._id === id);
+        // Charger directement le chauffeur par ID (optimisé)
+        const response = await driversService.getById(id);
         
-        // Si pas trouvé dans l'API, chercher dans les chauffeurs de test
-        if (!foundDriver) {
-          foundDriver = testDrivers.find(d => d._id === id);
-        }
-        
-        if (foundDriver) {
-          setDriver(foundDriver);
+        if (response.data) {
+          setDriver(response.data);
+          setError(null);
         } else {
-          setError('Chauffeur non trouvé');
+          // Si pas trouvé dans l'API, chercher dans les chauffeurs de test
+          const foundDriver = testDrivers.find(d => d._id === id);
+          if (foundDriver) {
+            setDriver(foundDriver);
+            setError(null);
+          } else {
+            setError('Chauffeur non trouvé');
+          }
         }
       } catch (err) {
         console.error('Erreur:', err);
@@ -116,6 +121,7 @@ export default function DriverDetailPage() {
         const foundDriver = testDrivers.find(d => d._id === id);
         if (foundDriver) {
           setDriver(foundDriver);
+          setError(null);
         } else {
           setError('Chauffeur non trouvé');
         }
@@ -216,15 +222,41 @@ export default function DriverDetailPage() {
 
             {/* Bouton d'action */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-24">
-              <Link
-                to="/register"
-                className="block w-full py-3 lg:py-4 bg-orange-500 text-white text-center text-sm lg:text-base font-medium rounded-lg hover:bg-orange-600 transition-colors"
-              >
-                Contacter ce chauffeur
-              </Link>
-              <p className="text-xs lg:text-sm text-gray-500 text-center">
-                Créez un compte gratuit pour contacter ce chauffeur
-              </p>
+              {user ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      setContacting(true);
+                      const response = await messagesApi.createOrGetConversation(
+                        driver.userId._id || driver.userId,
+                        { type: 'driver_inquiry', driverId: driver._id }
+                      );
+                      navigate(`/messages?conversation=${response.data.conversation._id}`);
+                    } catch (error) {
+                      console.error('Erreur:', error);
+                      alert('Erreur lors de la création de la conversation');
+                    } finally {
+                      setContacting(false);
+                    }
+                  }}
+                  disabled={contacting}
+                  className="block w-full py-3 lg:py-4 bg-orange-500 text-white text-center text-sm lg:text-base font-medium rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                >
+                  {contacting ? 'Connexion...' : 'Envoyer un message'}
+                </button>
+              ) : (
+                <>
+                  <Link
+                    to="/auth"
+                    className="block w-full py-3 lg:py-4 bg-orange-500 text-white text-center text-sm lg:text-base font-medium rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    Contacter ce chauffeur
+                  </Link>
+                  <p className="text-xs lg:text-sm text-gray-500 text-center mt-2">
+                    Créez un compte gratuit pour contacter ce chauffeur
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>

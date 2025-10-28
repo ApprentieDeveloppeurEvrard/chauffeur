@@ -101,7 +101,7 @@ export default function SearchResults({ results, query, onClose }) {
             {offers.map((offer) => (
               <Link
                 key={offer._id}
-                to={`/offer/${offer._id}`}
+                to={`/offre/${offer._id}`}
                 onClick={onClose}
                 className="block p-3 lg:p-4 hover:bg-gray-50 rounded-lg transition-colors"
               >
@@ -144,7 +144,7 @@ export default function SearchResults({ results, query, onClose }) {
             {products.map((product) => (
               <Link
                 key={product._id}
-                to={`/product/${product._id}`}
+                to={`/produit/${product._id}`}
                 onClick={onClose}
                 className="block p-3 lg:p-4 hover:bg-gray-50 rounded-lg transition-colors"
               >
