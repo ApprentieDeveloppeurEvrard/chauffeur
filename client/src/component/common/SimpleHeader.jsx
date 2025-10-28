@@ -96,7 +96,7 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
               <path d="M12 16L20 20L28 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M20 32V20" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span className="text-lg font-bold text-gray-900">GoDriver</span>
+            <span className="text-lg lg:text-2xl font-bold text-gray-900">GoDriver</span>
           </Link>
 
           {/* Barre de recherche desktop */}
@@ -145,7 +145,7 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
             )}
             <Link
               to="/publier-offre"
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors hidden lg:inline-block"
+              className="px-2 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors hidden lg:inline-block"
             >
               Publier une offre
             </Link>
@@ -153,7 +153,7 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
               <div className="relative">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 transition-colors"
+                  className="px-4 py-2 bg-orange-500 text-white text-sm lg:text-base font-medium rounded hover:bg-orange-600 transition-colors"
                 >
                   Mon espace
                 </button>
@@ -165,13 +165,13 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
                       className="fixed inset-0 z-10" 
                       onClick={() => setShowMenu(false)}
                     />
-                    <div className="absolute right-0 mt-2 text-sm w-64 p-3 bg-white border border-gray-500/30 text-gray-800/80 rounded-md font-medium z-20">
+                    <div className="absolute right-0 mt-2 text-base lg:text-lg w-64 p-3 bg-white border border-gray-500/30 text-gray-800/80 rounded-md font-medium z-20">
                       {/* Informations utilisateur */}
                       <div className="px-3 py-3 mb-2 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-sm font-semibold text-gray-900">
+                        <p className="text-base lg:text-lg font-semibold text-gray-900">
                           {user.firstName} {user.lastName}
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5">{user.email}</p>
+                        <p className="text-sm lg:text-base text-gray-500 mt-0.5">{user.email}</p>
                         <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-600">
                           {user.role === 'driver' ? 'Chauffeur' : 'Employeur'}
                         </span>
@@ -248,7 +248,7 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
             ) : (
               <Link
                 to="/auth"
-                className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 transition-colors"
+                className="px-4 py-2 bg-orange-500 text-white text-sm lg:text-base font-medium rounded hover:bg-orange-600 transition-colors"
               >
                 Connexion
               </Link>

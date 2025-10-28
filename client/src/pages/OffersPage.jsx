@@ -13,6 +13,11 @@ export default function OffersPage() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showFabMenu, setShowFabMenu] = useState(false);
   const navigate = useNavigate();
+  
+  // États des filtres
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedContractType, setSelectedContractType] = useState('');
+  const [selectedWorkType, setSelectedWorkType] = useState('');
 
   // Bannières publicitaires
   const banners = [
@@ -145,13 +150,28 @@ export default function OffersPage() {
     return () => clearInterval(interval);
   }, [banners.length]);
 
-  // Filtrage simple par recherche
-  const filteredOffers = offers.filter(offer =>
-    searchQuery === '' ||
-    offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    offer.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    offer.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filtrage combiné (recherche + filtres)
+  const filteredOffers = offers.filter(offer => {
+    // Filtre de recherche
+    const matchesSearch = searchQuery === '' ||
+      offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      offer.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (offer.location && offer.location.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Filtre par ville
+    const matchesCity = selectedCity === '' ||
+      (offer.location && offer.location.toLowerCase().includes(selectedCity.toLowerCase()));
+    
+    // Filtre par type de contrat
+    const matchesContractType = selectedContractType === '' ||
+      (offer.type && offer.type.toLowerCase() === selectedContractType.toLowerCase());
+    
+    // Filtre par type de travail
+    const matchesWorkType = selectedWorkType === '' ||
+      (offer.workType && offer.workType.toLowerCase().includes(selectedWorkType.toLowerCase()));
+    
+    return matchesSearch && matchesCity && matchesContractType && matchesWorkType;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -193,12 +213,42 @@ export default function OffersPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Ville
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Toutes les villes</option>
                   <option value="abidjan">Abidjan</option>
-                  <option value="bouake">Bouaké</option>
                   <option value="yamoussoukro">Yamoussoukro</option>
-                  <option value="san-pedro">San-Pédro</option>
+                  <option value="bouake">Bouaké</option>
+                  <option value="daloa">Daloa</option>
+                  <option value="san-pedro">San Pedro</option>
+                  <option value="man">Man</option>
+                  <option value="gagnoa">Gagnoa</option>
+                  <option value="korhogo">Korhogo</option>
+                  <option value="divo">Divo</option>
+                  <option value="abengourou">Abengourou</option>
+                  <option value="bondoukou">Bondoukou</option>
+                  <option value="seguela">Séguéla</option>
+                  <option value="soubre">Soubré</option>
+                  <option value="ferkessedougou">Ferkessédougou</option>
+                  <option value="odienne">Odienné</option>
+                  <option value="touba">Touba</option>
+                  <option value="dabou">Dabou</option>
+                  <option value="tiassale">Tiassalé</option>
+                  <option value="grand-bassam">Grand-Bassam</option>
+                  <option value="guiglo">Guiglo</option>
+                  <option value="danane">Danané</option>
+                  <option value="biankouma">Biankouma</option>
+                  <option value="mbatto">M'Batto</option>
+                  <option value="bocanda">Bocanda</option>
+                  <option value="katiola">Katiola</option>
+                  <option value="bouafle">Bouaflé</option>
+                  <option value="sakassou">Sakassou</option>
+                  <option value="daoukro">Daoukro</option>
+                  <option value="tanda">Tanda</option>
+                  <option value="tabou">Tabou</option>
                 </select>
               </div>
 
@@ -207,7 +257,11 @@ export default function OffersPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Type de contrat
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedContractType}
+                  onChange={(e) => setSelectedContractType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Tous les types</option>
                   <option value="cdi">CDI</option>
                   <option value="cdd">CDD</option>
@@ -220,10 +274,14 @@ export default function OffersPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Horaire
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedWorkType}
+                  onChange={(e) => setSelectedWorkType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Tous les horaires</option>
-                  <option value="temps-plein">Temps plein</option>
-                  <option value="temps-partiel">Temps partiel</option>
+                  <option value="temps plein">Temps plein</option>
+                  <option value="temps partiel">Temps partiel</option>
                   <option value="flexible">Flexible</option>
                 </select>
               </div>
@@ -242,7 +300,14 @@ export default function OffersPage() {
               </div>
 
               {/* Bouton Réinitialiser */}
-              <button className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+              <button 
+                onClick={() => {
+                  setSelectedCity('');
+                  setSelectedContractType('');
+                  setSelectedWorkType('');
+                }}
+                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
                 Réinitialiser les filtres
               </button>
             </div>
@@ -373,12 +438,42 @@ export default function OffersPage() {
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Ville
                 </label>
-                <select className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Toutes les villes</option>
                   <option value="abidjan">Abidjan</option>
-                  <option value="bouake">Bouaké</option>
                   <option value="yamoussoukro">Yamoussoukro</option>
-                  <option value="san-pedro">San-Pédro</option>
+                  <option value="bouake">Bouaké</option>
+                  <option value="daloa">Daloa</option>
+                  <option value="san-pedro">San Pedro</option>
+                  <option value="man">Man</option>
+                  <option value="gagnoa">Gagnoa</option>
+                  <option value="korhogo">Korhogo</option>
+                  <option value="divo">Divo</option>
+                  <option value="abengourou">Abengourou</option>
+                  <option value="bondoukou">Bondoukou</option>
+                  <option value="seguela">Séguéla</option>
+                  <option value="soubre">Soubré</option>
+                  <option value="ferkessedougou">Ferkessédougou</option>
+                  <option value="odienne">Odienné</option>
+                  <option value="touba">Touba</option>
+                  <option value="dabou">Dabou</option>
+                  <option value="tiassale">Tiassalé</option>
+                  <option value="grand-bassam">Grand-Bassam</option>
+                  <option value="guiglo">Guiglo</option>
+                  <option value="danane">Danané</option>
+                  <option value="biankouma">Biankouma</option>
+                  <option value="mbatto">M'Batto</option>
+                  <option value="bocanda">Bocanda</option>
+                  <option value="katiola">Katiola</option>
+                  <option value="bouafle">Bouaflé</option>
+                  <option value="sakassou">Sakassou</option>
+                  <option value="daoukro">Daoukro</option>
+                  <option value="tanda">Tanda</option>
+                  <option value="tabou">Tabou</option>
                 </select>
               </div>
 
@@ -387,7 +482,11 @@ export default function OffersPage() {
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Type de contrat
                 </label>
-                <select className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedContractType}
+                  onChange={(e) => setSelectedContractType(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Tous les types</option>
                   <option value="cdi">CDI</option>
                   <option value="cdd">CDD</option>
@@ -400,10 +499,14 @@ export default function OffersPage() {
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Horaire
                 </label>
-                <select className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedWorkType}
+                  onChange={(e) => setSelectedWorkType(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Tous les horaires</option>
-                  <option value="temps-plein">Temps plein</option>
-                  <option value="temps-partiel">Temps partiel</option>
+                  <option value="temps plein">Temps plein</option>
+                  <option value="temps partiel">Temps partiel</option>
                   <option value="flexible">Flexible</option>
                 </select>
               </div>
@@ -423,7 +526,14 @@ export default function OffersPage() {
 
               {/* Boutons */}
               <div className="flex gap-2 pt-3">
-                <button className="flex-1 px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                <button 
+                  onClick={() => {
+                    setSelectedCity('');
+                    setSelectedContractType('');
+                    setSelectedWorkType('');
+                  }}
+                  className="flex-1 px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                >
                   Réinitialiser
                 </button>
                 <button 

@@ -150,11 +150,35 @@ export default function OrderProductForm({ productId, productName, productPrice,
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
           >
             <option value="Abidjan">Abidjan</option>
-            <option value="Bouaké">Bouaké</option>
             <option value="Yamoussoukro">Yamoussoukro</option>
-            <option value="San-Pédro">San-Pédro</option>
+            <option value="Bouaké">Bouaké</option>
             <option value="Daloa">Daloa</option>
+            <option value="San Pedro">San Pedro</option>
+            <option value="Man">Man</option>
+            <option value="Gagnoa">Gagnoa</option>
             <option value="Korhogo">Korhogo</option>
+            <option value="Divo">Divo</option>
+            <option value="Abengourou">Abengourou</option>
+            <option value="Bondoukou">Bondoukou</option>
+            <option value="Séguéla">Séguéla</option>
+            <option value="Soubré">Soubré</option>
+            <option value="Ferkessédougou">Ferkessédougou</option>
+            <option value="Odienné">Odienné</option>
+            <option value="Touba">Touba</option>
+            <option value="Dabou">Dabou</option>
+            <option value="Tiassalé">Tiassalé</option>
+            <option value="Grand-Bassam">Grand-Bassam</option>
+            <option value="Guiglo">Guiglo</option>
+            <option value="Danané">Danané</option>
+            <option value="Biankouma">Biankouma</option>
+            <option value="M'Batto">M'Batto</option>
+            <option value="Bocanda">Bocanda</option>
+            <option value="Katiola">Katiola</option>
+            <option value="Bouaflé">Bouaflé</option>
+            <option value="Sakassou">Sakassou</option>
+            <option value="Daoukro">Daoukro</option>
+            <option value="Tanda">Tanda</option>
+            <option value="Tabou">Tabou</option>
           </select>
         </div>
 

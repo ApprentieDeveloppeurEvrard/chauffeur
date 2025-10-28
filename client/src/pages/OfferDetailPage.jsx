@@ -305,7 +305,7 @@ export default function OfferDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <SimpleHeader activeTab="offres" readOnly={true} />
+      <SimpleHeader activeTab="offres" />
 
       {/* Contenu - Style fiche produit */}
       <main className="max-w-7xl mx-auto px-4 lg:px-6 py-8">
@@ -319,20 +319,20 @@ export default function OfferDetailPage() {
               </h1>
               <p className="text-sm sm:text-base text-gray-600 mb-4">{offer.company}</p>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded">
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs lg:text-lg font-medium rounded">
                   {offer.contractType || offer.type || 'CDI'}
                 </span>
                 {offer.type && (
-                  <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs lg:text-lg font-medium rounded">
                     {offer.type}
                   </span>
                 )}
                 {(offer.conditions?.workType || offer.workType) && (
-                  <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs lg:text-lg font-medium rounded">
                     {offer.conditions?.workType?.replace('_', ' ') || offer.workType}
                   </span>
                 )}
-                <span className="text-sm text-gray-500">
+                <span className="text-xs lg:text-lg text-gray-500">
                   Publié le {new Date(offer.createdAt || offer.postedDate).toLocaleDateString('fr-FR')}
                 </span>
               </div>
@@ -340,13 +340,13 @@ export default function OfferDetailPage() {
 
             {/* Description */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mb-6">
-              <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-4">Description du poste</h2>
+              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Description du poste</h2>
               <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{offer.description}</p>
             </div>
 
             {/* Exigences */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mb-6">
-              <h2 className="text-sm sm:text-base font-semibold text-gray-900 mb-4">Profil recherché</h2>
+              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Profil recherché</h2>
               <ul className="space-y-2">
                 {/* Afficher les exigences selon la structure */}
                 {(offer.requirementsList && Array.isArray(offer.requirementsList)) ? (
@@ -432,34 +432,34 @@ export default function OfferDetailPage() {
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Informations</h3>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Localisation</p>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-xs lg:text-lg text-gray-500 mb-1">Localisation</p>
+                    <p className="text-xs lg:text-lg font-medium text-gray-900">
                       {offer.location?.address && offer.location?.city 
                         ? `${offer.location.address}, ${offer.location.city}`
                         : offer.location?.city || offer.location || 'Non spécifié'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Salaire</p>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-xs lg:text-lg text-gray-500 mb-1">Salaire</p>
+                    <p className="text-xs lg:text-lg font-medium text-gray-900">
                       {offer.salaryRange || (offer.conditions?.salary ? `${offer.conditions.salary.toLocaleString()} FCFA` : offer.salary || 'À négocier')}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Type de véhicule</p>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-xs lg:text-lg text-gray-500 mb-1">Type de véhicule</p>
+                    <p className="text-xs lg:text-lg font-medium text-gray-900">
                       {offer.requirements?.vehicleType || offer.vehicleType || 'Non spécifié'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Expérience requise</p>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-xs lg:text-lg text-gray-500 mb-1">Expérience requise</p>
+                    <p className="text-xs lg:text-lg font-medium text-gray-900">
                       {offer.requirements?.experience || offer.experience || 'Non spécifié'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500 mb-1">Permis</p>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-xs lg:text-lg text-gray-500 mb-1">Permis</p>
+                    <p className="text-xs lg:text-lg font-medium text-gray-900">
                       Permis {offer.requirements?.licenseType || offer.licenseType || 'B'}
                     </p>
                   </div>

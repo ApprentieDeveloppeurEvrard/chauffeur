@@ -151,7 +151,7 @@ export default function DriverDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <SimpleHeader activeTab="chauffeurs" readOnly={true} />
+      <SimpleHeader activeTab="chauffeurs" />
 
       {/* Contenu - Style fiche produit */}
       <main className="max-w-7xl mx-auto px-4 lg:px-6 py-4 lg:py-8">
@@ -186,7 +186,7 @@ export default function DriverDetailPage() {
                 <span className="text-sm sm:text-base lg:text-lg text-gray-900 font-medium">
                   {driver.rating ? driver.rating.toFixed(1) : '5.0'}/5
                 </span>
-                <span className="text-xs lg:text-sm text-gray-500">
+                <span className="text-xs lg:text-lg text-gray-500">
                   ({driver.totalRides || 0} courses)
                 </span>
               </div>
@@ -196,20 +196,20 @@ export default function DriverDetailPage() {
             <div className="bg-white border border-gray-200 rounded-lg p-6 lg:p-8 mb-6">
               <div className="space-y-3 lg:space-y-4">
                 <div className="flex justify-between py-2 lg:py-3 border-b border-gray-200">
-                  <span className="text-xs lg:text-sm text-gray-600">Expérience</span>
-                  <span className="text-xs lg:text-sm font-medium text-gray-900">{driver.experience || 'Non spécifiée'}</span>
+                  <span className="text-xs lg:text-lg text-gray-600">Expérience</span>
+                  <span className="text-xs lg:text-lg font-medium text-gray-900">{driver.experience || 'Non spécifiée'}</span>
                 </div>
                 <div className="flex justify-between py-2 lg:py-3 border-b border-gray-200">
-                  <span className="text-xs lg:text-sm text-gray-600">Type de véhicule</span>
-                  <span className="text-xs lg:text-sm font-medium text-gray-900">{driver.vehicleType || 'Non spécifié'}</span>
+                  <span className="text-xs lg:text-lg text-gray-600">Type de véhicule</span>
+                  <span className="text-xs lg:text-lg font-medium text-gray-900">{driver.vehicleType || 'Non spécifié'}</span>
                 </div>
                 <div className="flex justify-between py-2 lg:py-3 border-b border-gray-200">
-                  <span className="text-xs lg:text-sm text-gray-600">Zone de travail</span>
-                  <span className="text-xs lg:text-sm font-medium text-gray-900">{driver.workZone || 'Abidjan'}</span>
+                  <span className="text-xs lg:text-lg text-gray-600">Zone de travail</span>
+                  <span className="text-xs lg:text-lg font-medium text-gray-900">{driver.workZone || 'Abidjan'}</span>
                 </div>
                 <div className="flex justify-between py-2 lg:py-3">
-                  <span className="text-xs lg:text-sm text-gray-600">Permis</span>
-                  <span className="text-xs lg:text-sm font-medium text-gray-900">Permis {driver.licenseType || 'B'}</span>
+                  <span className="text-xs lg:text-lg text-gray-600">Permis</span>
+                  <span className="text-xs lg:text-lg font-medium text-gray-900">Permis {driver.licenseType || 'B'}</span>
                 </div>
               </div>
             </div>

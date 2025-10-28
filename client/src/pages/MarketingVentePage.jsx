@@ -14,6 +14,11 @@ export default function MarketingVentePage() {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showFabMenu, setShowFabMenu] = useState(false);
   const navigate = useNavigate();
+  
+  // États des filtres
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedPriceRange, setSelectedPriceRange] = useState('');
 
   // Bannières publicitaires
   const banners = [
@@ -168,13 +173,50 @@ export default function MarketingVentePage() {
     return () => clearInterval(interval);
   }, [banners.length]);
 
-  // Filtrage simple par recherche
-  const filteredProducts = products.filter(product =>
-    searchQuery === '' ||
-    (product.title || product.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (product.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (product.location?.city || product.location || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filtrage combiné (recherche + filtres)
+  const filteredProducts = products.filter(product => {
+    // Filtre de recherche
+    const matchesSearch = searchQuery === '' ||
+      (product.title || product.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.location?.city || product.location || '').toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Filtre par catégorie
+    const matchesCategory = selectedCategory === '' ||
+      (product.category && product.category.toLowerCase() === selectedCategory.toLowerCase());
+    
+    // Filtre par ville
+    const matchesCity = selectedCity === '' ||
+      (product.location?.city && product.location.city.toLowerCase().includes(selectedCity.toLowerCase())) ||
+      (product.location && typeof product.location === 'string' && product.location.toLowerCase().includes(selectedCity.toLowerCase()));
+    
+    // Filtre par prix (si implémenté)
+    let matchesPrice = true;
+    if (selectedPriceRange && product.price) {
+      const priceValue = typeof product.price === 'string' 
+        ? parseInt(product.price.replace(/[^0-9]/g, '')) 
+        : product.price;
+      
+      switch(selectedPriceRange) {
+        case '0-500000':
+          matchesPrice = priceValue < 500000;
+          break;
+        case '500000-2000000':
+          matchesPrice = priceValue >= 500000 && priceValue < 2000000;
+          break;
+        case '2000000-5000000':
+          matchesPrice = priceValue >= 2000000 && priceValue < 5000000;
+          break;
+        case '5000000+':
+          matchesPrice = priceValue >= 5000000;
+          break;
+        default:
+          matchesPrice = true;
+      }
+    }
+    
+    return matchesSearch && matchesCategory && matchesCity && matchesPrice;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -216,7 +258,11 @@ export default function MarketingVentePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Catégorie
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Toutes les catégories</option>
                   <option value="vehicules">Véhicules</option>
                   <option value="pieces">Pièces & Accessoires</option>
@@ -245,12 +291,42 @@ export default function MarketingVentePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Ville
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Toutes les villes</option>
                   <option value="abidjan">Abidjan</option>
-                  <option value="bouake">Bouaké</option>
                   <option value="yamoussoukro">Yamoussoukro</option>
-                  <option value="san-pedro">San-Pédro</option>
+                  <option value="bouake">Bouaké</option>
+                  <option value="daloa">Daloa</option>
+                  <option value="san-pedro">San Pedro</option>
+                  <option value="man">Man</option>
+                  <option value="gagnoa">Gagnoa</option>
+                  <option value="korhogo">Korhogo</option>
+                  <option value="divo">Divo</option>
+                  <option value="abengourou">Abengourou</option>
+                  <option value="bondoukou">Bondoukou</option>
+                  <option value="seguela">Séguéla</option>
+                  <option value="soubre">Soubré</option>
+                  <option value="ferkessedougou">Ferkessédougou</option>
+                  <option value="odienne">Odienné</option>
+                  <option value="touba">Touba</option>
+                  <option value="dabou">Dabou</option>
+                  <option value="tiassale">Tiassalé</option>
+                  <option value="grand-bassam">Grand-Bassam</option>
+                  <option value="guiglo">Guiglo</option>
+                  <option value="danane">Danané</option>
+                  <option value="biankouma">Biankouma</option>
+                  <option value="mbatto">M'Batto</option>
+                  <option value="bocanda">Bocanda</option>
+                  <option value="katiola">Katiola</option>
+                  <option value="bouafle">Bouaflé</option>
+                  <option value="sakassou">Sakassou</option>
+                  <option value="daoukro">Daoukro</option>
+                  <option value="tanda">Tanda</option>
+                  <option value="tabou">Tabou</option>
                 </select>
               </div>
 
@@ -259,7 +335,11 @@ export default function MarketingVentePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Fourchette de prix
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedPriceRange}
+                  onChange={(e) => setSelectedPriceRange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Tous les prix</option>
                   <option value="0-50000">0 - 50,000 FCFA</option>
                   <option value="50000-100000">50,000 - 100,000 FCFA</option>
@@ -269,7 +349,14 @@ export default function MarketingVentePage() {
               </div>
 
               {/* Bouton Réinitialiser */}
-              <button className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+              <button 
+                onClick={() => {
+                  setSelectedCategory('');
+                  setSelectedCity('');
+                  setSelectedPriceRange('');
+                }}
+                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
                 Réinitialiser les filtres
               </button>
             </div>
@@ -401,7 +488,11 @@ export default function MarketingVentePage() {
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Catégorie
                 </label>
-                <select className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Toutes les catégories</option>
                   <option value="vehicules">Véhicules</option>
                   <option value="pieces">Pièces & Accessoires</option>
@@ -430,7 +521,11 @@ export default function MarketingVentePage() {
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Ville
                 </label>
-                <select className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Toutes les villes</option>
                   <option value="abidjan">Abidjan</option>
                   <option value="bouake">Bouaké</option>
@@ -444,7 +539,11 @@ export default function MarketingVentePage() {
                 <label className="block text-xs font-medium text-gray-700 mb-1.5">
                   Fourchette de prix
                 </label>
-                <select className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <select 
+                  value={selectedPriceRange}
+                  onChange={(e) => setSelectedPriceRange(e.target.value)}
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
                   <option value="">Tous les prix</option>
                   <option value="0-50000">0 - 50,000 FCFA</option>
                   <option value="50000-100000">50,000 - 100,000 FCFA</option>
@@ -455,7 +554,14 @@ export default function MarketingVentePage() {
 
               {/* Boutons */}
               <div className="flex gap-2 pt-3">
-                <button className="flex-1 px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+                <button 
+                  onClick={() => {
+                    setSelectedCategory('');
+                    setSelectedCity('');
+                    setSelectedPriceRange('');
+                  }}
+                  className="flex-1 px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                >
                   Réinitialiser
                 </button>
                 <button 

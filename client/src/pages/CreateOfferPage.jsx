@@ -173,7 +173,7 @@ export default function CreateOfferPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header complet sans sous-navigation */}
-      <SimpleHeader readOnly={true} hideSubNav={true} />
+      <SimpleHeader hideSubNav={true} />
 
       <main className="max-w-4xl mx-auto px-4 lg:px-6 py-8">
         {/* Header */}

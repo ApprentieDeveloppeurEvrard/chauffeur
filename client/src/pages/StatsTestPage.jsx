@@ -41,7 +41,7 @@ export default function StatsTestPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SimpleHeader activeTab="test" readOnly={true} />
+      <SimpleHeader activeTab="test" />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">

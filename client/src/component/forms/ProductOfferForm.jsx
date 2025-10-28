@@ -144,7 +144,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
             </div>
           ))}
         </div>
-        <div className="flex justify-between mt-2 sm:mt-3 text-sm sm:text-base font-medium text-gray-600">
+        <div className="flex justify-between mt-2 sm:mt-3 text-sm lg:text-lg font-medium text-gray-600">
           <span>Informations produit</span>
           <span>Contact & Livraison</span>
         </div>
@@ -152,7 +152,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
-          <p className="text-sm sm:text-base text-red-700">{error}</p>
+          <p className="text-sm lg:text-lg text-red-700">{error}</p>
         </div>
       )}
 
@@ -161,7 +161,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
         {currentStep === 1 && (
           <>
             <div>
-              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Nom du produit <span className="text-red-500">*</span>
               </label>
               <input
@@ -177,7 +177,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Catégorie <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -199,7 +199,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
               </div>
 
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Prix (FCFA) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -215,7 +215,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
             </div>
 
             <div>
-              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Description <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -231,7 +231,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Marque
                 </label>
                 <input
@@ -245,7 +245,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
               </div>
 
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   État <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -264,7 +264,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
             </div>
 
             <div>
-              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Stock disponible <span className="text-red-500">*</span>
               </label>
               <input
@@ -280,7 +280,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
 
             {/* Caractéristiques */}
             <div>
-              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Caractéristiques du produit
               </label>
               <textarea
@@ -294,12 +294,12 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
                 placeholder="Une caractéristique par ligne&#10;Ex:&#10;Garantie 2 ans&#10;Compatible tous véhicules&#10;Certifié ISO 9001"
               />
-              <p className="mt-1 text-xs sm:text-sm text-gray-500">Une caractéristique par ligne</p>
+              <p className="mt-1 text-xs lg:text-sm text-gray-500">Une caractéristique par ligne</p>
             </div>
 
             {/* Avantages / Spécifications */}
             <div>
-              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Avantages / Points forts
               </label>
               <textarea
@@ -313,12 +313,12 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
                 placeholder="Un avantage par ligne&#10;Ex:&#10;Livraison rapide&#10;Prix compétitif&#10;Service après-vente"
               />
-              <p className="mt-1 text-xs sm:text-sm text-gray-500">Un avantage par ligne</p>
+              <p className="mt-1 text-xs lg:text-sm text-gray-500">Un avantage par ligne</p>
             </div>
 
             {/* Upload d'images */}
             <div>
-              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Photos du produit (max 5)
               </label>
               <input
@@ -337,7 +337,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
                   <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  <p className="mt-1 text-sm sm:text-base text-gray-600">
+                  <p className="mt-1 text-sm lg:text-lg text-gray-600">
                     Cliquez pour ajouter des images
                   </p>
                 </div>
@@ -380,7 +380,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Email de contact <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -395,7 +395,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
               </div>
 
               <div>
-                <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Téléphone de contact <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -411,7 +411,7 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
             </div>
 
             <div>
-              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Ville <span className="text-red-500">*</span>
               </label>
               <select
@@ -422,16 +422,40 @@ export default function ProductOfferForm({ onSubmit, loading, error, initialData
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
               >
                 <option value="Abidjan">Abidjan</option>
-                <option value="Bouaké">Bouaké</option>
                 <option value="Yamoussoukro">Yamoussoukro</option>
-                <option value="San-Pédro">San-Pédro</option>
+                <option value="Bouaké">Bouaké</option>
                 <option value="Daloa">Daloa</option>
+                <option value="San Pedro">San Pedro</option>
+                <option value="Man">Man</option>
+                <option value="Gagnoa">Gagnoa</option>
                 <option value="Korhogo">Korhogo</option>
+                <option value="Divo">Divo</option>
+                <option value="Abengourou">Abengourou</option>
+                <option value="Bondoukou">Bondoukou</option>
+                <option value="Séguéla">Séguéla</option>
+                <option value="Soubré">Soubré</option>
+                <option value="Ferkessédougou">Ferkessédougou</option>
+                <option value="Odienné">Odienné</option>
+                <option value="Touba">Touba</option>
+                <option value="Dabou">Dabou</option>
+                <option value="Tiassalé">Tiassalé</option>
+                <option value="Grand-Bassam">Grand-Bassam</option>
+                <option value="Guiglo">Guiglo</option>
+                <option value="Danané">Danané</option>
+                <option value="Biankouma">Biankouma</option>
+                <option value="M'Batto">M'Batto</option>
+                <option value="Bocanda">Bocanda</option>
+                <option value="Katiola">Katiola</option>
+                <option value="Bouaflé">Bouaflé</option>
+                <option value="Sakassou">Sakassou</option>
+                <option value="Daoukro">Daoukro</option>
+                <option value="Tanda">Tanda</option>
+                <option value="Tabou">Tabou</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Options de livraison <span className="text-red-500">*</span>
               </label>
               <select

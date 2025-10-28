@@ -92,7 +92,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
             </div>
           ))}
         </div>
-        <div className="flex justify-between mt-2 sm:mt-3 text-xs sm:text-sm font-medium text-gray-600">
+        <div className="flex justify-between mt-2 sm:mt-3 text-xs lg:text-sm font-medium text-gray-600">
           <span>Informations</span>
           <span>Exigences</span>
           <span>Conditions</span>
@@ -101,7 +101,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
-          <p className="text-sm text-red-700">{error}</p>
+          <p className="text-sm lg:text-lg text-red-700">{error}</p>
         </div>
       )}
 
@@ -110,7 +110,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
         {currentStep === 1 && (
           <>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Titre du poste <span className="text-red-500">*</span>
               </label>
               <input
@@ -125,7 +125,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Description du poste <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -141,7 +141,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Type d'offre <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -160,7 +160,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Type de travail <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -180,7 +180,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Adresse <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -195,7 +195,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Ville <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -206,11 +206,35 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                 >
                   <option value="Abidjan">Abidjan</option>
-                  <option value="Bouaké">Bouaké</option>
                   <option value="Yamoussoukro">Yamoussoukro</option>
-                  <option value="San-Pédro">San-Pédro</option>
+                  <option value="Bouaké">Bouaké</option>
                   <option value="Daloa">Daloa</option>
+                  <option value="San Pedro">San Pedro</option>
+                  <option value="Man">Man</option>
+                  <option value="Gagnoa">Gagnoa</option>
                   <option value="Korhogo">Korhogo</option>
+                  <option value="Divo">Divo</option>
+                  <option value="Abengourou">Abengourou</option>
+                  <option value="Bondoukou">Bondoukou</option>
+                  <option value="Séguéla">Séguéla</option>
+                  <option value="Soubré">Soubré</option>
+                  <option value="Ferkessédougou">Ferkessédougou</option>
+                  <option value="Odienné">Odienné</option>
+                  <option value="Touba">Touba</option>
+                  <option value="Dabou">Dabou</option>
+                  <option value="Tiassalé">Tiassalé</option>
+                  <option value="Grand-Bassam">Grand-Bassam</option>
+                  <option value="Guiglo">Guiglo</option>
+                  <option value="Danané">Danané</option>
+                  <option value="Biankouma">Biankouma</option>
+                  <option value="M'Batto">M'Batto</option>
+                  <option value="Bocanda">Bocanda</option>
+                  <option value="Katiola">Katiola</option>
+                  <option value="Bouaflé">Bouaflé</option>
+                  <option value="Sakassou">Sakassou</option>
+                  <option value="Daoukro">Daoukro</option>
+                  <option value="Tanda">Tanda</option>
+                  <option value="Tabou">Tabou</option>
                 </select>
               </div>
             </div>
@@ -222,7 +246,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Permis requis <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -240,7 +264,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Expérience requise <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -260,7 +284,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Type de véhicule <span className="text-red-500">*</span>
               </label>
               <select
@@ -281,7 +305,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                 Zone de travail <span className="text-red-500">*</span>
               </label>
               <input
@@ -302,7 +326,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Salaire (FCFA) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -317,7 +341,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Type de salaire <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -338,7 +362,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Date de début <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -352,7 +376,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Horaires
                 </label>
                 <input
@@ -368,7 +392,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Email de contact <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -383,7 +407,7 @@ export default function JobOfferForm({ onSubmit, loading, error }) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm lg:text-lg font-medium text-gray-700 mb-2">
                   Téléphone de contact <span className="text-red-500">*</span>
                 </label>
                 <input

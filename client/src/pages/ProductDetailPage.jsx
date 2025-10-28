@@ -318,7 +318,7 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <SimpleHeader activeTab="marketing" readOnly={true} />
+      <SimpleHeader activeTab="marketing" />
 
       {/* Contenu - Style fiche produit */}
       <main className="max-w-7xl mx-auto px-4 lg:px-6 py-8">
@@ -437,14 +437,14 @@ export default function ProductDetailPage() {
 
             {/* Description */}
             <div className="mb-6 pb-6 border-b border-gray-200">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Description</h2>
+              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Description</h2>
               <p className="text-sm sm:text-base text-gray-700 leading-relaxed">{product.description}</p>
             </div>
 
             {/* Caractéristiques */}
             {product.requirementsList && product.requirementsList.length > 0 && (
               <div className="mb-6 pb-6 border-b border-gray-200">
-                <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Caractéristiques</h2>
+                <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Caractéristiques</h2>
                 <ul className="grid grid-cols-1 gap-2">
                   {product.requirementsList.map((feature, index) => (
                     <li key={index} className="flex items-start gap-2 text-sm sm:text-base text-gray-700">
@@ -461,7 +461,7 @@ export default function ProductDetailPage() {
             {/* Avantages */}
             {product.benefits && product.benefits.length > 0 && (
               <div className="mb-6 pb-6 border-b border-gray-200">
-                <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Avantages</h2>
+                <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Avantages</h2>
                 <ul className="grid grid-cols-1 gap-2">
                   {product.benefits.map((benefit, index) => (
                     <li key={index} className="flex items-start gap-2 text-sm sm:text-base text-gray-700">
@@ -477,14 +477,14 @@ export default function ProductDetailPage() {
 
             {/* Contact */}
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Contact</h2>
+              <h2 className="text-base lg:text-lg font-semibold text-gray-900 mb-4">Contact</h2>
               {product.contactInfo?.email && (
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-xs lg:text-lg text-gray-600 mb-2">
                   <span className="font-medium">Email:</span> {product.contactInfo.email}
                 </p>
               )}
               {product.contactInfo?.phone && (
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-xs lg:text-lg text-gray-600 mb-4">
                   <span className="font-medium">Tél:</span> {product.contactInfo.phone}
                 </p>
               )}
@@ -497,7 +497,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Info */}
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs lg:text-lg text-gray-500 text-center">
               Publié le {new Date(product.createdAt || product.postedDate).toLocaleDateString('fr-FR')}
             </p>
           </div>
