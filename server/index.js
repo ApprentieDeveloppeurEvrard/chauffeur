@@ -8,6 +8,7 @@ const driverRoutes = require('./routes/drivers');
 const offerRoutes = require('./routes/offers');
 const statsRoutes = require('./routes/stats');
 const searchRoutes = require('./routes/search');
+const messageRoutes = require('./routes/messages');
 
 const { connectToDatabase } = require('./db/connect');
 const app = express();
@@ -106,6 +107,7 @@ app.use('/api/drivers', driverRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Not found handler
 app.use((req, res) => {

@@ -1,21 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
 const messageController = require('../controllers/messageController');
+const { requireAuth } = require('../middleware/auth');
 
 // Toutes les routes nécessitent une authentification
 router.use(requireAuth);
 
-// Envoyer un message
-router.post('/send', messageController.sendMessage);
-
-// Récupérer les conversations
+// Conversations
+router.post('/conversations', messageController.createOrGetConversation);
 router.get('/conversations', messageController.getConversations);
+router.put('/conversations/:conversationId/read', messageController.markConversationAsRead);
+router.delete('/conversations/:conversationId', messageController.deleteConversation);
 
-// Récupérer les messages d'une conversation
+// Messages
 router.get('/conversations/:conversationId/messages', messageController.getMessages);
+router.post('/conversations/:conversationId/messages', messageController.sendMessage);
 
-// Marquer une conversation comme lue
-router.patch('/conversations/:conversationId/read', messageController.markAsRead);
+// Compteur de non lus
+router.get('/unread-count', messageController.getUnreadCount);
 
 module.exports = router;

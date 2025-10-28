@@ -20,32 +20,28 @@ const getAllOffers = async (req, res) => {
     // Construire les filtres
     const filters = { status: 'active' };
     
-    // Filtrage des offres directes
+    // Filtrage des offres directes (optimisé)
     if (req.user && req.user.sub) {
       // Pour les chauffeurs, récupérer l'ID du profil Driver
-      const user = await User.findById(req.user.sub);
-      console.log('Utilisateur connecté:', { userId: req.user.sub, role: user?.role });
+      const user = await User.findById(req.user.sub).select('role').lean();
       
       if (user && user.role === 'driver') {
         const Driver = require('../models/Driver');
-        const driver = await Driver.findOne({ userId: req.user.sub });
-        console.log('Profil chauffeur trouvé:', { driverId: driver?._id, name: driver?.firstName + ' ' + driver?.lastName });
+        const driver = await Driver.findOne({ userId: req.user.sub }).select('_id').lean();
         
         if (driver) {
           // Chauffeur connecté : afficher les offres générales + ses offres directes
           filters.$or = [
-            { targetDriverId: { $exists: false } }, // Offres générales
-            { targetDriverId: null }, // Offres générales (null explicite)
-            { targetDriverId: driver._id } // Offres directes pour ce chauffeur
+            { targetDriverId: { $exists: false } },
+            { targetDriverId: null },
+            { targetDriverId: driver._id }
           ];
-          console.log('Filtres appliqués pour chauffeur:', JSON.stringify(filters, null, 2));
         } else {
           // Chauffeur sans profil : seulement les offres générales
           filters.$or = [
             { targetDriverId: { $exists: false } },
             { targetDriverId: null }
           ];
-          console.log('Chauffeur sans profil - filtres généraux appliqués');
         }
       } else {
         // Utilisateur non-chauffeur : seulement les offres générales
@@ -53,7 +49,6 @@ const getAllOffers = async (req, res) => {
           { targetDriverId: { $exists: false } },
           { targetDriverId: null }
         ];
-        console.log('Utilisateur non-chauffeur - filtres généraux appliqués');
       }
     } else {
       // Utilisateur non connecté : seulement les offres générales
@@ -61,7 +56,6 @@ const getAllOffers = async (req, res) => {
         { targetDriverId: { $exists: false } },
         { targetDriverId: null }
       ];
-      console.log('Utilisateur non connecté - filtres généraux appliqués');
     }
     
     if (type) filters.type = type;
@@ -78,16 +72,17 @@ const getAllOffers = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
 
-    const offers = await Offer.find(filters)
-      .populate('employer', 'firstName lastName email')
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .lean();
-
-    console.log(`Offres trouvées: ${offers.length}, avec targetDriverId:`, offers.map(o => ({ id: o._id, targetDriverId: o.targetDriverId, title: o.title })));
-
-    const total = await Offer.countDocuments(filters);
+    // Requête optimisée avec projection
+    const [offers, total] = await Promise.all([
+      Offer.find(filters)
+        .populate('employer', 'firstName lastName companyName')
+        .select('-__v') // Exclure les champs inutiles
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Offer.countDocuments(filters)
+    ]);
 
     res.json({
       offers,

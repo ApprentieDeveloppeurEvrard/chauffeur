@@ -1,129 +1,102 @@
 const mongoose = require('mongoose');
 
-const conversationSchema = new mongoose.Schema(
-  {
-    participants: [{
-      userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-      },
-      role: {
-        type: String,
-        enum: ['employer', 'driver', 'client'],
-        required: true
-      },
-      name: {
-        type: String,
-        required: true
-      },
-      avatar: String
-    }],
-    lastMessage: {
-      content: String,
-      senderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      },
-      timestamp: {
-        type: Date,
-        default: Date.now
-      }
+const conversationSchema = new mongoose.Schema({
+  participants: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }],
+  
+  // Contexte de la conversation (offre, candidature, etc.)
+  context: {
+    type: {
+      type: String,
+      enum: ['offer_application', 'direct_contact', 'driver_inquiry', 'product_inquiry'],
+      default: 'direct_contact'
     },
-    unreadCount: {
-      type: Map,
-      of: Number,
-      default: new Map()
+    offerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Offer'
     },
-    isActive: {
-      type: Boolean,
-      default: true
+    applicationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Application'
     },
-    context: {
-      type: {
-        type: String,
-        enum: ['profile_contact', 'offer_application', 'direct_offer', 'general'],
-        default: 'general'
-      },
-      relatedId: {
-        type: mongoose.Schema.Types.ObjectId
-      },
-      title: String
+    driverId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Driver'
     }
   },
-  {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+  
+  // Dernier message pour affichage rapide
+  lastMessage: {
+    content: String,
+    senderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    timestamp: Date,
+    type: {
+      type: String,
+      enum: ['text', 'system', 'attachment'],
+      default: 'text'
+    }
+  },
+  
+  // Compteur de messages non lus par participant
+  unreadCount: {
+    type: Map,
+    of: Number,
+    default: {}
+  },
+  
+  // Statut de la conversation
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  
+  // Utilisateurs bloqués
+  blockedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  
+  // Métadonnées
+  metadata: {
+    type: Map,
+    of: mongoose.Schema.Types.Mixed
   }
-);
+}, {
+  timestamps: true
+});
 
-// Index pour améliorer les performances
-conversationSchema.index({ 'participants.userId': 1 });
+// Index pour recherche rapide
+conversationSchema.index({ participants: 1 });
 conversationSchema.index({ 'lastMessage.timestamp': -1 });
 conversationSchema.index({ updatedAt: -1 });
 
-// Virtual pour récupérer les messages
-conversationSchema.virtual('messages', {
-  ref: 'Message',
-  localField: '_id',
-  foreignField: 'conversationId'
-});
-
-// Méthode pour ajouter un participant
-conversationSchema.methods.addParticipant = function(userId, role, name, avatar) {
-  const existingParticipant = this.participants.find(p => p.userId.toString() === userId.toString());
-  if (!existingParticipant) {
-    this.participants.push({ userId, role, name, avatar });
-  }
-  return this;
+// Méthode pour vérifier si un utilisateur est participant
+conversationSchema.methods.isParticipant = function(userId) {
+  return this.participants.some(p => p.toString() === userId.toString());
 };
 
-// Méthode pour mettre à jour le dernier message
-conversationSchema.methods.updateLastMessage = function(content, senderId) {
-  this.lastMessage = {
-    content: content.substring(0, 100), // Limiter à 100 caractères
-    senderId,
-    timestamp: new Date()
-  };
-  
-  // Incrémenter le compteur de messages non lus pour les autres participants
-  this.participants.forEach(participant => {
-    if (participant.userId.toString() !== senderId.toString()) {
-      const currentCount = this.unreadCount.get(participant.userId.toString()) || 0;
-      this.unreadCount.set(participant.userId.toString(), currentCount + 1);
-    }
-  });
-  
-  return this;
+// Méthode pour obtenir l'autre participant
+conversationSchema.methods.getOtherParticipant = function(userId) {
+  return this.participants.find(p => p.toString() !== userId.toString());
 };
 
-// Méthode pour marquer comme lu
-conversationSchema.methods.markAsRead = function(userId) {
+// Méthode pour incrémenter le compteur de non lus
+conversationSchema.methods.incrementUnread = function(userId) {
+  const count = this.unreadCount.get(userId.toString()) || 0;
+  this.unreadCount.set(userId.toString(), count + 1);
+  return this.save();
+};
+
+// Méthode pour réinitialiser le compteur de non lus
+conversationSchema.methods.resetUnread = function(userId) {
   this.unreadCount.set(userId.toString(), 0);
-  return this;
-};
-
-// Méthode statique pour trouver ou créer une conversation
-conversationSchema.statics.findOrCreate = async function(participant1, participant2, context = {}) {
-  const participants = [participant1, participant2].sort((a, b) => 
-    a.userId.toString().localeCompare(b.userId.toString())
-  );
-  
-  let conversation = await this.findOne({
-    'participants.userId': { $all: [participant1.userId, participant2.userId] }
-  });
-  
-  if (!conversation) {
-    conversation = new this({
-      participants,
-      context,
-      unreadCount: new Map()
-    });
-    await conversation.save();
-  }
-  
-  return conversation;
+  return this.save();
 };
 
 module.exports = mongoose.model('Conversation', conversationSchema);

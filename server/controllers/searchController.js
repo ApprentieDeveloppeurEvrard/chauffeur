@@ -75,9 +75,21 @@ exports.globalSearch = async (req, res) => {
     const normalizedQuery = normalizeText(query);
     const queryWords = normalizedQuery.split(/\s+/).filter(w => w.length > 0);
     
-    // Recherche des chauffeurs
-    const allDrivers = await Driver.find({ isActive: true })
-      .populate('userId', 'firstName lastName email phone')
+    // Recherche des chauffeurs avec regex pour pré-filtrer (optimisé)
+    const searchRegex = new RegExp(queryWords.join('|'), 'i');
+    const allDrivers = await Driver.find({ 
+      isActive: true,
+      $or: [
+        { vehicleBrand: searchRegex },
+        { vehicleModel: searchRegex },
+        { workZone: searchRegex },
+        { city: searchRegex },
+        { specialties: { $in: queryWords.map(w => new RegExp(w, 'i')) } }
+      ]
+    })
+      .populate('userId', 'firstName lastName')
+      .select('userId vehicleBrand vehicleModel workZone city specialties experience rating totalRides')
+      .limit(30) // Réduit de 50 à 30 pour plus de rapidité
       .lean();
     
     const matchedDrivers = allDrivers
@@ -116,12 +128,21 @@ exports.globalSearch = async (req, res) => {
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
-    // Recherche des offres d'emploi
+    // Recherche des offres d'emploi avec pré-filtrage (optimisé)
     const allOffers = await Offer.find({ 
       status: 'active',
-      type: { $ne: 'product' }
+      type: { $ne: 'product' },
+      $or: [
+        { title: searchRegex },
+        { description: searchRegex },
+        { type: searchRegex },
+        { location: searchRegex },
+        { vehicleType: searchRegex }
+      ]
     })
       .populate('employer', 'firstName lastName companyName')
+      .select('title description type location employer vehicleType licenseType createdAt')
+      .limit(30) // Réduit pour plus de rapidité
       .lean();
     
     const matchedOffers = allOffers
@@ -158,12 +179,20 @@ exports.globalSearch = async (req, res) => {
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
-    // Recherche des offres marketing/produits
+    // Recherche des offres marketing/produits avec pré-filtrage (optimisé)
     const allProducts = await Offer.find({ 
       status: 'active',
-      type: 'product'
+      type: 'product',
+      $or: [
+        { title: searchRegex },
+        { description: searchRegex },
+        { category: searchRegex },
+        { location: searchRegex }
+      ]
     })
       .populate('employer', 'firstName lastName companyName')
+      .select('title description category location employer price createdAt')
+      .limit(30) // Réduit pour plus de rapidité
       .lean();
     
     const matchedProducts = allProducts

@@ -1,158 +1,103 @@
-const Message = require('../models/Message');
 const Conversation = require('../models/Conversation');
+const Message = require('../models/Message');
 const User = require('../models/User');
-const Driver = require('../models/Driver');
-const { createNotification } = require('../services/notificationService');
 
-// Envoyer un message
-exports.sendMessage = async (req, res) => {
-  console.log('='.repeat(50));
-  console.log('📨 DÉBUT sendMessage');
-  console.log('='.repeat(50));
-  
+// Créer ou récupérer une conversation
+exports.createOrGetConversation = async (req, res) => {
   try {
-    console.log('Body reçu:', JSON.stringify(req.body, null, 2));
-    console.log('User authentifié:', JSON.stringify(req.user, null, 2));
-    
-    const { recipientId, message, applicationId } = req.body;
-    const senderId = req.user?.sub || req.user?.id || req.user?._id;
-    
-    console.log('SenderId extrait:', senderId);
+    const { targetUserId, context = {} } = req.body;
+    const currentUserId = req.user.sub;
 
-    // Validation
-    if (!recipientId || !message) {
-      console.log('❌ Validation échouée - recipientId ou message manquant');
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Destinataire et message requis' 
+    // Vérifier que l'utilisateur cible existe
+    const targetUser = await User.findById(targetUserId);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    // Vérifier si une conversation existe déjà
+    let conversation = await Conversation.findOne({
+      participants: { $all: [currentUserId, targetUserId] },
+      isActive: true
+    }).populate('participants', 'firstName lastName email role profilePhotoUrl');
+
+    // Si pas de conversation, en créer une nouvelle
+    if (!conversation) {
+      conversation = new Conversation({
+        participants: [currentUserId, targetUserId],
+        context,
+        unreadCount: new Map([
+          [currentUserId.toString(), 0],
+          [targetUserId.toString(), 0]
+        ])
       });
-    }
-    
-    console.log('✅ Validation OK - recipientId:', recipientId, 'senderId:', senderId);
+      await conversation.save();
+      await conversation.populate('participants', 'firstName lastName email role profilePhotoUrl');
 
-    // Récupérer les informations de l'expéditeur
-    const sender = await User.findById(senderId);
-    if (!sender) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Expéditeur non trouvé' 
-      });
-    }
-
-    // Récupérer les informations du destinataire
-    // Le recipientId peut être soit un User ID, soit un Driver ID
-    let recipient = await User.findById(recipientId);
-    
-    // Si pas trouvé, c'est peut-être un Driver ID, cherchons le User associé
-    if (!recipient) {
-      const driverProfile = await Driver.findById(recipientId);
-      if (driverProfile && driverProfile.userId) {
-        recipient = await User.findById(driverProfile.userId);
-      }
-    }
-    
-    if (!recipient) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Destinataire non trouvé' 
-      });
-    }
-
-    // Créer ou récupérer la conversation
-    const participant1 = {
-      userId: sender._id,
-      role: sender.role,
-      name: `${sender.firstName} ${sender.lastName}`,
-      avatar: sender.profilePhotoUrl
-    };
-
-    const participant2 = {
-      userId: recipient._id,
-      role: recipient.role,
-      name: `${recipient.firstName} ${recipient.lastName}`,
-      avatar: recipient.profilePhotoUrl
-    };
-
-    const context = applicationId ? {
-      type: 'offer_application',
-      relatedId: applicationId,
-      title: 'Candidature'
-    } : {
-      type: 'general',
-      title: 'Conversation'
-    };
-
-    const conversation = await Conversation.findOrCreate(participant1, participant2, context);
-
-    // Créer le message
-    const newMessage = new Message({
-      conversationId: conversation._id,
-      senderId: sender._id,
-      senderName: `${sender.firstName} ${sender.lastName}`,
-      senderRole: sender.role,
-      content: message,
-      type: 'text'
-    });
-
-    await newMessage.save();
-
-    // Créer une notification pour le destinataire
-    try {
-      await createNotification(recipient._id, 'new_message', {
-        senderName: `${sender.firstName} ${sender.lastName}`,
+      // Message système de bienvenue
+      const systemMessage = new Message({
         conversationId: conversation._id,
-        messageId: newMessage._id
+        senderId: currentUserId,
+        content: 'Conversation démarrée',
+        type: 'system'
       });
-    } catch (notifError) {
-      console.error('Erreur lors de l\'envoi de la notification:', notifError);
-      // Ne pas faire échouer la requête si la notification échoue
+      await systemMessage.save();
     }
 
-    res.status(201).json({
-      success: true,
-      message: 'Message envoyé avec succès',
-      data: {
-        message: newMessage,
-        conversationId: conversation._id
-      }
-    });
-
+    res.json({ conversation });
   } catch (error) {
-    console.error('❌ Erreur lors de l\'envoi du message:', error);
-    console.error('Stack trace:', error.stack);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors de l\'envoi du message',
-      error: error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    console.error('Erreur création conversation:', error);
+    res.status(500).json({ error: 'Erreur lors de la création de la conversation' });
   }
 };
 
-// Récupérer les conversations d'un utilisateur
+// Récupérer toutes les conversations de l'utilisateur
 exports.getConversations = async (req, res) => {
   try {
     const userId = req.user.sub;
+    const { page = 1, limit = 20 } = req.query;
 
     const conversations = await Conversation.find({
-      'participants.userId': userId,
+      participants: userId,
       isActive: true
     })
-    .sort({ 'lastMessage.timestamp': -1 })
-    .lean();
+      .populate('participants', 'firstName lastName email role profilePhotoUrl companyName')
+      .populate('lastMessage.senderId', 'firstName lastName')
+      .sort({ updatedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .lean();
+
+    // Ajouter les informations de l'autre participant
+    const conversationsWithDetails = conversations.map(conv => {
+      const otherParticipant = conv.participants.find(
+        p => p._id.toString() !== userId.toString()
+      );
+      const unreadCount = conv.unreadCount?.[userId.toString()] || 0;
+
+      return {
+        ...conv,
+        otherParticipant,
+        unreadCount
+      };
+    });
+
+    const total = await Conversation.countDocuments({
+      participants: userId,
+      isActive: true
+    });
 
     res.json({
-      success: true,
-      data: conversations
+      conversations: conversationsWithDetails,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
     });
-
   } catch (error) {
-    console.error('Erreur lors de la récupération des conversations:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la récupération des conversations',
-      error: error.message
-    });
+    console.error('Erreur récupération conversations:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des conversations' });
   }
 };
 
@@ -161,34 +106,32 @@ exports.getMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
     const userId = req.user.sub;
+    const { page = 1, limit = 50 } = req.query;
 
-    // Vérifier que l'utilisateur fait partie de la conversation
+    // Vérifier que l'utilisateur est participant
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
-      return res.status(404).json({
-        success: false,
-        message: 'Conversation non trouvée'
-      });
+      return res.status(404).json({ error: 'Conversation non trouvée' });
     }
 
-    const isParticipant = conversation.participants.some(
-      p => p.userId.toString() === userId.toString()
-    );
-
-    if (!isParticipant) {
-      return res.status(403).json({
-        success: false,
-        message: 'Accès non autorisé à cette conversation'
-      });
+    if (!conversation.isParticipant(userId)) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
     }
 
-    // Récupérer les messages
     const messages = await Message.find({
       conversationId,
       isDeleted: false
     })
-    .sort({ createdAt: 1 })
-    .lean();
+      .populate('senderId', 'firstName lastName profilePhotoUrl')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .lean();
+
+    const total = await Message.countDocuments({
+      conversationId,
+      isDeleted: false
+    });
 
     // Marquer les messages comme lus
     await Message.updateMany(
@@ -202,53 +145,143 @@ exports.getMessages = async (req, res) => {
       }
     );
 
-    // Marquer la conversation comme lue
-    conversation.markAsRead(userId);
-    await conversation.save();
+    // Réinitialiser le compteur de non lus
+    await conversation.resetUnread(userId);
 
     res.json({
-      success: true,
-      data: messages
+      messages: messages.reverse(), // Ordre chronologique
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Erreur récupération messages:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des messages' });
+  }
+};
+
+// Envoyer un message
+exports.sendMessage = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { content, type = 'text', metadata = {} } = req.body;
+    const senderId = req.user.sub;
+
+    // Vérifier la conversation
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res.status(404).json({ error: 'Conversation non trouvée' });
+    }
+
+    if (!conversation.isParticipant(senderId)) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+
+    // Créer le message
+    const message = new Message({
+      conversationId,
+      senderId,
+      content,
+      type,
+      metadata,
+      readBy: [{ userId: senderId, readAt: new Date() }]
     });
 
+    await message.save();
+    await message.populate('senderId', 'firstName lastName profilePhotoUrl');
+
+    // Mettre à jour la conversation
+    conversation.lastMessage = {
+      content,
+      senderId,
+      timestamp: message.createdAt,
+      type
+    };
+
+    // Incrémenter le compteur pour l'autre participant
+    const otherParticipantId = conversation.getOtherParticipant(senderId);
+    if (otherParticipantId) {
+      await conversation.incrementUnread(otherParticipantId);
+    }
+
+    await conversation.save();
+
+    res.status(201).json({ message });
   } catch (error) {
-    console.error('Erreur lors de la récupération des messages:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors de la récupération des messages',
-      error: error.message
-    });
+    console.error('Erreur envoi message:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'envoi du message' });
   }
 };
 
 // Marquer une conversation comme lue
-exports.markAsRead = async (req, res) => {
+exports.markConversationAsRead = async (req, res) => {
   try {
     const { conversationId } = req.params;
     const userId = req.user.sub;
 
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {
-      return res.status(404).json({
-        success: false,
-        message: 'Conversation non trouvée'
-      });
+      return res.status(404).json({ error: 'Conversation non trouvée' });
     }
 
-    conversation.markAsRead(userId);
+    if (!conversation.isParticipant(userId)) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+
+    await conversation.resetUnread(userId);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erreur marquage lecture:', error);
+    res.status(500).json({ error: 'Erreur lors du marquage comme lu' });
+  }
+};
+
+// Obtenir le nombre total de messages non lus
+exports.getUnreadCount = async (req, res) => {
+  try {
+    const userId = req.user.sub;
+
+    const conversations = await Conversation.find({
+      participants: userId,
+      isActive: true
+    }).lean();
+
+    const totalUnread = conversations.reduce((sum, conv) => {
+      return sum + (conv.unreadCount?.[userId.toString()] || 0);
+    }, 0);
+
+    res.json({ unreadCount: totalUnread });
+  } catch (error) {
+    console.error('Erreur comptage non lus:', error);
+    res.status(500).json({ error: 'Erreur lors du comptage des messages non lus' });
+  }
+};
+
+// Supprimer une conversation
+exports.deleteConversation = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const userId = req.user.sub;
+
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res.status(404).json({ error: 'Conversation non trouvée' });
+    }
+
+    if (!conversation.isParticipant(userId)) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+
+    conversation.isActive = false;
     await conversation.save();
 
-    res.json({
-      success: true,
-      message: 'Conversation marquée comme lue'
-    });
-
+    res.json({ success: true });
   } catch (error) {
-    console.error('Erreur lors du marquage comme lu:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur lors du marquage comme lu',
-      error: error.message
-    });
+    console.error('Erreur suppression conversation:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression' });
   }
 };
