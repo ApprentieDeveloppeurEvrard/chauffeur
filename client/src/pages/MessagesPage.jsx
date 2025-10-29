@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import SimpleHeader from '../component/common/SimpleHeader';
@@ -24,10 +24,10 @@ export default function MessagesPage() {
 
     fetchConversations();
 
-    // Polling automatique toutes les 20 secondes en mode silencieux
+    // Polling automatique toutes les 60 secondes en mode silencieux (réduit pour éviter rafraîchissements visibles)
     const intervalId = setInterval(() => {
       fetchConversations(true); // Mode silencieux
-    }, 20000);
+    }, 60000);
 
     // Gérer le redimensionnement
     const handleResize = () => {
@@ -52,17 +52,20 @@ export default function MessagesPage() {
     }
   }, [searchParams, conversations]);
 
-  const fetchConversations = async (silent = false) => {
+  const fetchConversations = useCallback(async (silent = false) => {
     try {
       if (!silent) setLoading(true);
       const response = await messagesApi.getConversations();
       const newConversations = response.data.conversations || [];
       
-      // Mise à jour silencieuse - comparer avant de mettre à jour
+      // Mise à jour silencieuse - comparer intelligemment
       setConversations(prevConversations => {
-        // Si les conversations sont identiques, ne pas mettre à jour
-        if (JSON.stringify(prevConversations) === JSON.stringify(newConversations)) {
-          return prevConversations;
+        // Comparer seulement les IDs et timestamps pour éviter JSON.stringify coûteux
+        const prevIds = prevConversations.map(c => `${c._id}-${c.lastMessage?.createdAt || ''}`);
+        const newIds = newConversations.map(c => `${c._id}-${c.lastMessage?.createdAt || ''}`);
+        
+        if (prevIds.length === newIds.length && prevIds.every((id, i) => id === newIds[i])) {
+          return prevConversations; // Pas de changement
         }
         return newConversations;
       });
@@ -71,7 +74,7 @@ export default function MessagesPage() {
     } finally {
       if (!silent) setLoading(false);
     }
-  };
+  }, []);
 
   const handleSelectConversation = (conversation) => {
     setSelectedConversation(conversation);
@@ -84,10 +87,21 @@ export default function MessagesPage() {
     navigate('/messages', { replace: true });
   };
 
-  const handleNewMessage = (message) => {
-    // Rafraîchir la liste des conversations
-    fetchConversations();
-  };
+  const handleNewMessage = useCallback((message) => {
+    // Mise à jour optimiste de la conversation active sans recharger toute la liste
+    setConversations(prevConversations => {
+      return prevConversations.map(conv => {
+        if (conv._id === selectedConversation?._id) {
+          return {
+            ...conv,
+            lastMessage: message,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return conv;
+      });
+    });
+  }, [selectedConversation]);
 
   if (loading) {
     return (

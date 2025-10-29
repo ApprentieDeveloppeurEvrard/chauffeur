@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { offersApi, messagesApi } from '../services/api';
 import SimpleHeader from '../component/common/SimpleHeader';
+import ImageModal from '../component/common/ImageModal';
 import api from '../services/api';
 
 export default function ProductDetailPage() {
@@ -14,6 +15,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [contacting, setContacting] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   // Vérifier si l'utilisateur est le propriétaire de l'offre
   const isOwner = user && product && product.employerId === user.sub;
@@ -331,7 +333,8 @@ export default function ProductDetailPage() {
               <img 
                 src={product.images[currentImageIndex]} 
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={() => setShowImageModal(true)}
               />
               
               {/* Badge catégorie */}
@@ -530,6 +533,15 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Modal d'agrandissement d'image */}
+      {showImageModal && (
+        <ImageModal
+          imageUrl={product.images[currentImageIndex]}
+          alt={product.name}
+          onClose={() => setShowImageModal(false)}
+        />
+      )}
     </div>
   );
 }

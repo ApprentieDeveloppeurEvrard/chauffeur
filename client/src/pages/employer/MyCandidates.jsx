@@ -69,7 +69,7 @@ export default function MyCandidates() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Mes candidatures</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl text-gray-900">Mes candidatures</h1>
           <p className="text-gray-600 mt-2">Gérez les candidatures reçues pour vos offres d'emploi</p>
         </div>
 
@@ -129,7 +129,7 @@ export default function MyCandidates() {
             <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune candidature</h3>
+            <h3 className="text-lg text-gray-900 mb-2">Aucune candidature</h3>
             <p className="text-gray-600">Vous n'avez pas encore reçu de candidatures pour vos offres.</p>
           </div>
         ) : (
@@ -146,12 +146,12 @@ export default function MyCandidates() {
                       {/* Info candidat */}
                       <div className="flex items-start gap-4 flex-1">
                         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-orange-600 font-bold text-base sm:text-lg">
+                          <span className="text-orange-600 text-base sm:text-lg">
                             {candidate.driverName.charAt(0)}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 mb-1">
+                          <h3 className="text-sm sm:text-base lg:text-lg text-gray-900 mb-1">
                             {candidate.driverName}
                           </h3>
                           <p className="text-sm text-gray-600 mb-2">

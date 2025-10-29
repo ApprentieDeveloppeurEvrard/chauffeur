@@ -74,7 +74,7 @@ export default function MyProducts() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Mes offres marketing</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl text-gray-900">Mes offres marketing</h1>
           <p className="text-gray-600 mt-2">Gérez vos produits et services publiés</p>
         </div>
 
@@ -112,7 +112,7 @@ export default function MyProducts() {
             <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
             </svg>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune offre marketing</h3>
+            <h3 className="text-lg text-gray-900 mb-2">Aucune offre marketing</h3>
             <p className="text-gray-600 mb-4">Vous n'avez pas encore publié de produits ou services.</p>
             <button
               onClick={() => navigate('/publier-offre')}
@@ -157,12 +157,12 @@ export default function MyProducts() {
                     </div>
                   )}
                   
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
+                  <h3 className="text-base sm:text-lg text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
                     {product.title}
                   </h3>
 
                   <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-2xl font-bold text-orange-600">
+                    <span className="text-2xl text-orange-600">
                       {parseInt(product.conditions?.salary || product.price || 0).toLocaleString()}
                     </span>
                     <span className="text-sm text-gray-600">FCFA</span>

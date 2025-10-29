@@ -91,7 +91,7 @@ export default function MyOffers() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Mes annonces</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl text-gray-900">Mes annonces</h1>
           <p className="text-gray-600 mt-2">Gérez vos offres d'emploi publiées</p>
         </div>
 
@@ -141,7 +141,7 @@ export default function MyOffers() {
             <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune offre</h3>
+            <h3 className="text-lg text-gray-900 mb-2">Aucune offre</h3>
             <p className="text-gray-600 mb-4">Vous n'avez pas encore publié d'offres d'emploi.</p>
             <button
               onClick={() => navigate('/publier-offre?type=job')}
@@ -166,7 +166,7 @@ export default function MyOffers() {
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-3">
                         <div>
-                          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{offer.title}</h3>
+                          <h3 className="text-lg sm:text-xl text-gray-900 mb-2">{offer.title}</h3>
                           <div className="flex flex-wrap gap-2 mb-3">
                             <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
                               {offer.type}
@@ -270,7 +270,7 @@ export default function MyOffers() {
             </div>
 
             {/* Titre */}
-            <h3 className="text-gray-900 font-semibold mt-4 text-xl">
+            <h3 className="text-gray-900 mt-4 text-xl">
               Supprimer cette offre ?
             </h3>
 

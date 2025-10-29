@@ -167,7 +167,7 @@ export default function UserProfilePage() {
       <SimpleHeader />
 
       <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Mon Profil</h1>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl text-gray-900 mb-4 sm:mb-6">Mon Profil</h1>
 
         {/* Messages */}
         {error && (
@@ -184,7 +184,7 @@ export default function UserProfilePage() {
 
         {/* Informations personnelles */}
         <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">Informations personnelles</h2>
+          <h2 className="text-lg sm:text-xl text-gray-900 mb-3 sm:mb-4">Informations personnelles</h2>
           
           <form onSubmit={handleUpdateUserInfo} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -249,7 +249,7 @@ export default function UserProfilePage() {
           <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Devenir Chauffeur</h2>
+                <h2 className="text-lg sm:text-xl text-gray-900">Devenir Chauffeur</h2>
                 <p className="text-sm sm:text-base text-gray-600 mt-1">
                   Complétez vos informations pour apparaître dans la liste des chauffeurs
                 </p>
@@ -528,7 +528,7 @@ export default function UserProfilePage() {
 
                 {/* Documents */}
                 <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents requis</h3>
+                  <h3 className="text-lg text-gray-900 mb-4">Documents requis</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
@@ -629,7 +629,7 @@ export default function UserProfilePage() {
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
                 </svg>
                 <div>
-                  <h3 className="font-semibold text-green-900">Vous êtes chauffeur</h3>
+                  <h3 className="text-green-900">Vous êtes chauffeur</h3>
                   <p className="text-sm text-green-700">Votre profil apparaît dans la liste des chauffeurs</p>
                 </div>
               </div>
@@ -637,12 +637,12 @@ export default function UserProfilePage() {
 
             {/* Informations et documents du chauffeur */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations et documents du chauffeur</h2>
+              <h2 className="text-xl text-gray-900 mb-4">Informations et documents du chauffeur</h2>
               
               <form className="space-y-6">
                 {/* Informations du permis */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Permis de conduire</h3>
+                  <h3 className="text-lg text-gray-900 mb-4">Permis de conduire</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
@@ -691,7 +691,7 @@ export default function UserProfilePage() {
 
                 {/* Informations du véhicule */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Véhicule</h3>
+                  <h3 className="text-lg text-gray-900 mb-4">Véhicule</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
@@ -801,7 +801,7 @@ export default function UserProfilePage() {
 
                 {/* Adresse et contacts */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Adresse et contacts</h3>
+                  <h3 className="text-lg text-gray-900 mb-4">Adresse et contacts</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
@@ -877,7 +877,7 @@ export default function UserProfilePage() {
 
                 {/* Documents */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents</h3>
+                  <h3 className="text-lg text-gray-900 mb-4">Documents</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
@@ -960,7 +960,7 @@ export default function UserProfilePage() {
         {/* Section Employeur */}
         {user?.role === 'client' && (
           <div className="bg-white rounded-lg border border-gray-200 p-6 mt-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations de l'entreprise</h2>
+            <h2 className="text-xl text-gray-900 mb-4">Informations de l'entreprise</h2>
             <form className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -1069,7 +1069,7 @@ export default function UserProfilePage() {
 
               {/* Documents entreprise */}
               <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents de l'entreprise</h3>
+                <h3 className="text-lg text-gray-900 mb-4">Documents de l'entreprise</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">

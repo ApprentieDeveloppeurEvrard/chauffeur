@@ -165,14 +165,14 @@ export default function SimpleHeader({ activeTab = '', searchQuery = '', onSearc
                       className="fixed inset-0 z-10" 
                       onClick={() => setShowMenu(false)}
                     />
-                    <div className="absolute right-0 mt-2 text-base lg:text-lg w-64 p-3 bg-white border border-gray-500/30 text-gray-800/80 rounded-md font-medium z-20">
+                    <div className="absolute right-0 mt-2 text-base lg:text-lg w-64 p-3 bg-white border border-gray-500/30 text-gray-800/80 rounded-md z-20">
                       {/* Informations utilisateur */}
                       <div className="px-3 py-3 mb-2 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-base lg:text-lg font-semibold text-gray-900">
+                        <p className="text-base lg:text-lg text-gray-900">
                           {user.firstName} {user.lastName}
                         </p>
                         <p className="text-sm lg:text-base text-gray-500 mt-0.5">{user.email}</p>
-                        <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-600">
+                        <span className="inline-block mt-2 px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-600">
                           {user.role === 'driver' ? 'Chauffeur' : 'Employeur'}
                         </span>
                       </div>

@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { driversService, messagesApi } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import SimpleHeader from '../component/common/SimpleHeader';
+import ImageModal from '../component/common/ImageModal';
 
 export default function DriverDetailPage() {
   const { id } = useParams();
@@ -12,6 +13,7 @@ export default function DriverDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [contacting, setContacting] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   // Chauffeurs de test (mêmes que HomePage)
   const testDrivers = [
@@ -169,7 +171,8 @@ export default function DriverDetailPage() {
                 <img 
                   src={driver.profilePhotoUrl} 
                   alt={`${driver.firstName} ${driver.lastName}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover cursor-pointer"
+                  onClick={() => setShowImageModal(true)}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
@@ -295,6 +298,15 @@ export default function DriverDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Modal d'agrandissement d'image */}
+      {showImageModal && driver.profilePhotoUrl && (
+        <ImageModal
+          imageUrl={driver.profilePhotoUrl}
+          alt={`${driver.firstName} ${driver.lastName}`}
+          onClose={() => setShowImageModal(false)}
+        />
+      )}
     </div>
   );
 }

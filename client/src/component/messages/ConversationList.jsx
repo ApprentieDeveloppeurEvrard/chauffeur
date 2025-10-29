@@ -17,10 +17,10 @@ export default function ConversationList({ conversations, selectedConversation, 
 
   return (
     <div className="h-full bg-white relative">
-      {/* En-tête fixe - Position absolue */}
-      <div className="absolute top-0 left-0 right-0 z-20 p-2 sm:p-3 border-b border-gray-200 bg-white">
+      {/* En-tête fixe - Fixed sous le sous-header sur mobile, absolute sur desktop */}
+      <div className="fixed top-[128px] lg:absolute lg:top-0 left-0 right-0 z-20 p-2 sm:p-3 border-b border-gray-200 bg-white">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">Messages</h2>
+          <h2 className="text-base text-gray-900">Messages</h2>
           <button
             onClick={onRefresh}
             className="p-1.5 hover:bg-gray-200 rounded transition-colors"
@@ -34,7 +34,7 @@ export default function ConversationList({ conversations, selectedConversation, 
       </div>
 
       {/* Liste des conversations - Scrollable avec padding pour l'en-tête */}
-      <div className="absolute top-[49px] sm:top-[57px] bottom-0 left-0 right-0 overflow-y-auto overflow-x-hidden">
+      <div className="absolute top-[57px] lg:top-[57px] bottom-0 left-0 right-0 overflow-y-auto overflow-x-hidden">
         {conversations.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <p>Aucune conversation</p>

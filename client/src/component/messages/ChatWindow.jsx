@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { messagesApi } from '../../services/api';
 import { format } from 'date-fns';
@@ -25,16 +25,16 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
       // Marquer comme lu
       markAsRead();
       
-      // Polling automatique toutes les 15 secondes en mode silencieux (seulement si l'utilisateur ne tape pas)
+      // Polling automatique toutes les 60 secondes en mode silencieux (réduit pour éviter rafraîchissements visibles)
       const intervalId = setInterval(() => {
         if (!isTyping) {
           fetchMessages(true); // Mode silencieux - pas de loader
         }
-      }, 15000);
+      }, 60000);
       
       return () => clearInterval(intervalId);
     }
-  }, [conversation?._id, isTyping, deletedMessageIds]);
+  }, [conversation?._id, isTyping]); // Retiré deletedMessageIds pour éviter re-renders
 
   // Auto-scroll vers le bas
   useEffect(() => {
@@ -62,11 +62,14 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
       // Filtrer les messages supprimés localement
       const filteredMessages = allMessages.filter(msg => !deletedMessageIds.has(msg._id));
       
-      // Mise à jour silencieuse - comparer avant de mettre à jour pour éviter les re-renders inutiles
+      // Mise à jour silencieuse - comparer intelligemment
       setMessages(prevMessages => {
-        // Si les messages sont identiques, ne pas mettre à jour
-        if (JSON.stringify(prevMessages) === JSON.stringify(filteredMessages)) {
-          return prevMessages;
+        // Comparer seulement les IDs et timestamps pour éviter JSON.stringify coûteux
+        const prevIds = prevMessages.map(m => `${m._id}-${m.createdAt}`);
+        const newIds = filteredMessages.map(m => `${m._id}-${m.createdAt}`);
+        
+        if (prevIds.length === newIds.length && prevIds.every((id, i) => id === newIds[i])) {
+          return prevMessages; // Pas de changement
         }
         return filteredMessages;
       });
@@ -89,7 +92,7 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSendMessage = async (e) => {
+  const handleSendMessage = useCallback(async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || sending) return;
 
@@ -106,7 +109,7 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
         ...response.data.message,
         senderId: user.sub // S'assurer que senderId est l'ID de l'utilisateur connecté
       };
-      setMessages([...messages, newMsg]);
+      setMessages(prev => [...prev, newMsg]);
       setNewMessage('');
       
       // Notifier le parent
@@ -119,9 +122,9 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
     } finally {
       setSending(false);
     }
-  };
+  }, [newMessage, sending, conversation._id, user.sub, onNewMessage]);
 
-  const handleDeleteMessage = (messageId) => {
+  const handleDeleteMessage = useCallback((messageId) => {
     // Ajouter l'ID à la liste des messages supprimés
     setDeletedMessageIds(prev => new Set([...prev, messageId]));
     
@@ -131,7 +134,7 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
     
     // TODO: Implémenter l'appel API côté serveur si nécessaire
     // await messagesApi.deleteMessage(messageId);
-  };
+  }, []);
 
   const formatMessageTime = (date) => {
     try {
@@ -178,8 +181,8 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
 
   return (
     <div className="h-full bg-white relative">
-      {/* En-tête du chat - Position absolue fixe en haut */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center gap-1.5 xs:gap-2 sm:gap-3 p-2 xs:p-3 sm:p-4 border-b border-gray-200 bg-white">
+      {/* En-tête du chat - Fixed sous le sous-header sur mobile, absolute sur desktop */}
+      <div className="fixed top-[128px] lg:absolute lg:top-0 left-0 right-0 z-20 flex items-center gap-1.5 xs:gap-2 sm:gap-3 p-2 xs:p-3 sm:p-4 border-b border-gray-200 bg-white">
         {/* Bouton retour (mobile) */}
         {onBack && (
           <button
@@ -201,7 +204,7 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
               className="w-8 xs:w-10 sm:w-12 h-8 xs:h-10 sm:h-12 rounded-full object-cover"
             />
           ) : (
-            <div className="w-8 xs:w-10 sm:w-12 h-8 xs:h-10 sm:h-12 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold text-xs xs:text-sm sm:text-base">
+            <div className="w-8 xs:w-10 sm:w-12 h-8 xs:h-10 sm:h-12 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs xs:text-sm sm:text-base">
               {getInitials(otherUser?.firstName, otherUser?.lastName)}
             </div>
           )}
@@ -209,7 +212,7 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
 
         {/* Infos utilisateur */}
         <div className="flex-1 min-w-0">
-          <h2 className="font-semibold text-xs xs:text-sm sm:text-base text-gray-900 truncate">
+          <h2 className="text-xs xs:text-sm sm:text-base text-gray-900 truncate">
             {otherUser?.firstName} {otherUser?.lastName}
           </h2>
           <p className="text-[10px] xs:text-xs sm:text-sm text-blue-600 truncate">
@@ -275,7 +278,7 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
                             className="w-8 h-8 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-semibold">
+                          <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs">
                             {getInitials(otherUser?.firstName, otherUser?.lastName)}
                           </div>
                         )}
@@ -352,8 +355,8 @@ export default function ChatWindow({ conversation, onBack, onNewMessage }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Zone de saisie - Position absolue fixe en bas */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 p-2 xs:p-3 sm:p-4 border-t border-gray-200 bg-white">
+      {/* Zone de saisie - Fixed en bas sur mobile, absolute sur desktop */}
+      <div className="fixed lg:absolute bottom-0 left-0 right-0 z-20 p-2 xs:p-3 sm:p-4 border-t border-gray-200 bg-white">
         <form onSubmit={handleSendMessage} className="flex items-end gap-1.5 xs:gap-2 sm:gap-3">
           {/* Bouton pièce jointe (optionnel) */}
           <button
