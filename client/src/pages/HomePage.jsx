@@ -43,233 +43,6 @@ export default function HomePage() {
     }
   ];
 
-  // Chauffeurs de test
-  const testDrivers = [
-    {
-      _id: '1',
-      firstName: 'Kouassi',
-      lastName: 'Jean',
-      rating: 4.8,
-      totalRides: 156,
-      experience: '5-10 ans d\'expérience',
-      vehicleType: 'Berline',
-      workZone: 'Cocody',
-      isAvailable: true,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '2',
-      firstName: 'Koné',
-      lastName: 'Ibrahim',
-      rating: 4.9,
-      totalRides: 203,
-      experience: 'Plus de 10 ans d\'expérience',
-      vehicleType: '4x4/SUV',
-      workZone: 'Plateau',
-      isAvailable: true,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '3',
-      firstName: 'Yao',
-      lastName: 'Marie',
-      rating: 4.7,
-      totalRides: 98,
-      experience: '3-5 ans d\'expérience',
-      vehicleType: 'Berline',
-      workZone: 'Marcory',
-      isAvailable: false,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '4',
-      firstName: 'Traoré',
-      lastName: 'Seydou',
-      rating: 5.0,
-      totalRides: 312,
-      experience: 'Plus de 10 ans d\'expérience',
-      vehicleType: 'Minibus',
-      workZone: 'Yopougon',
-      isAvailable: true,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '5',
-      firstName: 'N\'Guessan',
-      lastName: 'Aya',
-      rating: 4.6,
-      totalRides: 67,
-      experience: '1-3 ans d\'expérience',
-      vehicleType: 'Berline',
-      workZone: 'Abobo',
-      isAvailable: true,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '6',
-      firstName: 'Bamba',
-      lastName: 'Moussa',
-      rating: 4.8,
-      totalRides: 145,
-      experience: '5-10 ans d\'expérience',
-      vehicleType: 'Pick-up',
-      workZone: 'Cocody',
-      isAvailable: true,
-      profilePhotoUrl: null
-    }
-  ];
-
-  // Offres de test
-  const testOffers = [
-    {
-      _id: '1',
-      title: 'Chauffeur personnel',
-      company: 'Entreprise Privée',
-      location: 'Cocody, Abidjan',
-      salary: '250,000 - 350,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps plein',
-      vehicleType: 'Berline',
-      experience: '3-5 ans',
-      postedDate: '2024-01-15'
-    },
-    {
-      _id: '2',
-      title: 'Chauffeur VIP',
-      company: 'Hôtel 5 étoiles',
-      location: 'Plateau, Abidjan',
-      salary: '400,000 - 500,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps plein',
-      vehicleType: 'Véhicule de luxe',
-      experience: '5-10 ans',
-      postedDate: '2024-01-14'
-    },
-    {
-      _id: '3',
-      title: 'Chauffeur livreur',
-      company: 'Société de logistique',
-      location: 'Yopougon, Abidjan',
-      salary: '180,000 - 220,000 FCFA',
-      type: 'CDD',
-      workType: 'Temps plein',
-      vehicleType: 'Utilitaire',
-      experience: '1-3 ans',
-      postedDate: '2024-01-13'
-    },
-    {
-      _id: '4',
-      title: 'Chauffeur de direction',
-      company: 'Multinationale',
-      location: 'Marcory, Abidjan',
-      salary: '350,000 - 450,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps plein',
-      vehicleType: '4x4/SUV',
-      experience: '5-10 ans',
-      postedDate: '2024-01-12'
-    },
-    {
-      _id: '5',
-      title: 'Chauffeur scolaire',
-      company: 'École internationale',
-      location: 'Cocody, Abidjan',
-      salary: '200,000 - 280,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps partiel',
-      vehicleType: 'Minibus',
-      experience: '3-5 ans',
-      postedDate: '2024-01-11'
-    },
-    {
-      _id: '6',
-      title: 'Chauffeur taxi',
-      company: 'Compagnie de taxi',
-      location: 'Abobo, Abidjan',
-      salary: '150,000 - 200,000 FCFA',
-      type: 'Indépendant',
-      workType: 'Flexible',
-      vehicleType: 'Berline',
-      experience: '1-3 ans',
-      postedDate: '2024-01-10'
-    }
-  ];
-
-  // Produits de test
-  const testProducts = [
-    {
-      _id: '1',
-      name: 'Véhicule Toyota Corolla 2018',
-      category: 'Véhicules',
-      price: '8,500,000 FCFA',
-      location: 'Cocody, Abidjan',
-      condition: 'Occasion',
-      seller: 'Jean Kouassi',
-      image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&h=300&fit=crop',
-      description: 'Véhicule en excellent état, entretien régulier',
-      postedDate: '2024-01-15'
-    },
-    {
-      _id: '2',
-      name: 'Pièces détachées auto',
-      category: 'Pièces & Accessoires',
-      price: '50,000 FCFA',
-      location: 'Yopougon, Abidjan',
-      condition: 'Neuf',
-      seller: 'Auto Parts CI',
-      image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&h=300&fit=crop',
-      description: 'Large gamme de pièces détachées neuves',
-      postedDate: '2024-01-14'
-    },
-    {
-      _id: '3',
-      name: 'Service de nettoyage auto',
-      category: 'Services',
-      price: '15,000 FCFA',
-      location: 'Plateau, Abidjan',
-      condition: 'Service',
-      seller: 'Clean Car Pro',
-      image: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=400&h=300&fit=crop',
-      description: 'Nettoyage complet intérieur et extérieur',
-      postedDate: '2024-01-13'
-    },
-    {
-      _id: '4',
-      name: 'Assurance auto complète',
-      category: 'Assurances',
-      price: 'À partir de 120,000 FCFA/an',
-      location: 'Marcory, Abidjan',
-      condition: 'Service',
-      seller: 'Assur CI',
-      image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=300&fit=crop',
-      description: 'Couverture complète tous risques',
-      postedDate: '2024-01-12'
-    },
-    {
-      _id: '5',
-      name: 'Formation conduite défensive',
-      category: 'Formations',
-      price: '75,000 FCFA',
-      location: 'Cocody, Abidjan',
-      condition: 'Service',
-      seller: 'Drive Safe Academy',
-      image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&h=300&fit=crop',
-      description: 'Formation professionnelle de 5 jours',
-      postedDate: '2024-01-11'
-    },
-    {
-      _id: '6',
-      name: 'Équipements de sécurité',
-      category: 'Équipements',
-      price: '25,000 FCFA',
-      location: 'Abobo, Abidjan',
-      condition: 'Neuf',
-      seller: 'Safety First',
-      image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=300&fit=crop',
-      description: 'Kit complet de sécurité routière',
-      postedDate: '2024-01-10'
-    }
-  ];
 
   // Charger les données
   useEffect(() => {
@@ -279,13 +52,13 @@ export default function HomePage() {
         
         // Charger les chauffeurs (limité à 8 pour la page d'accueil)
         const driversResponse = await driversService.getAll();
-        if (driversResponse.data && driversResponse.data.data && driversResponse.data.data.length > 0) {
+        if (driversResponse.data && driversResponse.data.data) {
           const allDrivers = driversResponse.data.data;
           setTotalDrivers(allDrivers.length); // Nombre total
           setDrivers(allDrivers.slice(0, 8)); // Afficher seulement 8
         } else {
-          setDrivers(testDrivers);
-          setTotalDrivers(testDrivers.length);
+          setDrivers([]);
+          setTotalDrivers(0);
         }
         
         // Charger les offres (limité à 8 pour la page d'accueil)
@@ -294,16 +67,16 @@ export default function HomePage() {
         console.log('Structure:', offersResponse.data);
         
         // L'API retourne {offers: [...]} et non {data: [...]}
-        if (offersResponse.data && offersResponse.data.offers && offersResponse.data.offers.length > 0) {
+        if (offersResponse.data && offersResponse.data.offers) {
           const allOffers = offersResponse.data.offers;
           console.log('Nombre d\'offres:', allOffers.length);
           console.log('Première offre:', allOffers[0]);
           setTotalOffers(allOffers.length); // Nombre total
           setOffers(allOffers.slice(0, 8)); // Afficher seulement 8
         } else {
-          console.log('Aucune offre API, utilisation des données de test');
-          setOffers(testOffers);
-          setTotalOffers(testOffers.length);
+          console.log('Aucune offre API');
+          setOffers([]);
+          setTotalOffers(0);
         }
 
         // Charger les produits (limité à 8 pour la page d'accueil)
@@ -323,21 +96,21 @@ export default function HomePage() {
             console.log('Premier produit:', allProducts[0]);
             setProducts(allProducts.slice(0, 8)); // Afficher seulement 8
           } else {
-            console.log('Aucun produit API, utilisation des données de test');
-            setProducts(testProducts);
+            console.log('Aucun produit API');
+            setProducts([]);
           }
         } catch (productError) {
           console.error('Erreur lors du chargement des produits:', productError);
-          setProducts(testProducts);
+          setProducts([]);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
-        // Utiliser les données de test en cas d'erreur
-        setDrivers(testDrivers);
-        setTotalDrivers(testDrivers.length);
-        setOffers(testOffers);
-        setTotalOffers(testOffers.length);
-        setProducts(testProducts);
+        // En cas d'erreur, afficher des tableaux vides
+        setDrivers([]);
+        setTotalDrivers(0);
+        setOffers([]);
+        setTotalOffers(0);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -516,8 +289,8 @@ export default function HomePage() {
             <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun chauffeur trouvé</h3>
-            <p className="text-gray-600">Essayez de modifier vos filtres de recherche</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun chauffeur disponible</h3>
+            <p className="text-gray-600">Aucun chauffeur inscrit pour le moment</p>
           </div>
         )}
 
@@ -535,11 +308,21 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-            {offers.map(offer => (
-              <OfferCard key={offer._id} offer={offer} />
-            ))}
-          </div>
+          {offers.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+              {offers.map(offer => (
+                <OfferCard key={offer._id} offer={offer} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune offre disponible</h3>
+              <p className="text-gray-600">Aucune offre d'emploi publiée pour le moment</p>
+            </div>
+          )}
         </div>
 
         {/* Section Marketing & Vente */}
@@ -556,11 +339,21 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-            {products.map(product => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </div>
+          {products.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+              {products.map(product => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg">
+              <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun produit disponible</h3>
+              <p className="text-gray-600">Aucun produit publié pour le moment</p>
+            </div>
+          )}
         </div>
       </main>
 

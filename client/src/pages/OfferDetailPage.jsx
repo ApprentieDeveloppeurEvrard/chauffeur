@@ -9,182 +9,12 @@ export default function OfferDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [offer, setOffer] = useState(null);
+  const [employer, setEmployer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [applying, setApplying] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
 
-  // Offres de test (mêmes que OffersPage)
-  const testOffers = [
-    {
-      _id: '1',
-      title: 'Chauffeur personnel',
-      company: 'Entreprise Privée',
-      location: 'Cocody, Abidjan',
-      salary: '250,000 - 350,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps plein',
-      vehicleType: 'Berline',
-      experience: '3-5 ans',
-      licenseType: 'B',
-      description: 'Nous recherchons un chauffeur personnel expérimenté pour assurer le transport quotidien de notre dirigeant. Vous serez responsable de la conduite en toute sécurité, de l\'entretien du véhicule et de la planification des itinéraires.',
-      requirements: [
-        'Permis de conduire catégorie B valide',
-        '3 à 5 ans d\'expérience en tant que chauffeur',
-        'Excellente connaissance d\'Abidjan',
-        'Ponctualité et discrétion',
-        'Présentation soignée'
-      ],
-      benefits: [
-        'Salaire attractif',
-        'Assurance santé',
-        'Congés payés',
-        'Formation continue',
-        'Véhicule de fonction'
-      ],
-      postedDate: '2024-01-15'
-    },
-    {
-      _id: '2',
-      title: 'Chauffeur VIP',
-      company: 'Hôtel 5 étoiles',
-      location: 'Plateau, Abidjan',
-      salary: '400,000 - 500,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps plein',
-      vehicleType: 'Véhicule de luxe',
-      experience: '5-10 ans',
-      licenseType: 'B',
-      description: 'Hôtel de luxe recherche chauffeur VIP pour le transport de clients prestigieux. Service haut de gamme requis avec excellente présentation et maîtrise de l\'anglais.',
-      requirements: [
-        'Permis de conduire catégorie B',
-        'Minimum 5 ans d\'expérience',
-        'Maîtrise de l\'anglais',
-        'Excellente présentation',
-        'Expérience avec véhicules de luxe'
-      ],
-      benefits: [
-        'Salaire très attractif',
-        'Pourboires',
-        'Assurance complète',
-        'Uniforme fourni',
-        'Repas sur place'
-      ],
-      postedDate: '2024-01-14'
-    },
-    {
-      _id: '3',
-      title: 'Chauffeur livreur',
-      company: 'Société de logistique',
-      location: 'Yopougon, Abidjan',
-      salary: '180,000 - 220,000 FCFA',
-      type: 'CDD',
-      workType: 'Temps plein',
-      vehicleType: 'Utilitaire',
-      experience: '1-3 ans',
-      licenseType: 'B',
-      description: 'Société de logistique en expansion recrute chauffeur livreur pour assurer la livraison de colis dans la région d\'Abidjan. Respect des délais et bon relationnel client requis.',
-      requirements: [
-        'Permis B valide',
-        '1 à 3 ans d\'expérience',
-        'Bonne connaissance d\'Abidjan',
-        'Sens de l\'organisation',
-        'Bon relationnel'
-      ],
-      benefits: [
-        'Salaire fixe + primes',
-        'Véhicule fourni',
-        'Carburant pris en charge',
-        'Assurance',
-        'Évolution possible'
-      ],
-      postedDate: '2024-01-13'
-    },
-    {
-      _id: '4',
-      title: 'Chauffeur de direction',
-      company: 'Multinationale',
-      location: 'Marcory, Abidjan',
-      salary: '350,000 - 450,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps plein',
-      vehicleType: '4x4/SUV',
-      experience: '5-10 ans',
-      licenseType: 'B',
-      description: 'Grande entreprise internationale recherche chauffeur de direction pour assurer le transport de cadres supérieurs. Discrétion absolue et grande disponibilité requises.',
-      requirements: [
-        'Permis B depuis plus de 5 ans',
-        'Expérience significative',
-        'Discrétion professionnelle',
-        'Disponibilité horaires flexibles',
-        'Maîtrise du français et anglais'
-      ],
-      benefits: [
-        'Package salarial attractif',
-        'Assurance groupe',
-        'Mutuelle famille',
-        'Prime de fin d\'année',
-        'Plan de carrière'
-      ],
-      postedDate: '2024-01-12'
-    },
-    {
-      _id: '5',
-      title: 'Chauffeur scolaire',
-      company: 'École internationale',
-      location: 'Cocody, Abidjan',
-      salary: '200,000 - 280,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps partiel',
-      vehicleType: 'Minibus',
-      experience: '3-5 ans',
-      licenseType: 'B',
-      description: 'École internationale recherche chauffeur pour le transport scolaire. Patience avec les enfants et conduite sécuritaire primordiales.',
-      requirements: [
-        'Permis B valide',
-        'Expérience transport de personnes',
-        'Patience avec les enfants',
-        'Casier judiciaire vierge',
-        'Ponctualité exemplaire'
-      ],
-      benefits: [
-        'Horaires adaptés',
-        'Vacances scolaires',
-        'Environnement familial',
-        'Assurance',
-        'Stabilité'
-      ],
-      postedDate: '2024-01-11'
-    },
-    {
-      _id: '6',
-      title: 'Chauffeur taxi',
-      company: 'Compagnie de taxi',
-      location: 'Abobo, Abidjan',
-      salary: '150,000 - 200,000 FCFA',
-      type: 'Indépendant',
-      workType: 'Flexible',
-      vehicleType: 'Berline',
-      experience: '1-3 ans',
-      licenseType: 'B',
-      description: 'Compagnie de taxi recrute chauffeurs indépendants. Horaires flexibles, revenus basés sur l\'activité. Véhicule peut être fourni.',
-      requirements: [
-        'Permis B',
-        'Connaissance d\'Abidjan',
-        'Bon relationnel',
-        'Smartphone',
-        'Disponibilité'
-      ],
-      benefits: [
-        'Horaires flexibles',
-        'Revenus attractifs',
-        'Véhicule disponible',
-        'Formation fournie',
-        'Indépendance'
-      ],
-      postedDate: '2024-01-10'
-    }
-  ];
 
   useEffect(() => {
     const fetchOffer = async () => {
@@ -199,38 +29,47 @@ export default function OfferDetailPage() {
         if (response.data) {
           console.log('Offre trouvée:', response.data);
           setOffer(response.data);
+          
+          // Récupérer les informations de l'employeur si disponible
+          if (response.data.employerId && typeof response.data.employerId === 'object') {
+            // L'employerId est populé avec les données de l'employeur
+            setEmployer(response.data.employerId);
+            console.log('Employeur trouvé:', response.data.employerId);
+          } else if (response.data.employer) {
+            setEmployer(response.data.employer);
+          } else {
+            console.log('Aucune donnée employeur trouvée');
+          }
+          
+          // Vérifier si le chauffeur a déjà postulé
+          if (user && user.role === 'driver') {
+            try {
+              const applicationsResponse = await applicationsApi.myApplications();
+              const hasAlreadyApplied = applicationsResponse.data?.some(
+                app => app.offerId === id || app.offer?._id === id
+              );
+              setHasApplied(hasAlreadyApplied);
+              console.log('A déjà postulé:', hasAlreadyApplied);
+            } catch (appError) {
+              console.log('Erreur lors de la vérification des candidatures:', appError);
+            }
+          }
+          
           setError(null);
         } else {
-          // Si pas trouvé dans l'API, chercher dans les offres de test
-          console.log('Recherche dans les offres de test...');
-          const foundOffer = testOffers.find(o => o._id === id);
-          if (foundOffer) {
-            console.log('Offre trouvée dans les tests:', foundOffer);
-            setOffer(foundOffer);
-            setError(null);
-          } else {
-            console.error('Aucune offre trouvée avec l\'ID:', id);
-            setError('Offre non trouvée');
-          }
+          console.error('Aucune offre trouvée avec l\'ID:', id);
+          setError('Offre non trouvée');
         }
       } catch (err) {
         console.error('Erreur lors du chargement:', err);
-        // En cas d'erreur API, utiliser les offres de test
-        const foundOffer = testOffers.find(o => o._id === id);
-        if (foundOffer) {
-          console.log('Utilisation de l\'offre de test après erreur:', foundOffer);
-          setOffer(foundOffer);
-          setError(null);
-        } else {
-          setError('Impossible de charger l\'offre');
-        }
+        setError('Impossible de charger l\'offre');
       } finally {
         setLoading(false);
       }
     };
 
     fetchOffer();
-  }, [id]);
+  }, [id, user]);
 
   const handleApply = async () => {
     if (!user || user.role !== 'driver') {
@@ -254,16 +93,18 @@ export default function OfferDetailPage() {
       console.error('Données complètes:', error.response?.data);
       console.error('Détails de l\'erreur:', error.response?.data?.details);
       
-      if (error.response?.status === 400 && error.response?.data?.message?.includes('déjà postulé')) {
+      const errorMessage = error.response?.data?.error || error.response?.data?.message;
+      
+      if (error.response?.status === 409 || errorMessage?.includes('déjà postulé')) {
         setHasApplied(true);
         alert('Vous avez déjà postulé à cette offre');
       } else if (error.response?.status === 404) {
         alert('Offre non trouvée. Elle a peut-être été supprimée.');
-      } else if (error.response?.status === 401) {
+      } else if (error.response?.status === 401 || error.response?.status === 403) {
         alert('Vous devez être connecté en tant que chauffeur pour postuler.');
         navigate('/auth');
-      } else if (error.response?.data?.message) {
-        alert(`Erreur: ${error.response.data.message}`);
+      } else if (errorMessage) {
+        alert(`Erreur: ${errorMessage}`);
       } else if (error.message === 'Network Error') {
         alert('Erreur de connexion au serveur. Vérifiez que le serveur est démarré.');
       } else {
@@ -310,7 +151,16 @@ export default function OfferDetailPage() {
               <h1 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 mb-3">
                 {offer.title}
               </h1>
-              <p className="text-sm sm:text-base text-gray-600 mb-4">{offer.company}</p>
+              <div className="mb-4">
+                <p className="text-sm sm:text-base text-gray-900 font-medium mb-1">
+                  {offer.company || 'Entreprise'}
+                </p>
+                {(employer || offer.employer) && (
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Publié par : {employer ? `${employer.firstName} ${employer.lastName}` : (offer.employer?.firstName ? `${offer.employer.firstName} ${offer.employer.lastName}` : offer.employer)}
+                  </p>
+                )}
+              </div>
               <div className="flex flex-wrap items-center gap-3">
                 <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs lg:text-lg font-medium rounded">
                   {offer.contractType || offer.type || 'CDI'}

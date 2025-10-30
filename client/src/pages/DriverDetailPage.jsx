@@ -15,88 +15,6 @@ export default function DriverDetailPage() {
   const [contacting, setContacting] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
 
-  // Chauffeurs de test (mêmes que HomePage)
-  const testDrivers = [
-    {
-      _id: '1',
-      firstName: 'Kouassi',
-      lastName: 'Jean',
-      rating: 4.8,
-      totalRides: 156,
-      experience: '5-10 ans d\'expérience',
-      vehicleType: 'Berline',
-      workZone: 'Cocody',
-      isAvailable: true,
-      licenseType: 'B',
-      profilePhotoUrl: null
-    },
-    {
-      _id: '2',
-      firstName: 'Koné',
-      lastName: 'Ibrahim',
-      rating: 4.9,
-      totalRides: 203,
-      experience: 'Plus de 10 ans d\'expérience',
-      vehicleType: '4x4/SUV',
-      workZone: 'Plateau',
-      isAvailable: true,
-      licenseType: 'B',
-      profilePhotoUrl: null
-    },
-    {
-      _id: '3',
-      firstName: 'Yao',
-      lastName: 'Marie',
-      rating: 4.7,
-      totalRides: 98,
-      experience: '3-5 ans d\'expérience',
-      vehicleType: 'Berline',
-      workZone: 'Marcory',
-      isAvailable: false,
-      licenseType: 'B',
-      profilePhotoUrl: null
-    },
-    {
-      _id: '4',
-      firstName: 'Traoré',
-      lastName: 'Seydou',
-      rating: 5.0,
-      totalRides: 312,
-      experience: 'Plus de 10 ans d\'expérience',
-      vehicleType: 'Minibus',
-      workZone: 'Yopougon',
-      isAvailable: true,
-      licenseType: 'B',
-      profilePhotoUrl: null
-    },
-    {
-      _id: '5',
-      firstName: 'N\'Guessan',
-      lastName: 'Aya',
-      rating: 4.6,
-      totalRides: 67,
-      experience: '1-3 ans d\'expérience',
-      vehicleType: 'Berline',
-      workZone: 'Abobo',
-      isAvailable: true,
-      licenseType: 'B',
-      profilePhotoUrl: null
-    },
-    {
-      _id: '6',
-      firstName: 'Bamba',
-      lastName: 'Moussa',
-      rating: 4.8,
-      totalRides: 145,
-      experience: '5-10 ans d\'expérience',
-      vehicleType: 'Pick-up',
-      workZone: 'Cocody',
-      isAvailable: true,
-      licenseType: 'B',
-      profilePhotoUrl: null
-    }
-  ];
-
   useEffect(() => {
     const fetchDriver = async () => {
       try {
@@ -108,25 +26,11 @@ export default function DriverDetailPage() {
           setDriver(response.data);
           setError(null);
         } else {
-          // Si pas trouvé dans l'API, chercher dans les chauffeurs de test
-          const foundDriver = testDrivers.find(d => d._id === id);
-          if (foundDriver) {
-            setDriver(foundDriver);
-            setError(null);
-          } else {
-            setError('Chauffeur non trouvé');
-          }
+          setError('Chauffeur non trouvé');
         }
       } catch (err) {
         console.error('Erreur:', err);
-        // En cas d'erreur API, utiliser les chauffeurs de test
-        const foundDriver = testDrivers.find(d => d._id === id);
-        if (foundDriver) {
-          setDriver(foundDriver);
-          setError(null);
-        } else {
-          setError('Chauffeur non trouvé');
-        }
+        setError('Chauffeur non trouvé');
       } finally {
         setLoading(false);
       }

@@ -6,6 +6,7 @@ import PrivateRoute from './component/PrivateRoute'
 import HomePage from './pages/HomePage.jsx'
 import DriversPage from './pages/DriversPage.jsx'
 import DriverDetailPage from './pages/DriverDetailPage.jsx'
+import DriverProfilePage from './pages/DriverProfilePage.jsx'
 import OffersPage from './pages/OffersPage.jsx'
 import OfferDetailPage from './pages/OfferDetailPage.jsx'
 import CreateOfferPage from './pages/CreateOfferPage.jsx'
@@ -52,7 +53,7 @@ function App() {
               path="/driver/:id" 
               element={
                 <PrivateRoute>
-                  <DriverDetailPage />
+                  <DriverProfilePage />
                 </PrivateRoute>
               } 
             />

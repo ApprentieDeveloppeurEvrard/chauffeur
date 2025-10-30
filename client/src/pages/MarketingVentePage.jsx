@@ -38,106 +38,6 @@ export default function MarketingVentePage() {
     }
   ];
 
-  // Produits de test
-  const testProducts = [
-    {
-      _id: '1',
-      name: 'Véhicule Toyota Corolla 2018',
-      category: 'Véhicules',
-      price: '8,500,000 FCFA',
-      location: 'Cocody, Abidjan',
-      condition: 'Occasion',
-      seller: 'Jean Kouassi',
-      image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&h=300&fit=crop',
-      description: 'Véhicule en excellent état, entretien régulier',
-      postedDate: '2024-01-15'
-    },
-    {
-      _id: '2',
-      name: 'Pièces détachées auto',
-      category: 'Pièces & Accessoires',
-      price: '50,000 FCFA',
-      location: 'Yopougon, Abidjan',
-      condition: 'Neuf',
-      seller: 'Auto Parts CI',
-      image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&h=300&fit=crop',
-      description: 'Large gamme de pièces détachées neuves',
-      postedDate: '2024-01-14'
-    },
-    {
-      _id: '3',
-      name: 'Service de nettoyage auto',
-      category: 'Services',
-      price: '15,000 FCFA',
-      location: 'Plateau, Abidjan',
-      condition: 'Service',
-      seller: 'Clean Car Pro',
-      image: 'https://images.unsplash.com/photo-1607860108855-64acf2078ed9?w=400&h=300&fit=crop',
-      description: 'Nettoyage complet intérieur et extérieur',
-      postedDate: '2024-01-13'
-    },
-    {
-      _id: '4',
-      name: 'Assurance auto complète',
-      category: 'Assurances',
-      price: 'À partir de 120,000 FCFA/an',
-      location: 'Marcory, Abidjan',
-      condition: 'Service',
-      seller: 'Assur CI',
-      image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=300&fit=crop',
-      description: 'Couverture complète tous risques',
-      postedDate: '2024-01-12'
-    },
-    {
-      _id: '5',
-      name: 'Formation conduite défensive',
-      category: 'Formations',
-      price: '75,000 FCFA',
-      location: 'Cocody, Abidjan',
-      condition: 'Service',
-      seller: 'Drive Safe Academy',
-      image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&h=300&fit=crop',
-      description: 'Formation professionnelle de 5 jours',
-      postedDate: '2024-01-11'
-    },
-    {
-      _id: '6',
-      name: 'Équipements de sécurité',
-      category: 'Équipements',
-      price: '25,000 FCFA',
-      location: 'Abobo, Abidjan',
-      condition: 'Neuf',
-      seller: 'Safety First',
-      image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&h=300&fit=crop',
-      description: 'Kit complet de sécurité routière',
-      postedDate: '2024-01-10'
-    },
-    {
-      _id: '7',
-      name: 'GPS professionnel',
-      category: 'Électronique',
-      price: '85,000 FCFA',
-      location: 'Plateau, Abidjan',
-      condition: 'Neuf',
-      seller: 'Tech Auto',
-      image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=300&fit=crop',
-      description: 'GPS avec cartographie Afrique complète',
-      postedDate: '2024-01-09'
-    },
-    {
-      _id: '8',
-      name: 'Entretien mécanique',
-      category: 'Services',
-      price: '45,000 FCFA',
-      location: 'Yopougon, Abidjan',
-      condition: 'Service',
-      seller: 'Garage Pro',
-      image: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=400&h=300&fit=crop',
-      description: 'Révision complète + vidange',
-      postedDate: '2024-01-08'
-    }
-  ];
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -149,13 +49,12 @@ export default function MarketingVentePage() {
             status: 'active'
           }
         });
-        setProducts(response.data.offers || response.data);
+        setProducts(response.data.offers || response.data || []);
         setError(null);
       } catch (err) {
         console.error('Erreur lors du chargement des produits:', err);
         setError('Impossible de charger les produits');
-        // Fallback sur les données de test en cas d'erreur
-        setProducts(testProducts);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -386,7 +285,11 @@ export default function MarketingVentePage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500">Aucun produit trouvé</p>
+            <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun produit disponible</h3>
+            <p className="text-gray-600">Aucun produit publié pour le moment</p>
           </div>
         )}
           </div>

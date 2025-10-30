@@ -24,20 +24,28 @@ export default function MyCandidates() {
     try {
       const response = await applicationsApi.receivedApplications();
       console.log('Candidatures reçues:', response.data);
+      console.log('Premier candidat:', response.data[0]);
       
       // Transformer les données de l'API pour correspondre au format attendu
-      const formattedCandidates = response.data.map(application => ({
-        id: application._id,
-        driverId: application.driver?._id || application.driverId,
-        driverName: application.driver ? `${application.driver.firstName} ${application.driver.lastName}` : 'Chauffeur',
-        driverPhoto: application.driver?.profilePhotoUrl || null,
-        offerTitle: application.offer?.title || 'Offre',
-        appliedDate: application.createdAt || application.appliedDate,
-        status: application.status, // pending, accepted, rejected
-        experience: application.driver?.experience || 'Non spécifié',
-        licenseType: application.driver?.licenseType || 'N/A',
-        phone: application.driver?.phone || 'Non disponible'
-      }));
+      const formattedCandidates = response.data.map(application => {
+        console.log('Application complète:', application);
+        console.log('driverProfileId:', application.driverProfileId);
+        console.log('driver.driverProfileId:', application.driver?.driverProfileId);
+        console.log('driverId._id:', application.driverId?._id);
+        
+        return {
+          id: application._id,
+          driverId: application.driverProfileId || application.driver?.driverProfileId || application.driverId?._id || null,
+          driverName: application.driver ? `${application.driver.firstName} ${application.driver.lastName}` : (application.driverId ? `${application.driverId.firstName} ${application.driverId.lastName}` : 'Chauffeur'),
+          driverPhoto: application.driver?.profilePhotoUrl || application.driverId?.profilePhotoUrl || null,
+          offerTitle: application.offer?.title || application.offerId?.title || 'Offre',
+          appliedDate: application.createdAt || application.appliedDate,
+          status: application.status, // pending, accepted, rejected
+          experience: application.driver?.experience || application.driverId?.experience || 'Non spécifié',
+          licenseType: application.driver?.licenseType || application.driverId?.licenseType || 'N/A',
+          phone: application.driver?.phone || application.driverId?.phone || 'Non disponible'
+        };
+      });
       
       setCandidates(formattedCandidates);
     } catch (error) {
@@ -61,6 +69,32 @@ export default function MyCandidates() {
   const filteredCandidates = filter === 'all' 
     ? candidates 
     : candidates.filter(c => c.status === filter);
+
+  const handleAccept = async (candidateId) => {
+    try {
+      await applicationsApi.updateStatus(candidateId, 'accepted');
+      // Rafraîchir la liste
+      fetchCandidates();
+      alert('Candidature acceptée avec succès !');
+    } catch (error) {
+      console.error('Erreur lors de l\'acceptation:', error);
+      alert('Erreur lors de l\'acceptation de la candidature');
+    }
+  };
+
+  const handleReject = async (candidateId) => {
+    if (window.confirm('Êtes-vous sûr de vouloir refuser cette candidature ?')) {
+      try {
+        await applicationsApi.updateStatus(candidateId, 'rejected');
+        // Rafraîchir la liste
+        fetchCandidates();
+        alert('Candidature rejetée');
+      } catch (error) {
+        console.error('Erreur lors du rejet:', error);
+        alert('Erreur lors du rejet de la candidature');
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -145,8 +179,8 @@ export default function MyCandidates() {
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                       {/* Info candidat */}
                       <div className="flex items-start gap-4 flex-1">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-orange-600 text-base sm:text-lg">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white border-2 border-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-orange-500 text-base sm:text-lg font-semibold">
                             {candidate.driverName.charAt(0)}
                           </span>
                         </div>
@@ -188,20 +222,32 @@ export default function MyCandidates() {
                         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                           {candidate.status === 'pending' && (
                             <>
-                              <button className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-xs sm:text-sm font-medium">
+                              <button 
+                                onClick={() => handleAccept(candidate.id)}
+                                className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-xs sm:text-sm font-medium"
+                              >
                                 Accepter
                               </button>
-                              <button className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-xs sm:text-sm font-medium">
+                              <button 
+                                onClick={() => handleReject(candidate.id)}
+                                className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-xs sm:text-sm font-medium"
+                              >
                                 Refuser
                               </button>
                             </>
                           )}
-                          <button 
-                            onClick={() => navigate(`/driver/${candidate.driverId}`)}
-                            className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-xs sm:text-sm font-medium"
-                          >
-                            Voir profil
-                          </button>
+                          {candidate.driverId ? (
+                            <button 
+                              onClick={() => navigate(`/driver/${candidate.driverId}`)}
+                              className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-xs sm:text-sm font-medium"
+                            >
+                              Voir profil
+                            </button>
+                          ) : (
+                            <span className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-gray-50 text-gray-400 rounded-lg text-xs sm:text-sm text-center">
+                              Profil indisponible
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>

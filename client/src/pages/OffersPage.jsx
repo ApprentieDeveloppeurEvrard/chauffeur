@@ -37,82 +37,6 @@ export default function OffersPage() {
     }
   ];
 
-  // Offres de test
-  const testOffers = [
-    {
-      _id: '1',
-      title: 'Chauffeur personnel',
-      company: 'Entreprise Privée',
-      location: 'Cocody, Abidjan',
-      salary: '250,000 - 350,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps plein',
-      vehicleType: 'Berline',
-      experience: '3-5 ans',
-      postedDate: '2024-01-15'
-    },
-    {
-      _id: '2',
-      title: 'Chauffeur VIP',
-      company: 'Hôtel 5 étoiles',
-      location: 'Plateau, Abidjan',
-      salary: '400,000 - 500,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps plein',
-      vehicleType: 'Véhicule de luxe',
-      experience: '5-10 ans',
-      postedDate: '2024-01-14'
-    },
-    {
-      _id: '3',
-      title: 'Chauffeur livreur',
-      company: 'Société de logistique',
-      location: 'Yopougon, Abidjan',
-      salary: '180,000 - 220,000 FCFA',
-      type: 'CDD',
-      workType: 'Temps plein',
-      vehicleType: 'Utilitaire',
-      experience: '1-3 ans',
-      postedDate: '2024-01-13'
-    },
-    {
-      _id: '4',
-      title: 'Chauffeur de direction',
-      company: 'Multinationale',
-      location: 'Marcory, Abidjan',
-      salary: '350,000 - 450,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps plein',
-      vehicleType: '4x4/SUV',
-      experience: '5-10 ans',
-      postedDate: '2024-01-12'
-    },
-    {
-      _id: '5',
-      title: 'Chauffeur scolaire',
-      company: 'École internationale',
-      location: 'Cocody, Abidjan',
-      salary: '200,000 - 280,000 FCFA',
-      type: 'CDI',
-      workType: 'Temps partiel',
-      vehicleType: 'Minibus',
-      experience: '3-5 ans',
-      postedDate: '2024-01-11'
-    },
-    {
-      _id: '6',
-      title: 'Chauffeur taxi',
-      company: 'Compagnie de taxi',
-      location: 'Abobo, Abidjan',
-      salary: '150,000 - 200,000 FCFA',
-      type: 'Indépendant',
-      workType: 'Flexible',
-      vehicleType: 'Berline',
-      experience: '1-3 ans',
-      postedDate: '2024-01-10'
-    }
-  ];
-
   useEffect(() => {
     const fetchOffers = async () => {
       try {
@@ -123,16 +47,14 @@ export default function OffersPage() {
         console.log('Offres API (OffersPage):', response);
         
         // L'API retourne {offers: [...]}
-        if (response.data && response.data.offers && response.data.offers.length > 0) {
+        if (response.data && response.data.offers) {
           setOffers(response.data.offers);
         } else {
-          console.log('Aucune offre API, utilisation des données de test');
-          setOffers(testOffers);
+          setOffers([]);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des offres:', error);
-        // En cas d'erreur, utiliser les données de test
-        setOffers(testOffers);
+        setOffers([]);
       } finally {
         setLoading(false);
       }
@@ -336,7 +258,11 @@ export default function OffersPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500">Aucune offre trouvée</p>
+            <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune offre disponible</h3>
+            <p className="text-gray-600">Aucune offre d'emploi publiée pour le moment</p>
           </div>
         )}
           </div>

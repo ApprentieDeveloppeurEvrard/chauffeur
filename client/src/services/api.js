@@ -147,7 +147,7 @@ export const applicationsApi = {
   // Postuler à une offre
   apply: (offerId, data) => api.post(`/offers/${offerId}/apply`, data),
   // Accepter/refuser une candidature
-  updateStatus: (applicationId, status) => api.put(`/applications/${applicationId}/status`, { status }),
+  updateStatus: (applicationId, status) => api.patch(`/applications/${applicationId}/status`, { status }),
   // Annuler une candidature (chauffeur)
   withdraw: (applicationId) => api.delete(`/applications/${applicationId}`),
 }

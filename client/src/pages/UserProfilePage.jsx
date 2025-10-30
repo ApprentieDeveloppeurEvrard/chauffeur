@@ -12,6 +12,9 @@ export default function UserProfilePage() {
   const [success, setSuccess] = useState('');
   const [isDriver, setIsDriver] = useState(false);
   const [showDriverForm, setShowDriverForm] = useState(false);
+  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
+  const [isEditingDriverInfo, setIsEditingDriverInfo] = useState(false);
+  const [isEditingEmployerInfo, setIsEditingEmployerInfo] = useState(false);
 
   const [userInfo, setUserInfo] = useState({
     firstName: '',
@@ -39,6 +42,17 @@ export default function UserProfilePage() {
     emergencyContact: '',
     emergencyPhone: ''
   });
+
+  const [workExperience, setWorkExperience] = useState([
+    {
+      company: '',
+      position: '',
+      location: '',
+      startDate: '',
+      endDate: '',
+      description: ''
+    }
+  ]);
 
   const [employerInfo, setEmployerInfo] = useState({
     companyName: '',
@@ -110,6 +124,32 @@ export default function UserProfilePage() {
     });
   };
 
+  const handleWorkExperienceChange = (index, field, value) => {
+    const newExperiences = [...workExperience];
+    newExperiences[index][field] = value;
+    setWorkExperience(newExperiences);
+  };
+
+  const addWorkExperience = () => {
+    setWorkExperience([
+      ...workExperience,
+      {
+        company: '',
+        position: '',
+        location: '',
+        startDate: '',
+        endDate: '',
+        description: ''
+      }
+    ]);
+  };
+
+  const removeWorkExperience = (index) => {
+    if (workExperience.length > 1) {
+      setWorkExperience(workExperience.filter((_, i) => i !== index));
+    }
+  };
+
   const handleUpdateUserInfo = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -119,6 +159,7 @@ export default function UserProfilePage() {
     try {
       await api.put('/auth/profile', userInfo);
       setSuccess('Informations mises à jour avec succès !');
+      setIsEditingPersonalInfo(false);
     } catch (err) {
       setError(err.response?.data?.error || 'Erreur lors de la mise à jour');
     } finally {
@@ -184,7 +225,17 @@ export default function UserProfilePage() {
 
         {/* Informations personnelles */}
         <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
-          <h2 className="text-lg sm:text-xl text-gray-900 mb-3 sm:mb-4">Informations personnelles</h2>
+          <div className="flex justify-between items-center mb-3 sm:mb-4">
+            <h2 className="text-lg sm:text-xl text-gray-900">Informations personnelles</h2>
+            {!isEditingPersonalInfo && (
+              <button
+                onClick={() => setIsEditingPersonalInfo(true)}
+                className="px-4 py-2 text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 transition-colors"
+              >
+                Éditer
+              </button>
+            )}
+          </div>
           
           <form onSubmit={handleUpdateUserInfo} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -195,7 +246,8 @@ export default function UserProfilePage() {
                   name="firstName"
                   value={userInfo.firstName}
                   onChange={handleUserInfoChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  disabled={!isEditingPersonalInfo}
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditingPersonalInfo ? 'focus:ring-2 focus:ring-orange-500 focus:border-transparent' : 'bg-gray-50 cursor-not-allowed'}`}
                 />
               </div>
 
@@ -206,7 +258,8 @@ export default function UserProfilePage() {
                   name="lastName"
                   value={userInfo.lastName}
                   onChange={handleUserInfoChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  disabled={!isEditingPersonalInfo}
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditingPersonalInfo ? 'focus:ring-2 focus:ring-orange-500 focus:border-transparent' : 'bg-gray-50 cursor-not-allowed'}`}
                 />
               </div>
 
@@ -229,18 +282,30 @@ export default function UserProfilePage() {
                   name="phone"
                   value={userInfo.phone}
                   onChange={handleUserInfoChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  disabled={!isEditingPersonalInfo}
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditingPersonalInfo ? 'focus:ring-2 focus:ring-orange-500 focus:border-transparent' : 'bg-gray-50 cursor-not-allowed'}`}
                 />
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-            >
-              {loading ? 'Mise à jour...' : 'Mettre à jour'}
-            </button>
+            {isEditingPersonalInfo && (
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                >
+                  {loading ? 'Enregistrement...' : 'Enregistrer'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingPersonalInfo(false)}
+                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Annuler
+                </button>
+              </div>
+            )}
           </form>
         </div>
 
@@ -635,9 +700,142 @@ export default function UserProfilePage() {
               </div>
             </div>
 
+            {/* Expérience professionnelle */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+              <h2 className="text-xl text-gray-900 mb-4">Expérience professionnelle</h2>
+              
+              <div className="space-y-6">
+                {workExperience.map((exp, index) => (
+                  <div key={index} className="border border-gray-200 p-4 rounded-lg relative">
+                    {workExperience.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeWorkExperience(index)}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Poste occupé *
+                        </label>
+                        <input
+                          type="text"
+                          value={exp.position}
+                          onChange={(e) => handleWorkExperienceChange(index, 'position', e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
+                          placeholder="Ex: Chauffeur personnel"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Entreprise *
+                        </label>
+                        <input
+                          type="text"
+                          value={exp.company}
+                          onChange={(e) => handleWorkExperienceChange(index, 'company', e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
+                          placeholder="Ex: Société ABC"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Lieu
+                        </label>
+                        <input
+                          type="text"
+                          value={exp.location}
+                          onChange={(e) => handleWorkExperienceChange(index, 'location', e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
+                          placeholder="Ex: Abidjan"
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Date de début
+                          </label>
+                          <input
+                            type="month"
+                            value={exp.startDate}
+                            onChange={(e) => handleWorkExperienceChange(index, 'startDate', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Date de fin
+                          </label>
+                          <input
+                            type="month"
+                            value={exp.endDate}
+                            onChange={(e) => handleWorkExperienceChange(index, 'endDate', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
+                            placeholder="En cours si vide"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Description
+                        </label>
+                        <textarea
+                          value={exp.description}
+                          onChange={(e) => handleWorkExperienceChange(index, 'description', e.target.value)}
+                          rows="3"
+                          className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
+                          placeholder="Décrivez vos responsabilités et réalisations..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                <button
+                  type="button"
+                  onClick={addWorkExperience}
+                  className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Ajouter une expérience
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => {/* TODO: Sauvegarder les expériences */}}
+                  className="w-full py-3 bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                >
+                  Enregistrer les expériences
+                </button>
+              </div>
+            </div>
+
             {/* Informations et documents du chauffeur */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-xl text-gray-900 mb-4">Informations et documents du chauffeur</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl text-gray-900">Informations et documents du chauffeur</h2>
+                {!isEditingDriverInfo && (
+                  <button
+                    onClick={() => setIsEditingDriverInfo(true)}
+                    className="px-4 py-2 text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 transition-colors"
+                  >
+                    Éditer
+                  </button>
+                )}
+              </div>
               
               <form className="space-y-6">
                 {/* Informations du permis */}
@@ -945,13 +1143,24 @@ export default function UserProfilePage() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Mise à jour...' : 'Mettre à jour mes informations'}
-                </button>
+                {isEditingDriverInfo && (
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                    >
+                      {loading ? 'Enregistrement...' : 'Enregistrer'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingDriverInfo(false)}
+                      className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                )}
               </form>
             </div>
           </>
@@ -960,7 +1169,17 @@ export default function UserProfilePage() {
         {/* Section Employeur */}
         {user?.role === 'client' && (
           <div className="bg-white rounded-lg border border-gray-200 p-6 mt-6">
-            <h2 className="text-xl text-gray-900 mb-4">Informations de l'entreprise</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl text-gray-900">Informations de l'entreprise</h2>
+              {!isEditingEmployerInfo && (
+                <button
+                  onClick={() => setIsEditingEmployerInfo(true)}
+                  className="px-4 py-2 text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 transition-colors"
+                >
+                  Éditer
+                </button>
+              )}
+            </div>
             <form className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -1121,13 +1340,24 @@ export default function UserProfilePage() {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-              >
-                {loading ? 'Mise à jour...' : 'Mettre à jour les informations'}
-              </button>
+              {isEditingEmployerInfo && (
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                  >
+                    {loading ? 'Enregistrement...' : 'Enregistrer'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingEmployerInfo(false)}
+                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         )}

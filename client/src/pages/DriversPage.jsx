@@ -38,82 +38,6 @@ export default function DriversPage() {
     }
   ];
 
-  // Chauffeurs de test
-  const testDrivers = [
-    {
-      _id: '1',
-      firstName: 'Kouassi',
-      lastName: 'Jean',
-      rating: 4.8,
-      totalRides: 156,
-      experience: '5-10 ans d\'expérience',
-      vehicleType: 'Berline',
-      workZone: 'Cocody',
-      isAvailable: true,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '2',
-      firstName: 'Koné',
-      lastName: 'Ibrahim',
-      rating: 4.9,
-      totalRides: 203,
-      experience: 'Plus de 10 ans d\'expérience',
-      vehicleType: '4x4/SUV',
-      workZone: 'Plateau',
-      isAvailable: true,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '3',
-      firstName: 'Yao',
-      lastName: 'Marie',
-      rating: 4.7,
-      totalRides: 98,
-      experience: '3-5 ans d\'expérience',
-      vehicleType: 'Berline',
-      workZone: 'Marcory',
-      isAvailable: false,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '4',
-      firstName: 'Traoré',
-      lastName: 'Seydou',
-      rating: 5.0,
-      totalRides: 312,
-      experience: 'Plus de 10 ans d\'expérience',
-      vehicleType: 'Minibus',
-      workZone: 'Yopougon',
-      isAvailable: true,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '5',
-      firstName: 'N\'Guessan',
-      lastName: 'Aya',
-      rating: 4.6,
-      totalRides: 67,
-      experience: '1-3 ans d\'expérience',
-      vehicleType: 'Berline',
-      workZone: 'Abobo',
-      isAvailable: true,
-      profilePhotoUrl: null
-    },
-    {
-      _id: '6',
-      firstName: 'Bamba',
-      lastName: 'Moussa',
-      rating: 4.8,
-      totalRides: 145,
-      experience: '5-10 ans d\'expérience',
-      vehicleType: 'Pick-up',
-      workZone: 'Cocody',
-      isAvailable: true,
-      profilePhotoUrl: null
-    }
-  ];
-
   // Charger les données
   useEffect(() => {
     const fetchData = async () => {
@@ -128,14 +52,14 @@ export default function DriversPage() {
         
         // Charger tous les chauffeurs
         const driversResponse = await driversService.getAll();
-        if (driversResponse.data && driversResponse.data.data && driversResponse.data.data.length > 0) {
+        if (driversResponse.data && driversResponse.data.data) {
           setDrivers(driversResponse.data.data);
         } else {
-          setDrivers(testDrivers);
+          setDrivers([]);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
-        setDrivers(testDrivers);
+        setDrivers([]);
       } finally {
         setLoading(false);
       }
@@ -335,8 +259,8 @@ export default function DriversPage() {
             <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun chauffeur trouvé</h3>
-            <p className="text-gray-600">Essayez de modifier vos filtres de recherche</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun chauffeur disponible</h3>
+            <p className="text-gray-600">Aucun chauffeur inscrit pour le moment</p>
           </div>
         )}
           </div>

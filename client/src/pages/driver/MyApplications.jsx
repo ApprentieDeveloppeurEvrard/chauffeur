@@ -26,16 +26,28 @@ export default function MyApplications() {
       console.log('Mes candidatures:', response.data);
       
       // Transformer les données de l'API pour correspondre au format attendu
-      const formattedApplications = response.data.map(application => ({
-        id: application._id,
-        offerId: application.offer?._id || application.offerId,
-        offerTitle: application.offer?.title || 'Offre',
-        company: application.offer?.employer?.companyName || application.offer?.employer?.firstName + ' ' + application.offer?.employer?.lastName || 'Employeur',
-        location: application.offer?.location || 'Non spécifié',
-        salary: application.offer?.salary || '0',
-        appliedDate: application.createdAt || application.appliedDate,
-        status: application.status // pending, accepted, rejected
-      }));
+      const formattedApplications = response.data.map(application => {
+        // Formater la localisation
+        let location = 'Non spécifié';
+        if (application.offer?.location) {
+          if (typeof application.offer.location === 'string') {
+            location = application.offer.location;
+          } else if (application.offer.location.city) {
+            location = application.offer.location.city;
+          }
+        }
+        
+        return {
+          id: application._id,
+          offerId: application.offer?._id || application.offerId,
+          offerTitle: application.offer?.title || 'Offre',
+          company: application.offer?.employer?.companyName || application.offer?.employer?.firstName + ' ' + application.offer?.employer?.lastName || 'Employeur',
+          location: location,
+          salary: application.offer?.salary || '0',
+          appliedDate: application.createdAt || application.appliedDate,
+          status: application.status // pending, accepted, rejected
+        };
+      });
       
       setApplications(formattedApplications);
     } catch (error) {
