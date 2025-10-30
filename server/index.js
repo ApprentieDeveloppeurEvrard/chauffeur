@@ -6,6 +6,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const driverRoutes = require('./routes/drivers');
 const offerRoutes = require('./routes/offers');
+const applicationsRoutes = require('./routes/applications');
 const statsRoutes = require('./routes/stats');
 const searchRoutes = require('./routes/search');
 const messageRoutes = require('./routes/messages');
@@ -105,6 +106,7 @@ app.get('/debug/config', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/offers', offerRoutes);
+app.use('/api/applications', applicationsRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/messages', messageRoutes);

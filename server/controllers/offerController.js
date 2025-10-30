@@ -338,6 +338,15 @@ const applyToOffer = async (req, res) => {
       });
     }
 
+    // Récupérer le profil Driver correspondant au User
+    const Driver = require('../models/Driver');
+    const driverProfile = await Driver.findOne({ userId: userId });
+    if (!driverProfile) {
+      return res.status(404).json({ 
+        error: 'Profil chauffeur non trouvé. Veuillez compléter votre profil avant de postuler.' 
+      });
+    }
+
     // Vérifier que l'offre existe et peut recevoir des candidatures
     const offer = await Offer.findById(offerId);
     if (!offer) {
@@ -352,10 +361,10 @@ const applyToOffer = async (req, res) => {
       });
     }
 
-    // Vérifier que le chauffeur n'a pas déjà postulé
+    // Vérifier que le chauffeur n'a pas déjà postulé (utiliser driverProfile._id)
     const existingApplication = await Application.findOne({ 
       offerId, 
-      driverId: userId 
+      driverId: driverProfile._id 
     });
 
     if (existingApplication) {
@@ -367,8 +376,8 @@ const applyToOffer = async (req, res) => {
     const applicationData = {
       ...req.body,
       offerId,
-      driverId: userId,
-      employerId: offer.employerId // Utiliser employerId au lieu de employer
+      driverId: driverProfile._id, // Utiliser l'ID du profil Driver
+      employerId: offer.employerId
     };
 
     const application = await Application.create(applicationData);
@@ -377,8 +386,8 @@ const applyToOffer = async (req, res) => {
     await offer.incrementApplicationCount();
 
     await application.populate([
-      { path: 'offer', select: 'title type' },
-      { path: 'driver', select: 'firstName lastName email' }
+      { path: 'offerId', select: 'title type' },
+      { path: 'driverId', select: 'firstName lastName email' }
     ]);
 
     // Envoyer une notification à l'employeur
