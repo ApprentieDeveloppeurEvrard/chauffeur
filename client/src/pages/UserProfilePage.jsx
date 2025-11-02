@@ -5,16 +5,33 @@ import SimpleHeader from '../component/common/SimpleHeader';
 import api from '../services/api';
 
 export default function UserProfilePage() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isDriver, setIsDriver] = useState(false);
   const [showDriverForm, setShowDriverForm] = useState(false);
-  const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState(false);
-  const [isEditingDriverInfo, setIsEditingDriverInfo] = useState(false);
-  const [isEditingEmployerInfo, setIsEditingEmployerInfo] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [employerType, setEmployerType] = useState('particulier');
+
+  const [driverInfo, setDriverInfo] = useState({
+    licenseNumber: '',
+    licenseType: 'B',
+    licenseExpiryDate: '',
+    experience: '1-3',
+    workZone: ''
+  });
+
+  const [workExperiences, setWorkExperiences] = useState([
+    {
+      company: '',
+      position: '',
+      startDate: '',
+      endDate: '',
+      description: ''
+    }
+  ]);
 
   const [userInfo, setUserInfo] = useState({
     firstName: '',
@@ -23,37 +40,6 @@ export default function UserProfilePage() {
     phone: ''
   });
 
-  const [driverInfo, setDriverInfo] = useState({
-    licenseNumber: '',
-    licenseType: 'B',
-    licenseExpiryDate: '',
-    experience: '1-3',
-    vehicleType: 'berline',
-    vehicleBrand: '',
-    vehicleModel: '',
-    vehicleYear: '',
-    vehicleSeats: '5',
-    vehicleColor: '',
-    vehiclePlateNumber: '',
-    workZone: 'Abidjan',
-    specialties: [],
-    address: '',
-    city: 'Abidjan',
-    emergencyContact: '',
-    emergencyPhone: ''
-  });
-
-  const [workExperience, setWorkExperience] = useState([
-    {
-      company: '',
-      position: '',
-      location: '',
-      startDate: '',
-      endDate: '',
-      description: ''
-    }
-  ]);
-
   const [employerInfo, setEmployerInfo] = useState({
     companyName: '',
     companyType: '',
@@ -61,15 +47,22 @@ export default function UserProfilePage() {
     address: '',
     city: 'Abidjan',
     website: '',
-    description: ''
+    description: '',
+    sector: '',
+    employeeCount: '',
+    foundedYear: '',
+    companyPhone: '',
+    companyEmail: '',
+    contactPerson: '',
+    contactPosition: ''
   });
 
   const [documents, setDocuments] = useState({
     profilePhoto: null,
     idCard: null,
-    driverLicense: null,
-    vehicleRegistration: null,
-    companyRegistration: null
+    companyRegistration: null,
+    driverLicenseFront: null,
+    driverLicenseBack: null
   });
 
   useEffect(() => {
@@ -81,12 +74,86 @@ export default function UserProfilePage() {
         phone: user.phone || ''
       });
       setIsDriver(user.role === 'driver');
+
+      if (user.role === 'employer') {
+        loadEmployerProfile();
+      }
+      
+      if (user.role === 'driver') {
+        loadDriverProfile();
+      }
     }
   }, [user]);
+  
+  const loadDriverProfile = async () => {
+    try {
+      const response = await api.get('/drivers/profile');
+      if (response.data && response.data.driver) {
+        const driver = response.data.driver;
+        
+        // Charger les infos du permis
+        setDriverInfo({
+          licenseNumber: driver.licenseNumber || '',
+          licenseType: driver.licenseType || 'B',
+          licenseExpiryDate: driver.licenseExpiryDate ? driver.licenseExpiryDate.split('T')[0] : '',
+          experience: driver.experience || '1-3',
+          workZone: driver.workZone || ''
+        });
+        
+        // Charger les expériences professionnelles
+        if (driver.workExperience && driver.workExperience.length > 0) {
+          setWorkExperiences(driver.workExperience.map(exp => ({
+            company: exp.company || '',
+            position: exp.position || '',
+            startDate: exp.startDate ? exp.startDate.split('T')[0] : '',
+            endDate: exp.endDate ? exp.endDate.split('T')[0] : '',
+            description: exp.description || ''
+          })));
+        }
+      }
+    } catch (err) {
+      console.log('Aucun profil chauffeur trouvé ou erreur:', err);
+    }
+  };
+
+  const loadEmployerProfile = async () => {
+    try {
+      const response = await api.get('/employer/profile');
+      if (response.data && response.data.employer) {
+        const emp = response.data.employer;
+        setEmployerType(emp.employerType || 'particulier');
+        setEmployerInfo({
+          companyName: emp.companyName || '',
+          companyType: emp.companyType || '',
+          siret: emp.siret || '',
+          address: emp.address || '',
+          city: emp.city || 'Abidjan',
+          website: emp.website || '',
+          description: emp.description || '',
+          sector: emp.sector || '',
+          employeeCount: emp.employeeCount || '',
+          foundedYear: emp.foundedYear || '',
+          companyPhone: emp.companyPhone || '',
+          companyEmail: emp.companyEmail || '',
+          contactPerson: emp.contactPerson || '',
+          contactPosition: emp.contactPosition || ''
+        });
+      }
+    } catch (err) {
+      console.log('Aucun profil employeur trouvé');
+    }
+  };
 
   const handleUserInfoChange = (e) => {
     setUserInfo({
       ...userInfo,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleEmployerInfoChange = (e) => {
+    setEmployerInfo({
+      ...employerInfo,
       [e.target.name]: e.target.value
     });
   };
@@ -98,11 +165,29 @@ export default function UserProfilePage() {
     });
   };
 
-  const handleEmployerInfoChange = (e) => {
-    setEmployerInfo({
-      ...employerInfo,
-      [e.target.name]: e.target.value
-    });
+  const handleWorkExperienceChange = (index, field, value) => {
+    const newExperiences = [...workExperiences];
+    newExperiences[index][field] = value;
+    setWorkExperiences(newExperiences);
+  };
+
+  const addWorkExperience = () => {
+    setWorkExperiences([
+      ...workExperiences,
+      {
+        company: '',
+        position: '',
+        startDate: '',
+        endDate: '',
+        description: ''
+      }
+    ]);
+  };
+
+  const removeWorkExperience = (index) => {
+    if (workExperiences.length > 1) {
+      setWorkExperiences(workExperiences.filter((_, i) => i !== index));
+    }
   };
 
   const handleFileChange = (e) => {
@@ -115,81 +200,93 @@ export default function UserProfilePage() {
     }
   };
 
-  const handleSpecialtyToggle = (specialty) => {
-    setDriverInfo({
-      ...driverInfo,
-      specialties: driverInfo.specialties.includes(specialty)
-        ? driverInfo.specialties.filter(s => s !== specialty)
-        : [...driverInfo.specialties, specialty]
-    });
-  };
-
-  const handleWorkExperienceChange = (index, field, value) => {
-    const newExperiences = [...workExperience];
-    newExperiences[index][field] = value;
-    setWorkExperience(newExperiences);
-  };
-
-  const addWorkExperience = () => {
-    setWorkExperience([
-      ...workExperience,
-      {
-        company: '',
-        position: '',
-        location: '',
-        startDate: '',
-        endDate: '',
-        description: ''
-      }
-    ]);
-  };
-
-  const removeWorkExperience = (index) => {
-    if (workExperience.length > 1) {
-      setWorkExperience(workExperience.filter((_, i) => i !== index));
-    }
-  };
-
-  const handleUpdateUserInfo = async (e) => {
-    e.preventDefault();
+  const handleSaveAll = async () => {
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      await api.put('/auth/profile', userInfo);
-      setSuccess('Informations mises à jour avec succès !');
-      setIsEditingPersonalInfo(false);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Erreur lors de la mise à jour');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBecomeDriver = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      // Créer le profil chauffeur
-      const response = await api.post('/drivers/become-driver', {
-        ...userInfo,
-        ...driverInfo
-      });
-
-      setSuccess('Profil chauffeur créé avec succès ! Vous apparaissez maintenant dans la liste des chauffeurs.');
-      setIsDriver(true);
-      setShowDriverForm(false);
+      // Sauvegarder les informations personnelles
+      console.log('Mise à jour des infos personnelles:', userInfo);
+      await api.put('/auth/me', userInfo);
       
-      // Recharger les données utilisateur
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      // Sauvegarder les informations chauffeur si l'utilisateur est chauffeur
+      if (user?.role === 'driver') {
+        console.log('Mise à jour du profil chauffeur...');
+        
+        // Préparer les données du chauffeur
+        const driverData = {
+          firstName: userInfo.firstName,
+          lastName: userInfo.lastName,
+          phone: userInfo.phone,
+          licenseNumber: driverInfo.licenseNumber,
+          licenseType: driverInfo.licenseType,
+          licenseExpiryDate: driverInfo.licenseExpiryDate,
+          experience: driverInfo.experience,
+          workZone: driverInfo.workZone,
+          workExperience: workExperiences.filter(exp => 
+            exp.company || exp.position || exp.startDate || exp.endDate || exp.description
+          )
+        };
+        
+        console.log('Données chauffeur à envoyer:', driverData);
+        
+        const response = await api.put('/drivers/profile', driverData);
+        console.log('Réponse serveur:', response.data);
+      }
+      
+      // Sauvegarder les informations employeur si l'utilisateur est employeur
+      if (user?.role === 'employer') {
+        console.log('Mise à jour du profil employeur...');
+        
+        // Filtrer les champs vides pour les enums
+        const filteredEmployerInfo = {};
+        Object.keys(employerInfo).forEach(key => {
+          const value = employerInfo[key];
+          // Ne pas envoyer les champs vides pour les enums
+          if (value !== '' && value !== null && value !== undefined) {
+            filteredEmployerInfo[key] = value;
+          }
+        });
+        
+        await api.post('/employer/profile', {
+          employerType,
+          ...filteredEmployerInfo
+        });
+      }
+      
+      setSuccess('Toutes les informations ont été mises à jour avec succès !');
+      setIsEditing(false);
+      
+      // Recharger les données utilisateur depuis l'API
+      await refreshUser();
+      
+      // Recharger les profils spécifiques
+      if (user?.role === 'driver') {
+        await loadDriverProfile();
+      }
+      if (user?.role === 'employer') {
+        await loadEmployerProfile();
+      }
     } catch (err) {
-      setError(err.response?.data?.error || 'Erreur lors de la création du profil chauffeur');
+      console.error('Erreur de mise à jour complète:', err);
+      console.error('Réponse erreur:', err.response);
+      
+      const errorMessage = err.response?.data?.error 
+        || err.response?.data?.message 
+        || err.message
+        || 'Erreur lors de la mise à jour';
+      
+      setError(errorMessage);
+      
+      // Afficher les détails de validation si disponibles
+      if (err.response?.data?.details) {
+        console.error('Détails de validation:', err.response.data.details);
+        const details = Array.isArray(err.response.data.details) 
+          ? err.response.data.details.join(', ')
+          : err.response.data.details;
+        setError(errorMessage + ': ' + details);
+      }
     } finally {
       setLoading(false);
     }
@@ -208,9 +305,36 @@ export default function UserProfilePage() {
       <SimpleHeader />
 
       <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl text-gray-900 mb-4 sm:mb-6">Mon Profil</h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl text-gray-900">Mon Profil</h1>
+          <div className="flex gap-2 w-full sm:w-auto">
+            {!isEditing ? (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex-1 sm:flex-none px-4 py-2 text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 transition-colors text-sm sm:text-base"
+              >
+                Éditer
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleSaveAll}
+                  disabled={loading}
+                  className="flex-1 sm:flex-none px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 text-sm sm:text-base"
+                >
+                  {loading ? 'Enregistrement...' : 'Enregistrer'}
+                </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="flex-1 sm:flex-none px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm sm:text-base"
+                >
+                  Annuler
+                </button>
+              </>
+            )}
+          </div>
+        </div>
 
-        {/* Messages */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
             <p className="text-sm sm:text-base text-red-700">{error}</p>
@@ -225,19 +349,9 @@ export default function UserProfilePage() {
 
         {/* Informations personnelles */}
         <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
-          <div className="flex justify-between items-center mb-3 sm:mb-4">
-            <h2 className="text-lg sm:text-xl text-gray-900">Informations personnelles</h2>
-            {!isEditingPersonalInfo && (
-              <button
-                onClick={() => setIsEditingPersonalInfo(true)}
-                className="px-4 py-2 text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 transition-colors"
-              >
-                Éditer
-              </button>
-            )}
-          </div>
+          <h2 className="text-lg sm:text-xl text-gray-900 mb-3 sm:mb-4">Informations personnelles</h2>
           
-          <form onSubmit={handleUpdateUserInfo} className="space-y-4">
+          <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">Prénom</label>
@@ -246,8 +360,8 @@ export default function UserProfilePage() {
                   name="firstName"
                   value={userInfo.firstName}
                   onChange={handleUserInfoChange}
-                  disabled={!isEditingPersonalInfo}
-                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditingPersonalInfo ? 'focus:ring-2 focus:ring-orange-500 focus:border-transparent' : 'bg-gray-50 cursor-not-allowed'}`}
+                  disabled={!isEditing}
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500 focus:border-transparent' : 'bg-gray-50 cursor-not-allowed'}`}
                 />
               </div>
 
@@ -258,8 +372,8 @@ export default function UserProfilePage() {
                   name="lastName"
                   value={userInfo.lastName}
                   onChange={handleUserInfoChange}
-                  disabled={!isEditingPersonalInfo}
-                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditingPersonalInfo ? 'focus:ring-2 focus:ring-orange-500 focus:border-transparent' : 'bg-gray-50 cursor-not-allowed'}`}
+                  disabled={!isEditing}
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500 focus:border-transparent' : 'bg-gray-50 cursor-not-allowed'}`}
                 />
               </div>
 
@@ -282,410 +396,15 @@ export default function UserProfilePage() {
                   name="phone"
                   value={userInfo.phone}
                   onChange={handleUserInfoChange}
-                  disabled={!isEditingPersonalInfo}
-                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditingPersonalInfo ? 'focus:ring-2 focus:ring-orange-500 focus:border-transparent' : 'bg-gray-50 cursor-not-allowed'}`}
+                  disabled={!isEditing}
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500 focus:border-transparent' : 'bg-gray-50 cursor-not-allowed'}`}
                 />
               </div>
             </div>
 
-            {isEditingPersonalInfo && (
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-                >
-                  {loading ? 'Enregistrement...' : 'Enregistrer'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsEditingPersonalInfo(false)}
-                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  Annuler
-                </button>
-              </div>
-            )}
-          </form>
+          </div>
         </div>
 
-        {/* Section Devenir Chauffeur */}
-        {!isDriver && (
-          <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg sm:text-xl text-gray-900">Devenir Chauffeur</h2>
-                <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  Complétez vos informations pour apparaître dans la liste des chauffeurs
-                </p>
-              </div>
-              
-              {!showDriverForm && (
-                <button
-                  onClick={() => setShowDriverForm(true)}
-                  className="px-4 sm:px-6 py-2.5 sm:py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 active:bg-orange-700 transition-colors text-sm sm:text-base font-medium touch-manipulation"
-                >
-                  Commencer
-                </button>
-              )}
-            </div>
-
-            {showDriverForm && (
-              <form onSubmit={handleBecomeDriver} className="space-y-4 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Numéro de permis *
-                    </label>
-                    <input
-                      type="text"
-                      name="licenseNumber"
-                      value={driverInfo.licenseNumber}
-                      onChange={handleDriverInfoChange}
-                      required
-                      placeholder="Ex: CI240001234"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Type de permis
-                    </label>
-                    <select
-                      name="licenseType"
-                      value={driverInfo.licenseType}
-                      onChange={handleDriverInfoChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    >
-                      <option value="B">B (Voiture)</option>
-                      <option value="C">C (Poids lourd)</option>
-                      <option value="D">D (Transport de personnes)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Date d'expiration du permis
-                    </label>
-                    <input
-                      type="date"
-                      name="licenseExpiryDate"
-                      value={driverInfo.licenseExpiryDate}
-                      onChange={handleDriverInfoChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Expérience
-                    </label>
-                    <select
-                      name="experience"
-                      value={driverInfo.experience}
-                      onChange={handleDriverInfoChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    >
-                      <option value="0-1">Moins d'1 an</option>
-                      <option value="1-3">1 à 3 ans</option>
-                      <option value="3-5">3 à 5 ans</option>
-                      <option value="5+">Plus de 5 ans</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Type de véhicule
-                    </label>
-                    <select
-                      name="vehicleType"
-                      value={driverInfo.vehicleType}
-                      onChange={handleDriverInfoChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    >
-                      <option value="berline">Berline</option>
-                      <option value="suv">SUV</option>
-                      <option value="van">Van</option>
-                      <option value="minibus">Minibus</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Marque du véhicule
-                    </label>
-                    <input
-                      type="text"
-                      name="vehicleBrand"
-                      value={driverInfo.vehicleBrand}
-                      onChange={handleDriverInfoChange}
-                      placeholder="Ex: Toyota"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Modèle
-                    </label>
-                    <input
-                      type="text"
-                      name="vehicleModel"
-                      value={driverInfo.vehicleModel}
-                      onChange={handleDriverInfoChange}
-                      placeholder="Ex: Corolla"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Année
-                    </label>
-                    <input
-                      type="number"
-                      name="vehicleYear"
-                      value={driverInfo.vehicleYear}
-                      onChange={handleDriverInfoChange}
-                      placeholder="2020"
-                      min="1990"
-                      max={new Date().getFullYear()}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Nombre de places
-                    </label>
-                    <input
-                      type="number"
-                      name="vehicleSeats"
-                      value={driverInfo.vehicleSeats}
-                      onChange={handleDriverInfoChange}
-                      min="2"
-                      max="50"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Couleur du véhicule
-                    </label>
-                    <input
-                      type="text"
-                      name="vehicleColor"
-                      value={driverInfo.vehicleColor}
-                      onChange={handleDriverInfoChange}
-                      placeholder="Ex: Blanc"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Numéro d'immatriculation
-                    </label>
-                    <input
-                      type="text"
-                      name="vehiclePlateNumber"
-                      value={driverInfo.vehiclePlateNumber}
-                      onChange={handleDriverInfoChange}
-                      placeholder="Ex: AB-1234-CI"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Ville
-                    </label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={driverInfo.city}
-                      onChange={handleDriverInfoChange}
-                      placeholder="Ex: Abidjan"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Adresse complète
-                    </label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={driverInfo.address}
-                      onChange={handleDriverInfoChange}
-                      placeholder="Ex: Rue 12, Cocody"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Zone de travail
-                    </label>
-                    <input
-                      type="text"
-                      name="workZone"
-                      value={driverInfo.workZone}
-                      onChange={handleDriverInfoChange}
-                      placeholder="Ex: Abidjan"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Spécialités
-                    </label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {['transport_personnel', 'livraison', 'vtc', 'transport_scolaire', 'evenementiel'].map(specialty => (
-                        <label key={specialty} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={driverInfo.specialties.includes(specialty)}
-                            onChange={() => handleSpecialtyToggle(specialty)}
-                            className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                          />
-                          <span className="text-sm sm:text-base text-gray-700 capitalize">
-                            {specialty.replace('_', ' ')}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Contact d'urgence */}
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Contact d'urgence (Nom)
-                    </label>
-                    <input
-                      type="text"
-                      name="emergencyContact"
-                      value={driverInfo.emergencyContact}
-                      onChange={handleDriverInfoChange}
-                      placeholder="Ex: Marie Kouassi"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Téléphone d'urgence
-                    </label>
-                    <input
-                      type="tel"
-                      name="emergencyPhone"
-                      value={driverInfo.emergencyPhone}
-                      onChange={handleDriverInfoChange}
-                      placeholder="+225 07 00 00 00 00"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                {/* Documents */}
-                <div className="mt-6">
-                  <h3 className="text-lg text-gray-900 mb-4">Documents requis</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Photo de profil
-                      </label>
-                      <input
-                        type="file"
-                        name="profilePhoto"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                      {documents.profilePhoto && (
-                        <p className="text-xs text-green-600 mt-1">✓ {documents.profilePhoto.name}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Pièce d'identité *
-                      </label>
-                      <input
-                        type="file"
-                        name="idCard"
-                        accept="image/*,application/pdf"
-                        onChange={handleFileChange}
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                      {documents.idCard && (
-                        <p className="text-xs text-green-600 mt-1">✓ {documents.idCard.name}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Permis de conduire *
-                      </label>
-                      <input
-                        type="file"
-                        name="driverLicense"
-                        accept="image/*,application/pdf"
-                        onChange={handleFileChange}
-                        required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                      {documents.driverLicense && (
-                        <p className="text-xs text-green-600 mt-1">✓ {documents.driverLicense.name}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Carte grise du véhicule
-                      </label>
-                      <input
-                        type="file"
-                        name="vehicleRegistration"
-                        accept="image/*,application/pdf"
-                        onChange={handleFileChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                      {documents.vehicleRegistration && (
-                        <p className="text-xs text-green-600 mt-1">✓ {documents.vehicleRegistration.name}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-                  >
-                    {loading ? 'Création...' : 'Créer mon profil chauffeur'}
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setShowDriverForm(false)}
-                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    Annuler
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        )}
-
-        {/* Si déjà chauffeur - Informations complémentaires */}
         {isDriver && (
           <>
             <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
@@ -695,670 +414,532 @@ export default function UserProfilePage() {
                 </svg>
                 <div>
                   <h3 className="text-green-900">Vous êtes chauffeur</h3>
-                  <p className="text-sm text-green-700">Votre profil apparaît dans la liste des chauffeurs</p>
+                  <p className="text-sm text-gray-700">Votre profil apparaît dans la liste des chauffeurs</p>
                 </div>
               </div>
             </div>
 
+            {/* Informations Permis de conduire */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+              <h2 className="text-xl text-gray-900 mb-4">Permis de conduire</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Numéro de permis</label>
+                  <input
+                    type="text"
+                    name="licenseNumber"
+                    value={driverInfo.licenseNumber}
+                    onChange={handleDriverInfoChange}
+                    disabled={!isEditing}
+                    placeholder="Ex: CI240001234"
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Type de permis</label>
+                  <select
+                    name="licenseType"
+                    value={driverInfo.licenseType}
+                    onChange={handleDriverInfoChange}
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                  >
+                    <option value="B">B (Voiture)</option>
+                    <option value="C">C (Poids lourd)</option>
+                    <option value="D">D (Transport de personnes)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Date d'expiration</label>
+                  <input
+                    type="date"
+                    name="licenseExpiryDate"
+                    value={driverInfo.licenseExpiryDate}
+                    onChange={handleDriverInfoChange}
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Expérience</label>
+                  <select
+                    name="experience"
+                    value={driverInfo.experience}
+                    onChange={handleDriverInfoChange}
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                  >
+                    <option value="0-1">Moins d'1 an</option>
+                    <option value="1-3">1 à 3 ans</option>
+                    <option value="3-5">3 à 5 ans</option>
+                    <option value="5+">Plus de 5 ans</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Zone de travail / Ville</label>
+                  <select
+                    name="workZone"
+                    value={driverInfo.workZone}
+                    onChange={handleDriverInfoChange}
+                    disabled={!isEditing}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                  >
+                    <option value="">Sélectionnez une ville</option>
+                    <option value="Abidjan">Abidjan</option>
+                    <option value="Cocody">Cocody</option>
+                    <option value="Plateau">Plateau</option>
+                    <option value="Yopougon">Yopougon</option>
+                    <option value="Abobo">Abobo</option>
+                    <option value="Marcory">Marcory</option>
+                    <option value="Koumassi">Koumassi</option>
+                    <option value="Treichville">Treichville</option>
+                    <option value="Bouaké">Bouaké</option>
+                    <option value="Yamoussoukro">Yamoussoukro</option>
+                    <option value="San-Pédro">San-Pédro</option>
+                    <option value="Daloa">Daloa</option>
+                    <option value="Korhogo">Korhogo</option>
+                    <option value="Man">Man</option>
+                    <option value="Gagnoa">Gagnoa</option>
+                    <option value="Divo">Divo</option>
+                    <option value="Abengourou">Abengourou</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Documents du permis */}
+              <div className="mt-6">
+                <h3 className="text-lg text-gray-900 mb-4">Documents du permis de conduire</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Photo recto du permis *
+                    </label>
+                    <input
+                      type="file"
+                      name="driverLicenseFront"
+                      accept="image/*,application/pdf"
+                      onChange={handleFileChange}
+                      disabled={!isEditing}
+                      className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                    />
+                    {documents.driverLicenseFront && (
+                      <p className="text-xs text-green-600 mt-1">✓ {documents.driverLicenseFront.name}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Photo verso du permis *
+                    </label>
+                    <input
+                      type="file"
+                      name="driverLicenseBack"
+                      accept="image/*,application/pdf"
+                      onChange={handleFileChange}
+                      disabled={!isEditing}
+                      className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                    />
+                    {documents.driverLicenseBack && (
+                      <p className="text-xs text-green-600 mt-1">✓ {documents.driverLicenseBack.name}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
             {/* Expérience professionnelle */}
             <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-              <h2 className="text-xl text-gray-900 mb-4">Expérience professionnelle</h2>
-              
-              <div className="space-y-6">
-                {workExperience.map((exp, index) => (
-                  <div key={index} className="border border-gray-200 p-4 rounded-lg relative">
-                    {workExperience.length > 1 && (
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4">
+                <h2 className="text-xl text-gray-900">Expérience professionnelle</h2>
+                {isEditing && (
+                  <button
+                    onClick={addWorkExperience}
+                    className="w-full sm:w-auto px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+                  >
+                    + Ajouter une expérience
+                  </button>
+                )}
+              </div>
+              <div className="space-y-4">
+                {workExperiences.map((exp, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 relative">
+                    {isEditing && workExperiences.length > 1 && (
                       <button
-                        type="button"
                         onClick={() => removeWorkExperience(index)}
-                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700 p-1 sm:p-0"
+                        aria-label="Supprimer cette expérience"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg className="w-6 h-6 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                       </button>
                     )}
-                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Poste occupé *
-                        </label>
-                        <input
-                          type="text"
-                          value={exp.position}
-                          onChange={(e) => handleWorkExperienceChange(index, 'position', e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
-                          placeholder="Ex: Chauffeur personnel"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Entreprise *
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Entreprise</label>
                         <input
                           type="text"
                           value={exp.company}
                           onChange={(e) => handleWorkExperienceChange(index, 'company', e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
-                          placeholder="Ex: Société ABC"
+                          disabled={!isEditing}
+                          placeholder="Nom de l'entreprise"
+                          className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
                         />
                       </div>
-                      
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Lieu
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Poste occupé</label>
                         <input
                           type="text"
-                          value={exp.location}
-                          onChange={(e) => handleWorkExperienceChange(index, 'location', e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
-                          placeholder="Ex: Abidjan"
+                          value={exp.position}
+                          onChange={(e) => handleWorkExperienceChange(index, 'position', e.target.value)}
+                          disabled={!isEditing}
+                          placeholder="Ex: Chauffeur personnel"
+                          className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
                         />
                       </div>
-                      
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Date de début
-                          </label>
-                          <input
-                            type="month"
-                            value={exp.startDate}
-                            onChange={(e) => handleWorkExperienceChange(index, 'startDate', e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Date de fin
-                          </label>
-                          <input
-                            type="month"
-                            value={exp.endDate}
-                            onChange={(e) => handleWorkExperienceChange(index, 'endDate', e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
-                            placeholder="En cours si vide"
-                          />
-                        </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Date de début</label>
+                        <input
+                          type="date"
+                          value={exp.startDate}
+                          onChange={(e) => handleWorkExperienceChange(index, 'startDate', e.target.value)}
+                          disabled={!isEditing}
+                          className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                        />
                       </div>
-                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Date de fin</label>
+                        <input
+                          type="date"
+                          value={exp.endDate}
+                          onChange={(e) => handleWorkExperienceChange(index, 'endDate', e.target.value)}
+                          disabled={!isEditing}
+                          className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                        />
+                      </div>
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Description
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                         <textarea
                           value={exp.description}
                           onChange={(e) => handleWorkExperienceChange(index, 'description', e.target.value)}
+                          disabled={!isEditing}
                           rows="3"
-                          className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-orange-500 transition-colors"
                           placeholder="Décrivez vos responsabilités et réalisations..."
+                          className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
                         />
                       </div>
                     </div>
                   </div>
                 ))}
-                
-                <button
-                  type="button"
-                  onClick={addWorkExperience}
-                  className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-600 hover:border-orange-500 hover:text-orange-500 transition-colors flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Ajouter une expérience
-                </button>
-                
-                <button
-                  type="button"
-                  onClick={() => {/* TODO: Sauvegarder les expériences */}}
-                  className="w-full py-3 bg-orange-500 text-white hover:bg-orange-600 transition-colors"
-                >
-                  Enregistrer les expériences
-                </button>
+                <p className="text-sm text-gray-500">
+                  Ajoutez vos expériences professionnelles pour renforcer votre profil.
+                </p>
               </div>
-            </div>
-
-            {/* Informations et documents du chauffeur */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl text-gray-900">Informations et documents du chauffeur</h2>
-                {!isEditingDriverInfo && (
-                  <button
-                    onClick={() => setIsEditingDriverInfo(true)}
-                    className="px-4 py-2 text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 transition-colors"
-                  >
-                    Éditer
-                  </button>
-                )}
-              </div>
-              
-              <form className="space-y-6">
-                {/* Informations du permis */}
-                <div>
-                  <h3 className="text-lg text-gray-900 mb-4">Permis de conduire</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Numéro de permis
-                      </label>
-                      <input
-                        type="text"
-                        name="licenseNumber"
-                        value={driverInfo.licenseNumber}
-                        onChange={handleDriverInfoChange}
-                        placeholder="Ex: CI240001234"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Type de permis
-                      </label>
-                      <select
-                        name="licenseType"
-                        value={driverInfo.licenseType}
-                        onChange={handleDriverInfoChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      >
-                        <option value="B">B (Voiture)</option>
-                        <option value="C">C (Poids lourd)</option>
-                        <option value="D">D (Transport de personnes)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Date d'expiration
-                      </label>
-                      <input
-                        type="date"
-                        name="licenseExpiryDate"
-                        value={driverInfo.licenseExpiryDate}
-                        onChange={handleDriverInfoChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Informations du véhicule */}
-                <div>
-                  <h3 className="text-lg text-gray-900 mb-4">Véhicule</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Type de véhicule
-                      </label>
-                      <select
-                        name="vehicleType"
-                        value={driverInfo.vehicleType}
-                        onChange={handleDriverInfoChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      >
-                        <option value="berline">Berline</option>
-                        <option value="suv">SUV</option>
-                        <option value="van">Van</option>
-                        <option value="minibus">Minibus</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Marque
-                      </label>
-                      <input
-                        type="text"
-                        name="vehicleBrand"
-                        value={driverInfo.vehicleBrand}
-                        onChange={handleDriverInfoChange}
-                        placeholder="Ex: Toyota"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Modèle
-                      </label>
-                      <input
-                        type="text"
-                        name="vehicleModel"
-                        value={driverInfo.vehicleModel}
-                        onChange={handleDriverInfoChange}
-                        placeholder="Ex: Corolla"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Année
-                      </label>
-                      <input
-                        type="number"
-                        name="vehicleYear"
-                        value={driverInfo.vehicleYear}
-                        onChange={handleDriverInfoChange}
-                        placeholder="2020"
-                        min="1990"
-                        max={new Date().getFullYear()}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Couleur
-                      </label>
-                      <input
-                        type="text"
-                        name="vehicleColor"
-                        value={driverInfo.vehicleColor}
-                        onChange={handleDriverInfoChange}
-                        placeholder="Ex: Blanc"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Immatriculation
-                      </label>
-                      <input
-                        type="text"
-                        name="vehiclePlateNumber"
-                        value={driverInfo.vehiclePlateNumber}
-                        onChange={handleDriverInfoChange}
-                        placeholder="Ex: AB-1234-CI"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Nombre de places
-                      </label>
-                      <input
-                        type="number"
-                        name="vehicleSeats"
-                        value={driverInfo.vehicleSeats}
-                        onChange={handleDriverInfoChange}
-                        min="2"
-                        max="50"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Adresse et contacts */}
-                <div>
-                  <h3 className="text-lg text-gray-900 mb-4">Adresse et contacts</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Ville
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={driverInfo.city}
-                        onChange={handleDriverInfoChange}
-                        placeholder="Ex: Abidjan"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Zone de travail
-                      </label>
-                      <input
-                        type="text"
-                        name="workZone"
-                        value={driverInfo.workZone}
-                        onChange={handleDriverInfoChange}
-                        placeholder="Ex: Cocody, Plateau"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Adresse complète
-                      </label>
-                      <input
-                        type="text"
-                        name="address"
-                        value={driverInfo.address}
-                        onChange={handleDriverInfoChange}
-                        placeholder="Ex: Rue 12, Cocody"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Contact d'urgence
-                      </label>
-                      <input
-                        type="text"
-                        name="emergencyContact"
-                        value={driverInfo.emergencyContact}
-                        onChange={handleDriverInfoChange}
-                        placeholder="Ex: Marie Kouassi"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Téléphone d'urgence
-                      </label>
-                      <input
-                        type="tel"
-                        name="emergencyPhone"
-                        value={driverInfo.emergencyPhone}
-                        onChange={handleDriverInfoChange}
-                        placeholder="+225 07 00 00 00 00"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Documents */}
-                <div>
-                  <h3 className="text-lg text-gray-900 mb-4">Documents</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Photo de profil
-                      </label>
-                      <input
-                        type="file"
-                        name="profilePhoto"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                      {documents.profilePhoto && (
-                        <p className="text-xs text-green-600 mt-1">✓ {documents.profilePhoto.name}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Pièce d'identité
-                      </label>
-                      <input
-                        type="file"
-                        name="idCard"
-                        accept="image/*,application/pdf"
-                        onChange={handleFileChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                      {documents.idCard && (
-                        <p className="text-xs text-green-600 mt-1">✓ {documents.idCard.name}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Permis de conduire
-                      </label>
-                      <input
-                        type="file"
-                        name="driverLicense"
-                        accept="image/*,application/pdf"
-                        onChange={handleFileChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                      {documents.driverLicense && (
-                        <p className="text-xs text-green-600 mt-1">✓ {documents.driverLicense.name}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                        Carte grise du véhicule
-                      </label>
-                      <input
-                        type="file"
-                        name="vehicleRegistration"
-                        accept="image/*,application/pdf"
-                        onChange={handleFileChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      />
-                      {documents.vehicleRegistration && (
-                        <p className="text-xs text-green-600 mt-1">✓ {documents.vehicleRegistration.name}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {isEditingDriverInfo && (
-                  <div className="flex gap-2">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-                    >
-                      {loading ? 'Enregistrement...' : 'Enregistrer'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsEditingDriverInfo(false)}
-                      className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      Annuler
-                    </button>
-                  </div>
-                )}
-              </form>
             </div>
           </>
         )}
 
-        {/* Section Employeur */}
-        {user?.role === 'client' && (
-          <div className="bg-white rounded-lg border border-gray-200 p-6 mt-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl text-gray-900">Informations de l'entreprise</h2>
-              {!isEditingEmployerInfo && (
+        {user?.role === 'employer' && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+            <h2 className="text-xl text-gray-900 mb-4">Informations employeur</h2>
+
+            <div className="mb-6">
+              <label className="block text-sm sm:text-base font-medium text-gray-700 mb-3">
+                Type d'employeur
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
-                  onClick={() => setIsEditingEmployerInfo(true)}
-                  className="px-4 py-2 text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 transition-colors"
+                  type="button"
+                  onClick={() => setEmployerType('particulier')}
+                  disabled={!isEditing}
+                  className={`flex-1 px-6 py-3 rounded-lg border-2 transition-all ${
+                    employerType === 'particulier'
+                      ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  } ${!isEditing ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                 >
-                  Éditer
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>Particulier</span>
+                  </div>
                 </button>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setEmployerType('entreprise')}
+                  disabled={!isEditing}
+                  className={`flex-1 px-6 py-3 rounded-lg border-2 transition-all ${
+                    employerType === 'entreprise'
+                      ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  } ${!isEditing ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span>Entreprise</span>
+                  </div>
+                </button>
+              </div>
             </div>
-            <form className="space-y-4">
+
+            <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                    Nom de l'entreprise *
-                  </label>
-                  <input
-                    type="text"
-                    name="companyName"
-                    value={employerInfo.companyName}
-                    onChange={handleEmployerInfoChange}
-                    placeholder="Ex: Transport Express CI"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  />
-                </div>
+                {employerType === 'entreprise' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Nom de l'entreprise</label>
+                      <input
+                        type="text"
+                        name="companyName"
+                        value={employerInfo.companyName}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        placeholder="Ex: Transport Express CI"
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Type d'entreprise</label>
+                      <select
+                        name="companyType"
+                        value={employerInfo.companyType}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      >
+                        <option value="">Sélectionner...</option>
+                        <option value="sarl">SARL</option>
+                        <option value="sa">SA</option>
+                        <option value="entreprise_individuelle">Entreprise individuelle</option>
+                        <option value="association">Association</option>
+                        <option value="autre">Autre</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Numéro SIRET/RC</label>
+                      <input
+                        type="text"
+                        name="siret"
+                        value={employerInfo.siret}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        placeholder="Ex: CI-ABJ-2024-B-12345"
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Secteur d'activité</label>
+                      <select
+                        name="sector"
+                        value={employerInfo.sector}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      >
+                        <option value="">Sélectionner...</option>
+                        <option value="transport">Transport</option>
+                        <option value="logistique">Logistique</option>
+                        <option value="commerce">Commerce</option>
+                        <option value="industrie">Industrie</option>
+                        <option value="services">Services</option>
+                        <option value="hotellerie">Hôtellerie/Restauration</option>
+                        <option value="evenementiel">Événementiel</option>
+                        <option value="tourisme">Tourisme</option>
+                        <option value="autre">Autre</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Effectif</label>
+                      <select
+                        name="employeeCount"
+                        value={employerInfo.employeeCount}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      >
+                        <option value="">Sélectionner...</option>
+                        <option value="1-10">1-10 employés</option>
+                        <option value="11-50">11-50 employés</option>
+                        <option value="51-200">51-200 employés</option>
+                        <option value="201-500">201-500 employés</option>
+                        <option value="500+">Plus de 500 employés</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Année de création</label>
+                      <input
+                        type="number"
+                        name="foundedYear"
+                        value={employerInfo.foundedYear}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        placeholder="Ex: 2015"
+                        min="1900"
+                        max={new Date().getFullYear()}
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div>
-                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                    Type d'entreprise
-                  </label>
-                  <select
-                    name="companyType"
-                    value={employerInfo.companyType}
-                    onChange={handleEmployerInfoChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  >
-                    <option value="">Sélectionner...</option>
-                    <option value="sarl">SARL</option>
-                    <option value="sa">SA</option>
-                    <option value="entreprise_individuelle">Entreprise individuelle</option>
-                    <option value="association">Association</option>
-                    <option value="autre">Autre</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                    Numéro SIRET/RC
-                  </label>
-                  <input
-                    type="text"
-                    name="siret"
-                    value={employerInfo.siret}
-                    onChange={handleEmployerInfoChange}
-                    placeholder="Ex: CI-ABJ-2024-B-12345"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                    Ville
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
                   <input
                     type="text"
                     name="city"
                     value={employerInfo.city}
                     onChange={handleEmployerInfoChange}
+                    disabled={!isEditing}
                     placeholder="Ex: Abidjan"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Téléphone {employerType === 'entreprise' ? 'entreprise' : 'personnel'}
+                  </label>
+                  <input
+                    type="tel"
+                    name="companyPhone"
+                    value={employerInfo.companyPhone}
+                    onChange={handleEmployerInfoChange}
+                    disabled={!isEditing}
+                    placeholder="+225 27 00 00 00 00"
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email {employerType === 'entreprise' ? 'entreprise' : 'personnel'}
+                  </label>
+                  <input
+                    type="email"
+                    name="companyEmail"
+                    value={employerInfo.companyEmail}
+                    onChange={handleEmployerInfoChange}
+                    disabled={!isEditing}
+                    placeholder="contact@entreprise.com"
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                    Adresse complète
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Adresse complète</label>
                   <input
                     type="text"
                     name="address"
                     value={employerInfo.address}
                     onChange={handleEmployerInfoChange}
+                    disabled={!isEditing}
                     placeholder="Ex: Boulevard de la République, Plateau"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                    Site web
-                  </label>
-                  <input
-                    type="url"
-                    name="website"
-                    value={employerInfo.website}
-                    onChange={handleEmployerInfoChange}
-                    placeholder="https://www.example.com"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  />
-                </div>
+                {employerType === 'entreprise' && (
+                  <>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Site web</label>
+                      <input
+                        type="url"
+                        name="website"
+                        value={employerInfo.website}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        placeholder="https://www.example.com"
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      />
+                    </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                    Description de l'entreprise
-                  </label>
-                  <textarea
-                    name="description"
-                    value={employerInfo.description}
-                    onChange={handleEmployerInfoChange}
-                    rows="4"
-                    placeholder="Décrivez votre entreprise et vos activités..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  />
-                </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Description de l'entreprise</label>
+                      <textarea
+                        name="description"
+                        value={employerInfo.description}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        rows="4"
+                        placeholder="Décrivez votre entreprise..."
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
-              {/* Documents entreprise */}
-              <div className="mt-6">
-                <h3 className="text-lg text-gray-900 mb-4">Documents de l'entreprise</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Logo de l'entreprise
-                    </label>
-                    <input
-                      type="file"
-                      name="profilePhoto"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                    {documents.profilePhoto && (
-                      <p className="text-xs text-green-600 mt-1">✓ {documents.profilePhoto.name}</p>
-                    )}
-                  </div>
+              {employerType === 'entreprise' && (
+                <div className="mt-6">
+                  <h3 className="text-lg text-gray-900 mb-4">Personne de contact</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
+                      <input
+                        type="text"
+                        name="contactPerson"
+                        value={employerInfo.contactPerson}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        placeholder="Ex: Jean Kouassi"
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Registre de commerce
-                    </label>
-                    <input
-                      type="file"
-                      name="companyRegistration"
-                      accept="image/*,application/pdf"
-                      onChange={handleFileChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                    {documents.companyRegistration && (
-                      <p className="text-xs text-green-600 mt-1">✓ {documents.companyRegistration.name}</p>
-                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Fonction/Poste</label>
+                      <input
+                        type="text"
+                        name="contactPosition"
+                        value={employerInfo.contactPosition}
+                        onChange={handleEmployerInfoChange}
+                        disabled={!isEditing}
+                        placeholder="Ex: Directeur RH"
+                        className={`w-full px-4 py-2 border border-gray-300 rounded-lg ${isEditing ? 'focus:ring-2 focus:ring-orange-500' : 'bg-gray-50 cursor-not-allowed'}`}
+                      />
+                    </div>
                   </div>
-
-                  <div>
-                    <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">
-                      Pièce d'identité du gérant
-                    </label>
-                    <input
-                      type="file"
-                      name="idCard"
-                      accept="image/*,application/pdf"
-                      onChange={handleFileChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                    {documents.idCard && (
-                      <p className="text-xs text-green-600 mt-1">✓ {documents.idCard.name}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {isEditingEmployerInfo && (
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-                  >
-                    {loading ? 'Enregistrement...' : 'Enregistrer'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingEmployerInfo(false)}
-                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    Annuler
-                  </button>
                 </div>
               )}
-            </form>
+
+            </div>
+          </div>
+        )}
+
+        {!isDriver && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl text-gray-900">Devenir Chauffeur</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Complétez vos informations pour apparaître dans la liste des chauffeurs
+                </p>
+              </div>
+              
+              {!showDriverForm && (
+                <button
+                  onClick={() => setShowDriverForm(true)}
+                  className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                >
+                  Commencer
+                </button>
+              )}
+            </div>
+
+            {showDriverForm && (
+              <div className="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p>Le formulaire "Devenir Chauffeur" sera affiché ici avec tous les champs nécessaires.</p>
+              </div>
+            )}
           </div>
         )}
       </main>

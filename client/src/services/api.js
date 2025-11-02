@@ -253,4 +253,16 @@ export const searchService = {
   quick: (query) => api.get('/search/quick', { params: { query } }),
 }
 
+// Service employeur
+export const employerService = {
+  // Créer ou mettre à jour le profil employeur
+  createOrUpdateProfile: (data) => api.post('/employer/profile', data),
+  // Récupérer le profil employeur
+  getProfile: () => api.get('/employer/profile'),
+  // Supprimer le profil employeur
+  deleteProfile: () => api.delete('/employer/profile'),
+  // Upload de documents
+  uploadDocuments: (data) => api.post('/employer/documents', data),
+}
+
 export default api

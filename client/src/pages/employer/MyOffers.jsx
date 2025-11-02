@@ -90,9 +90,9 @@ export default function MyOffers() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl text-gray-900">Mes annonces</h1>
-          <p className="text-gray-600 mt-2">Gérez vos offres d'emploi publiées</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl text-gray-900 font-bold">Mes annonces</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">Gérez vos offres d'emploi publiées</p>
         </div>
 
         {/* Filtres */}
@@ -145,7 +145,7 @@ export default function MyOffers() {
             <p className="text-gray-600 mb-4">Vous n'avez pas encore publié d'offres d'emploi.</p>
             <button
               onClick={() => navigate('/publier-offre?type=job')}
-              className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium inline-flex items-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium inline-flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -161,28 +161,26 @@ export default function MyOffers() {
                 className="bg-white rounded-lg border border-gray-200 transition-all overflow-hidden"
               >
                 <div className="p-4 sm:p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                  <div className="flex flex-col gap-4">
                     {/* Info offre */}
                     <div className="flex-1">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="text-lg sm:text-xl text-gray-900 mb-2">{offer.title}</h3>
-                          <div className="flex flex-wrap gap-2 mb-3">
-                            <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
-                              {offer.type}
-                            </span>
-                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              offer.status === 'active' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {offer.status === 'active' ? 'Active' : 'Fermée'}
-                            </span>
-                          </div>
+                      <div className="mb-3">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{offer.title}</h3>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium">
+                            {offer.type}
+                          </span>
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            offer.status === 'active' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {offer.status === 'active' ? 'Active' : 'Fermée'}
+                          </span>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 mb-4">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -205,7 +203,7 @@ export default function MyOffers() {
                       </div>
 
                       {/* Statistiques */}
-                      <div className="flex flex-wrap gap-4 text-sm">
+                      <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm">
                         <div className="flex items-center gap-2 text-gray-600">
                           <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -223,22 +221,22 @@ export default function MyOffers() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex lg:flex-col gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 pt-3 border-t border-gray-100">
                       <button 
                         onClick={() => navigate(`/view-offer/${offer.id}`)}
-                        className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium whitespace-nowrap"
+                        className="flex-1 px-4 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
                       >
                         Voir détails
                       </button>
                       <button 
                         onClick={() => handleEdit(offer.id)}
-                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium whitespace-nowrap"
+                        className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
                       >
                         Modifier
                       </button>
                       <button 
                         onClick={() => openDeleteModal(offer)}
-                        className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium whitespace-nowrap"
+                        className="flex-1 px-4 py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
                       >
                         Supprimer
                       </button>
@@ -261,7 +259,7 @@ export default function MyOffers() {
           ></div>
           
           {/* Modal Content */}
-          <div className="relative flex flex-col items-center bg-white shadow-md rounded-xl py-6 px-5 md:w-[460px] w-[370px] border border-gray-200">
+          <div className="relative flex flex-col items-center bg-white shadow-md rounded-xl py-6 px-5 w-[90vw] max-w-[460px] border border-gray-200">
             {/* Icône */}
             <div className="flex items-center justify-center p-4 bg-red-100 rounded-full">
               <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

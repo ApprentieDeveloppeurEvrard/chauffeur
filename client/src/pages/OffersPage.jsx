@@ -48,6 +48,7 @@ export default function OffersPage() {
         
         // L'API retourne {offers: [...]}
         if (response.data && response.data.offers) {
+          console.log('Structure des offres:', response.data.offers[0]); // Debug
           setOffers(response.data.offers);
         } else {
           setOffers([]);
@@ -74,15 +75,20 @@ export default function OffersPage() {
 
   // Filtrage combiné (recherche + filtres)
   const filteredOffers = offers.filter(offer => {
+    // Normaliser location (peut être string ou objet)
+    const locationStr = typeof offer.location === 'string' 
+      ? offer.location 
+      : (offer.location?.city || offer.location?.ville || '');
+    
     // Filtre de recherche
     const matchesSearch = searchQuery === '' ||
-      offer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      offer.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (offer.location && offer.location.toLowerCase().includes(searchQuery.toLowerCase()));
+      (offer.title && offer.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (offer.company && offer.company.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (locationStr && locationStr.toLowerCase().includes(searchQuery.toLowerCase()));
     
     // Filtre par ville
     const matchesCity = selectedCity === '' ||
-      (offer.location && offer.location.toLowerCase().includes(selectedCity.toLowerCase()));
+      (locationStr && locationStr.toLowerCase().includes(selectedCity.toLowerCase()));
     
     // Filtre par type de contrat
     const matchesContractType = selectedContractType === '' ||

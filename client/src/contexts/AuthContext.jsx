@@ -111,6 +111,33 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const refreshUser = async () => {
+    try {
+      if (!token) return;
+      
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération du profil');
+      }
+
+      const data = await response.json();
+      const updatedUser = data.user;
+      
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      return updatedUser;
+    } catch (error) {
+      console.error('Erreur lors du rafraîchissement du profil:', error);
+      return null;
+    }
+  };
+
   const isAuthenticated = () => {
     return !!token && !!user;
   };
@@ -139,6 +166,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
+    refreshUser,
     isAuthenticated,
     isDriver,
     isClient,
