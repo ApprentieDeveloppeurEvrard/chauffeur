@@ -28,8 +28,20 @@ const employerSchema = new mongoose.Schema(
       type: String,
       trim: true
     },
+    // Type d'employeur
+    employerType: {
+      type: String,
+      enum: ['particulier', 'entreprise'],
+      default: 'particulier'
+    },
+    // Informations entreprise
     companyName: {
       type: String,
+      trim: true
+    },
+    companyType: {
+      type: String,
+      enum: ['sarl', 'sa', 'entreprise_individuelle', 'association', 'autre'],
       trim: true
     },
     companyLogo: {
@@ -42,25 +54,46 @@ const employerSchema = new mongoose.Schema(
         'logistique',
         'tourisme',
         'hotellerie',
+        'evenementiel',
         'commerce',
         'services',
         'industrie',
         'autre'
       ],
-      default: 'autre'
+      trim: true
     },
-    companyAddress: {
+    employeeCount: {
+      type: String,
+      enum: ['1-10', '11-50', '51-200', '201-500', '500+'],
+      trim: true
+    },
+    foundedYear: {
+      type: Number,
+      min: 1900,
+      max: new Date().getFullYear()
+    },
+    address: {
       type: String,
       trim: true
     },
-    companyCity: {
-      type: String,
-      trim: true
-    },
-    companyDescription: {
+    city: {
       type: String,
       trim: true,
-      maxlength: 500
+      default: 'Abidjan'
+    },
+    companyPhone: {
+      type: String,
+      trim: true
+    },
+    companyEmail: {
+      type: String,
+      trim: true,
+      lowercase: true
+    },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: 1000
     },
     website: {
       type: String,
@@ -69,6 +102,22 @@ const employerSchema = new mongoose.Schema(
     siret: {
       type: String,
       trim: true
+    },
+    // Personne de contact
+    contactPerson: {
+      type: String,
+      trim: true
+    },
+    contactPosition: {
+      type: String,
+      trim: true
+    },
+    // Documents
+    companyRegistration: {
+      type: String
+    },
+    idCard: {
+      type: String
     },
     status: {
       type: String,

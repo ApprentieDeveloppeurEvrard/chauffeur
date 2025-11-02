@@ -10,6 +10,7 @@ const applicationsRoutes = require('./routes/applications');
 const statsRoutes = require('./routes/stats');
 const searchRoutes = require('./routes/search');
 const messageRoutes = require('./routes/messages');
+const employerRoutes = require('./routes/employer');
 
 const { connectToDatabase } = require('./db/connect');
 const app = express();
@@ -110,6 +111,7 @@ app.use('/api/applications', applicationsRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/employer', employerRoutes);
 
 // Not found handler
 app.use((req, res) => {
