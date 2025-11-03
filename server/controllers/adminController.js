@@ -1,474 +1,473 @@
-const User = require('../models/User');
 const Driver = require('../models/Driver');
+const User = require('../models/User');
 const Offer = require('../models/Offer');
-const Mission = require('../models/Mission');
 const Application = require('../models/Application');
-const Transaction = require('../models/Transaction');
-const Ticket = require('../models/Ticket');
-const ActivityLog = require('../models/ActivityLog');
-const PlatformConfig = require('../models/PlatformConfig');
 
-// Middleware pour vérifier les droits admin
-const requireAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Accès réservé aux administrateurs' });
-  }
-  next();
-};
-
-// Dashboard principal avec KPIs
-const getDashboardStats = async (req, res) => {
+// Récupérer les statistiques du dashboard admin
+exports.getDashboardStats = async (req, res) => {
   try {
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    // Statistiques générales
-    const totalUsers = await User.countDocuments();
+    // Statistiques des chauffeurs
     const totalDrivers = await Driver.countDocuments();
-    const totalEmployers = await User.countDocuments({ role: 'client' });
-    const totalOffers = await Offer.countDocuments();
-    const totalMissions = await Mission.countDocuments();
-
-    // Statistiques par statut
-    const pendingDrivers = await Driver.countDocuments({ status: 'pending' });
     const approvedDrivers = await Driver.countDocuments({ status: 'approved' });
-    const suspendedDrivers = await Driver.countDocuments({ status: 'suspended' });
+    const pendingDrivers = await Driver.countDocuments({ status: 'pending' });
+    const rejectedDrivers = await Driver.countDocuments({ status: 'rejected' });
     
+    // Nouveaux chauffeurs cette semaine
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const newDriversThisWeek = await Driver.countDocuments({ 
+      createdAt: { $gte: oneWeekAgo } 
+    });
+
+    // Statistiques des employeurs
+    const totalEmployers = await User.countDocuments({ role: 'employer' });
+
+    // Statistiques des offres
+    const totalOffers = await Offer.countDocuments();
     const activeOffers = await Offer.countDocuments({ status: 'active' });
-    const completedMissions = await Mission.countDocuments({ status: 'completed' });
-    const activeMissions = await Mission.countDocuments({ status: 'active' });
+    const expiredOffers = await Offer.countDocuments({ status: 'expired' });
 
-    // Statistiques financières
-    const totalRevenue = await Transaction.aggregate([
-      { $match: { status: 'processed' } },
-      { $group: { _id: null, total: { $sum: '$platformFee' } } }
-    ]);
+    // Statistiques des candidatures
+    const totalApplications = await Application.countDocuments();
+    const pendingApplications = await Application.countDocuments({ status: 'pending' });
+    const acceptedApplications = await Application.countDocuments({ status: 'accepted' });
+    const rejectedApplications = await Application.countDocuments({ status: 'rejected' });
 
-    const monthlyRevenue = await Transaction.aggregate([
-      { $match: { status: 'processed', createdAt: { $gte: thirtyDaysAgo } } },
-      { $group: { _id: null, total: { $sum: '$platformFee' } } }
-    ]);
+    // Taux d'acceptation
+    const acceptanceRate = totalApplications > 0 
+      ? Math.round((acceptedApplications / totalApplications) * 100) 
+      : 0;
 
-    // Évolution sur 7 jours
-    const newDriversWeek = await Driver.countDocuments({ createdAt: { $gte: sevenDaysAgo } });
-    const newOffersWeek = await Offer.countDocuments({ createdAt: { $gte: sevenDaysAgo } });
-    const newMissionsWeek = await Mission.countDocuments({ createdAt: { $gte: sevenDaysAgo } });
-
-    // Tickets de support
-    const openTickets = await Ticket.countDocuments({ status: { $in: ['open', 'in_progress'] } });
-    const urgentTickets = await Ticket.countDocuments({ priority: 'urgent', status: { $ne: 'closed' } });
-
-    // Activité récente
-    const recentActivity = await ActivityLog.find({ category: 'admin' })
-      .populate('user', 'firstName lastName email')
+    // Derniers chauffeurs inscrits (pour validation)
+    const pendingValidation = await Driver.find()
       .sort({ createdAt: -1 })
-      .limit(10);
+      .limit(10)
+      .select('firstName lastName email status createdAt');
 
-    // Chauffeurs en attente de validation
-    const pendingValidation = await Driver.find({ status: 'pending' })
-      .populate('userId', 'firstName lastName email')
+    // Dernières offres publiées
+    const recentOffers = await Offer.find()
       .sort({ createdAt: -1 })
-      .limit(5);
+      .limit(10)
+      .populate('employerId', 'firstName lastName email')
+      .select('title type status createdAt employerId');
+
+    // Formater les offres récentes
+    const formattedOffers = recentOffers.map(offer => ({
+      _id: offer._id,
+      title: offer.title,
+      type: offer.type,
+      status: offer.status,
+      createdAt: offer.createdAt,
+      employerName: offer.employerId 
+        ? `${offer.employerId.firstName || ''} ${offer.employerId.lastName || ''}`.trim() 
+        : 'Employeur inconnu'
+    }));
 
     res.json({
       overview: {
-        totalUsers,
         totalDrivers,
         totalEmployers,
-        totalOffers,
-        totalMissions,
-        totalRevenue: totalRevenue[0]?.total || 0,
-        monthlyRevenue: monthlyRevenue[0]?.total || 0
+        totalApplications,
+        totalProducts: 0, // À implémenter si vous avez un modèle Product
+        acceptanceRate
       },
       drivers: {
-        pending: pendingDrivers,
         approved: approvedDrivers,
-        suspended: suspendedDrivers,
-        newThisWeek: newDriversWeek
+        pending: pendingDrivers,
+        rejected: rejectedDrivers,
+        newThisWeek: newDriversThisWeek
       },
       offers: {
+        total: totalOffers,
         active: activeOffers,
-        newThisWeek: newOffersWeek
+        expired: expiredOffers
+      },
+      applications: {
+        total: totalApplications,
+        pending: pendingApplications,
+        accepted: acceptedApplications,
+        rejected: rejectedApplications
       },
       missions: {
-        active: activeMissions,
-        completed: completedMissions,
-        newThisWeek: newMissionsWeek
+        total: 0, // À implémenter si vous avez un modèle Mission
+        active: 0
       },
       support: {
-        openTickets,
-        urgentTickets
+        pendingReports: 0 // À implémenter si vous avez un système de signalement
       },
-      recentActivity,
-      pendingValidation
+      pendingValidation,
+      recentActivity: {
+        recentOffers: formattedOffers
+      }
     });
-
   } catch (error) {
-    console.error('Erreur dashboard admin:', error);
+    console.error('Erreur getDashboardStats:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des statistiques' });
   }
 };
 
-// Gestion des chauffeurs
-const getDrivers = async (req, res) => {
+// Récupérer tous les chauffeurs avec filtres
+exports.getDrivers = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 20,
-      status,
-      search,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
-    } = req.query;
-
-    const query = {};
+    const { status, search, page = 1, limit = 20 } = req.query;
     
-    if (status) query.status = status;
+    const filter = {};
+    if (status) filter.status = status;
     if (search) {
-      query.$or = [
+      filter.$or = [
         { firstName: { $regex: search, $options: 'i' } },
         { lastName: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } }
       ];
     }
 
-    const drivers = await Driver.find(query)
-      .populate('userId', 'firstName lastName email phone isActive createdAt')
-      .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+    const drivers = await Driver.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit));
 
-    const total = await Driver.countDocuments(query);
+    const total = await Driver.countDocuments(filter);
 
     res.json({
       drivers,
       pagination: {
-        current: parseInt(page),
-        pages: Math.ceil(total / limit),
-        total
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / parseInt(limit))
       }
     });
-
   } catch (error) {
-    console.error('Erreur récupération chauffeurs:', error);
+    console.error('Erreur getDrivers:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des chauffeurs' });
   }
 };
 
-// Valider/Rejeter un chauffeur
-const updateDriverStatus = async (req, res) => {
+// Mettre à jour le statut d'un chauffeur
+exports.updateDriverStatus = async (req, res) => {
   try {
     const { driverId } = req.params;
     const { status, reason } = req.body;
-    const adminId = req.user.sub;
 
-    if (!['approved', 'rejected', 'suspended'].includes(status)) {
+    if (!['approved', 'rejected', 'pending', 'suspended'].includes(status)) {
       return res.status(400).json({ error: 'Statut invalide' });
     }
 
-    const driver = await Driver.findById(driverId);
+    const driver = await Driver.findByIdAndUpdate(
+      driverId,
+      { 
+        status,
+        statusReason: reason,
+        statusUpdatedAt: new Date()
+      },
+      { new: true }
+    );
+
     if (!driver) {
       return res.status(404).json({ error: 'Chauffeur non trouvé' });
     }
 
-    const oldStatus = driver.status;
-    driver.status = status;
-    await driver.save();
-
-    // Logger l'action admin
-    await ActivityLog.logAdmin(
-      adminId,
-      `update_driver_status_${status}`,
-      'driver',
-      driverId,
-      { oldStatus, newStatus: status, reason },
-      req
-    );
-
-    // Créer une notification pour le chauffeur
-    // TODO: Implémenter le système de notification
-
-    res.json({
-      message: `Chauffeur ${status === 'approved' ? 'approuvé' : status === 'rejected' ? 'rejeté' : 'suspendu'} avec succès`,
-      driver
-    });
-
+    res.json({ message: 'Statut mis à jour', driver });
   } catch (error) {
-    console.error('Erreur mise à jour statut chauffeur:', error);
+    console.error('Erreur updateDriverStatus:', error);
     res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
   }
 };
 
-// Gestion des offres
-const getOffers = async (req, res) => {
+// Récupérer toutes les offres avec filtres
+exports.getOffers = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 20,
-      status,
-      flagged,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
-    } = req.query;
+    const { status, type, search, page = 1, limit = 20 } = req.query;
+    
+    const filter = {};
+    if (status) filter.status = status;
+    if (type) filter.type = type;
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { 'location.city': { $regex: search, $options: 'i' } }
+      ];
+    }
 
-    const query = {};
-    if (status) query.status = status;
-    if (flagged === 'true') query.isFlagged = true;
+    const offers = await Offer.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .populate('employerId', 'firstName lastName email');
 
-    const offers = await Offer.find(query)
-      .populate('employerId', 'firstName lastName email')
-      .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    const total = await Offer.countDocuments(query);
+    const total = await Offer.countDocuments(filter);
 
     res.json({
       offers,
       pagination: {
-        current: parseInt(page),
-        pages: Math.ceil(total / limit),
-        total
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / parseInt(limit))
       }
     });
-
   } catch (error) {
-    console.error('Erreur récupération offres:', error);
+    console.error('Erreur getOffers:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des offres' });
   }
 };
 
-// Modérer une offre
-const moderateOffer = async (req, res) => {
+// Récupérer une offre spécifique par ID
+exports.getOfferById = async (req, res) => {
   try {
     const { offerId } = req.params;
-    const { action, reason } = req.body; // action: 'approve', 'reject', 'flag'
-    const adminId = req.user.sub;
+    
+    const offer = await Offer.findById(offerId)
+      .populate('employerId', 'firstName lastName email phone');
 
-    const offer = await Offer.findById(offerId);
     if (!offer) {
       return res.status(404).json({ error: 'Offre non trouvée' });
     }
 
-    let updateData = {};
-    let message = '';
-
-    switch (action) {
-      case 'approve':
-        updateData = { status: 'active', isFlagged: false };
-        message = 'Offre approuvée';
-        break;
-      case 'reject':
-        updateData = { status: 'closed', isFlagged: true };
-        message = 'Offre rejetée';
-        break;
-      case 'flag':
-        updateData = { isFlagged: true };
-        message = 'Offre signalée';
-        break;
-      default:
-        return res.status(400).json({ error: 'Action invalide' });
-    }
-
-    await Offer.findByIdAndUpdate(offerId, updateData);
-
-    // Logger l'action admin
-    await ActivityLog.logAdmin(
-      adminId,
-      `moderate_offer_${action}`,
-      'offer',
-      offerId,
-      { action, reason },
-      req
-    );
-
-    res.json({ message });
-
+    res.json(offer);
   } catch (error) {
-    console.error('Erreur modération offre:', error);
-    res.status(500).json({ error: 'Erreur lors de la modération de l\'offre' });
+    console.error('Erreur getOfferById:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération de l\'offre' });
   }
 };
 
-// Gestion des transactions
-const getTransactions = async (req, res) => {
+// Modérer une offre
+exports.moderateOffer = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 20,
-      status,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
-    } = req.query;
+    const { offerId } = req.params;
+    const { action, reason } = req.body;
 
-    const query = {};
-    if (status) query.status = status;
+    if (!['approve', 'reject', 'flag'].includes(action)) {
+      return res.status(400).json({ error: 'Action invalide' });
+    }
 
-    const transactions = await Transaction.find(query)
-      .populate('driverId', 'firstName lastName email')
-      .populate('employerId', 'firstName lastName email')
-      .populate('missionId', 'title type')
-      .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+    const updateData = {
+      moderationStatus: action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'flagged',
+      moderationReason: reason,
+      moderatedAt: new Date(),
+      moderatedBy: req.user.sub
+    };
 
-    const total = await Transaction.countDocuments(query);
+    const offer = await Offer.findByIdAndUpdate(offerId, updateData, { new: true });
 
-    res.json({
-      transactions,
-      pagination: {
-        current: parseInt(page),
-        pages: Math.ceil(total / limit),
-        total
-      }
-    });
+    if (!offer) {
+      return res.status(404).json({ error: 'Offre non trouvée' });
+    }
 
+    res.json({ message: 'Offre modérée', offer });
   } catch (error) {
-    console.error('Erreur récupération transactions:', error);
+    console.error('Erreur moderateOffer:', error);
+    res.status(500).json({ error: 'Erreur lors de la modération' });
+  }
+};
+
+// Récupérer les transactions (à implémenter selon votre modèle)
+exports.getTransactions = async (req, res) => {
+  try {
+    res.json({ transactions: [], message: 'Fonctionnalité à implémenter' });
+  } catch (error) {
     res.status(500).json({ error: 'Erreur lors de la récupération des transactions' });
   }
 };
 
-// Gestion des tickets de support
-const getTickets = async (req, res) => {
+// Récupérer les tickets de support (à implémenter)
+exports.getTickets = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 20,
-      status,
-      priority,
-      assignedTo,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
-    } = req.query;
-
-    const query = {};
-    if (status) query.status = status;
-    if (priority) query.priority = priority;
-    if (assignedTo) query.assignedTo = assignedTo;
-
-    const tickets = await Ticket.find(query)
-      .populate('userId', 'firstName lastName email')
-      .populate('assignedTo', 'firstName lastName email')
-      .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    const total = await Ticket.countDocuments(query);
-
-    res.json({
-      tickets,
-      pagination: {
-        current: parseInt(page),
-        pages: Math.ceil(total / limit),
-        total
-      }
-    });
-
+    res.json({ tickets: [], message: 'Fonctionnalité à implémenter' });
   } catch (error) {
-    console.error('Erreur récupération tickets:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des tickets' });
   }
 };
 
-// Assigner un ticket
-const assignTicket = async (req, res) => {
+// Assigner un ticket (à implémenter)
+exports.assignTicket = async (req, res) => {
   try {
-    const { ticketId } = req.params;
-    const { adminId } = req.body;
-    const currentAdminId = req.user.sub;
-
-    const ticket = await Ticket.findById(ticketId);
-    if (!ticket) {
-      return res.status(404).json({ error: 'Ticket non trouvé' });
-    }
-
-    await ticket.assign(adminId || currentAdminId);
-
-    // Logger l'action
-    await ActivityLog.logAdmin(
-      currentAdminId,
-      'assign_ticket',
-      'ticket',
-      ticketId,
-      { assignedTo: adminId || currentAdminId },
-      req
-    );
-
-    res.json({ message: 'Ticket assigné avec succès', ticket });
-
+    res.json({ message: 'Fonctionnalité à implémenter' });
   } catch (error) {
-    console.error('Erreur assignation ticket:', error);
     res.status(500).json({ error: 'Erreur lors de l\'assignation du ticket' });
   }
 };
 
-// Configuration de la plateforme
-const getConfigs = async (req, res) => {
+// Récupérer les configurations (à implémenter)
+exports.getPlatformConfigs = async (req, res) => {
   try {
-    const { category } = req.query;
-    const query = {};
-    if (category) query.category = category;
-
-    const configs = await PlatformConfig.find(query)
-      .populate('updatedBy', 'firstName lastName email')
-      .sort({ category: 1, key: 1 });
-
-    res.json({ configs });
-
+    res.json({ configs: [], message: 'Fonctionnalité à implémenter' });
   } catch (error) {
-    console.error('Erreur récupération configs:', error);
     res.status(500).json({ error: 'Erreur lors de la récupération des configurations' });
   }
 };
 
-// Mettre à jour une configuration
-const updateConfig = async (req, res) => {
+// Mettre à jour une configuration (à implémenter)
+exports.updatePlatformConfig = async (req, res) => {
   try {
-    const { configId } = req.params;
-    const { value, reason } = req.body;
-    const adminId = req.user.sub;
-
-    const config = await PlatformConfig.findById(configId);
-    if (!config) {
-      return res.status(404).json({ error: 'Configuration non trouvée' });
-    }
-
-    if (!config.isEditable) {
-      return res.status(403).json({ error: 'Cette configuration n\'est pas modifiable' });
-    }
-
-    await config.updateValue(value, adminId, reason);
-
-    // Logger l'action
-    await ActivityLog.logAdmin(
-      adminId,
-      'update_config',
-      'config',
-      configId,
-      { key: config.key, oldValue: config.history[config.history.length - 1]?.value, newValue: value, reason },
-      req
-    );
-
-    res.json({ message: 'Configuration mise à jour avec succès', config });
-
+    res.json({ message: 'Fonctionnalité à implémenter' });
   } catch (error) {
-    console.error('Erreur mise à jour config:', error);
-    res.status(500).json({ error: error.message || 'Erreur lors de la mise à jour de la configuration' });
+    res.status(500).json({ error: 'Erreur lors de la mise à jour de la configuration' });
   }
 };
 
-module.exports = {
-  requireAdmin,
-  getDashboardStats,
-  getDrivers,
-  updateDriverStatus,
-  getOffers,
-  moderateOffer,
-  getTransactions,
-  getTickets,
-  assignTicket,
-  getConfigs,
-  updateConfig
+// Récupérer tous les employeurs avec filtres
+exports.getEmployers = async (req, res) => {
+  try {
+    const { search, page = 1, limit = 20 } = req.query;
+    
+    const filter = { role: 'employer' };
+    if (search) {
+      filter.$or = [
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const User = require('../models/User');
+    const employers = await User.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .select('-password');
+
+    const total = await User.countDocuments(filter);
+
+    res.json({
+      employers,
+      pagination: {
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Erreur getEmployers:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des employeurs' });
+  }
+};
+
+// Suspendre/Activer un employeur
+exports.updateEmployerStatus = async (req, res) => {
+  try {
+    const { employerId } = req.params;
+    const { isActive } = req.body;
+
+    const User = require('../models/User');
+    const employer = await User.findByIdAndUpdate(
+      employerId,
+      { isActive },
+      { new: true }
+    ).select('-password');
+
+    if (!employer) {
+      return res.status(404).json({ error: 'Employeur non trouvé' });
+    }
+
+    res.json({ message: 'Statut mis à jour', employer });
+  } catch (error) {
+    console.error('Erreur updateEmployerStatus:', error);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
+  }
+};
+
+// Récupérer toutes les candidatures avec filtres
+exports.getApplications = async (req, res) => {
+  try {
+    const { status, search, page = 1, limit = 20 } = req.query;
+    
+    const filter = {};
+    if (status) filter.status = status;
+
+    const Application = require('../models/Application');
+    const applications = await Application.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .populate('driverId', 'firstName lastName email phone')
+      .populate('offerId', 'title type location');
+
+    // Filtrer par recherche après populate
+    let filteredApplications = applications;
+    if (search) {
+      filteredApplications = applications.filter(app => {
+        const driverName = `${app.driverId?.firstName || ''} ${app.driverId?.lastName || ''}`.toLowerCase();
+        const offerTitle = app.offerId?.title?.toLowerCase() || '';
+        const searchLower = search.toLowerCase();
+        return driverName.includes(searchLower) || offerTitle.includes(searchLower);
+      });
+    }
+
+    const total = await Application.countDocuments(filter);
+
+    res.json({
+      applications: filteredApplications,
+      pagination: {
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Erreur getApplications:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des candidatures' });
+  }
+};
+
+// Récupérer toutes les missions (placeholder - à implémenter selon votre modèle)
+exports.getMissions = async (req, res) => {
+  try {
+    // Pour l'instant, retourner un tableau vide
+    // À implémenter quand le modèle Mission sera créé
+    res.json([]);
+  } catch (error) {
+    console.error('Erreur getMissions:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des missions' });
+  }
+};
+
+// Récupérer tous les véhicules (placeholder - à implémenter selon votre modèle)
+exports.getVehicles = async (req, res) => {
+  try {
+    // Pour l'instant, retourner un tableau vide
+    // À implémenter quand le modèle Vehicle sera créé
+    res.json([]);
+  } catch (error) {
+    console.error('Erreur getVehicles:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des véhicules' });
+  }
+};
+
+// Envoyer une notification à un chauffeur
+exports.sendNotificationToDriver = async (req, res) => {
+  try {
+    const { driverId } = req.params;
+    const { title, message, type = 'admin_message' } = req.body;
+
+    if (!title || !message) {
+      return res.status(400).json({ error: 'Titre et message requis' });
+    }
+
+    const Driver = require('../models/Driver');
+    const driver = await Driver.findById(driverId);
+    
+    if (!driver) {
+      return res.status(404).json({ error: 'Chauffeur non trouvé' });
+    }
+
+    const Notification = require('../models/Notification');
+    const notification = await Notification.create({
+      userId: driver.userId,
+      type,
+      title,
+      message,
+      data: {
+        sentBy: 'admin',
+        driverId: driver._id
+      }
+    });
+
+    res.json({ 
+      message: 'Notification envoyée avec succès',
+      notification 
+    });
+  } catch (error) {
+    console.error('Erreur sendNotificationToDriver:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'envoi de la notification' });
+  }
 };

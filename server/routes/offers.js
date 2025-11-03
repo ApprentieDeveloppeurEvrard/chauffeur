@@ -1,5 +1,6 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
+const { cacheMiddleware } = require('../middleware/cache');
 const {
   getAllOffers,
   getMyOffers,
@@ -13,8 +14,8 @@ const {
 
 const router = express.Router();
 
-// Routes publiques
-router.get('/', getAllOffers); // Récupérer toutes les offres actives
+// Routes publiques avec cache
+router.get('/', cacheMiddleware(180), getAllOffers); // Cache 3 min
 
 // Routes authentifiées
 router.use(requireAuth);
@@ -22,7 +23,7 @@ router.use(requireAuth);
 // Gestion des offres
 router.get('/my', getMyOffers); // Mes offres
 router.post('/', createOffer); // Créer une offre
-router.get('/:offerId', getOfferById); // Récupérer une offre spécifique (protégé)
+router.get('/:offerId', cacheMiddleware(300), getOfferById); // Cache 5 min
 router.put('/:offerId', updateOffer); // Mettre à jour une offre
 router.delete('/:offerId', deleteOffer); // Supprimer une offre
 

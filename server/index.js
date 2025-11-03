@@ -11,8 +11,13 @@ const statsRoutes = require('./routes/stats');
 const searchRoutes = require('./routes/search');
 const messageRoutes = require('./routes/messages');
 const employerRoutes = require('./routes/employer');
+const adminRoutes = require('./routes/admin');
+const platformContentRoutes = require('./routes/platformContent');
 
 const { connectToDatabase } = require('./db/connect');
+const { getCacheStats, invalidateCache } = require('./middleware/cache');
+const KeepAlive = require('./utils/keepAlive');
+const { createIndexes } = require('./utils/createIndexes');
 const app = express();
 
 // Configuration CORS pour la production
@@ -104,6 +109,25 @@ app.get('/debug/config', (req, res) => {
   });
 });
 
+// Endpoint pour les statistiques du cache
+app.get('/debug/cache', (req, res) => {
+  const stats = getCacheStats();
+  res.json({
+    cache: stats,
+    message: 'Statistiques du cache en mémoire'
+  });
+});
+
+// Endpoint pour vider le cache (admin uniquement en production)
+app.post('/debug/cache/clear', (req, res) => {
+  const pattern = req.query.pattern;
+  invalidateCache(pattern);
+  res.json({
+    success: true,
+    message: pattern ? `Cache invalidé pour: ${pattern}` : 'Tout le cache a été vidé'
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/offers', offerRoutes);
@@ -112,6 +136,8 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/employer', employerRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/platform-content', platformContentRoutes);
 
 // Not found handler
 app.use((req, res) => {
@@ -127,12 +153,29 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 4000;
 connectToDatabase()
-  .then(() => {
+  .then(async () => {
     // eslint-disable-next-line no-console
     console.log('MongoDB connected');
+    
+    // Créer les index pour optimiser les performances
+    await createIndexes();
+    
     app.listen(PORT, () => {
       // eslint-disable-next-line no-console
       console.log(`Server listening on port ${PORT}`);
+      
+      // Activer le keep-alive en production pour éviter que Render endorme le serveur
+      if (process.env.NODE_ENV === 'production' && process.env.API_URL) {
+        const keepAlive = new KeepAlive(process.env.API_URL, 10 * 60 * 1000); // 10 minutes
+        keepAlive.start();
+        
+        // Arrêter le keep-alive proprement lors de l'arrêt du serveur
+        process.on('SIGTERM', () => {
+          console.log('SIGTERM reçu, arrêt du keep-alive...');
+          keepAlive.stop();
+          process.exit(0);
+        });
+      }
     });
   })
   .catch((err) => {

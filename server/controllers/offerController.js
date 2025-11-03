@@ -107,17 +107,30 @@ const getMyOffers = async (req, res) => {
   try {
     const userId = req.user.sub;
     
-    const offers = await Offer.find({ employerId: userId })
-      .sort({ createdAt: -1 })
-      .lean();
-
-    // Ajouter le nombre de candidatures pour chaque offre
-    for (let offer of offers) {
-      const applicationCount = await Application.countDocuments({ 
-        offerId: offer._id 
-      });
-      offer.applicationCount = applicationCount;
-    }
+    // Utiliser aggregation pour compter les candidatures en une seule requête
+    const offers = await Offer.aggregate([
+      { $match: { employerId: userId } },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: 'applications',
+          localField: '_id',
+          foreignField: 'offerId',
+          as: 'applications'
+        }
+      },
+      {
+        $addFields: {
+          applicationCount: { $size: '$applications' }
+        }
+      },
+      {
+        $project: {
+          applications: 0, // Exclure le tableau des applications
+          __v: 0
+        }
+      }
+    ]);
 
     res.json(offers);
 
