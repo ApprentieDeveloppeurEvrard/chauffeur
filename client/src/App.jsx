@@ -29,6 +29,7 @@ import MyProducts from './pages/employer/MyProducts.jsx'
 import DriverMyProducts from './pages/driver/MyProducts.jsx'
 import MyApplications from './pages/driver/MyApplications.jsx'
 import MessagesPage from './pages/MessagesPage.jsx'
+import MarketingPage from './pages/MarketingPage.jsx'
 
 function App() {
   return (
@@ -143,6 +144,7 @@ function App() {
             />
             
             {/* Pages publiques */}
+            <Route path="/marketing" element={<MarketingPage />} />
             <Route path="/tarifs" element={<TarifsPage />} />
             <Route path="/devenir-partenaire" element={<DevenirPartenairePage />} />
             <Route path="/formations" element={<FormationsPage />} />
