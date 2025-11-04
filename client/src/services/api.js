@@ -265,4 +265,13 @@ export const employerService = {
   uploadDocuments: (data) => api.post('/employer/documents', data),
 }
 
+// Service d'authentification (alias pour compatibilité)
+export const authService = {
+  getProfile: () => api.get('/auth/me'),
+  login: (email, password) => authApi.login({ email, password }),
+  register: (userData) => authApi.register(userData),
+  logout: () => authApi.logout(),
+  updateRole: (role) => api.put('/auth/me/role', { role }),
+}
+
 export default api

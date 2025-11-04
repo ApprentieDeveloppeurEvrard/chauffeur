@@ -17,6 +17,8 @@ import EditOfferPage from './pages/EditOfferPage.jsx'
 import EditJobOfferPage from './pages/EditJobOfferPage.jsx'
 import UserProfilePage from './pages/UserProfilePage.jsx'
 import Auth from './component/Auth.jsx'
+import AuthCallback from './pages/AuthCallback.jsx'
+import RoleSelection from './pages/RoleSelection.jsx'
 import TarifsPage from './pages/TarifsPage.jsx'
 import DevenirPartenairePage from './pages/DevenirPartenairePage.jsx'
 import FormationsPage from './pages/FormationsPage.jsx'
@@ -131,6 +133,18 @@ function App() {
             <Route 
               path="/auth" 
               element={<Auth />} 
+            />
+            
+            {/* Callback Google OAuth */}
+            <Route 
+              path="/auth/callback" 
+              element={<AuthCallback />} 
+            />
+            
+            {/* Sélection de rôle après Google OAuth */}
+            <Route 
+              path="/role-selection" 
+              element={<RoleSelection />} 
             />
 
             {/* Page de profil utilisateur protégée */}

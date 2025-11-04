@@ -362,6 +362,10 @@ export default function Auth() {
                 {/* Bouton social */}
                 <button
                   type="button"
+                  onClick={() => {
+                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+                    window.location.href = `${apiUrl}/api/auth/google`;
+                  }}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
