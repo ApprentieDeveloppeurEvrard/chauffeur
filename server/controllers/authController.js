@@ -255,6 +255,9 @@ const getProfile = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
+        needsRoleSelection: user.needsRoleSelection,
+        authProvider: user.authProvider,
+        profilePhotoUrl: user.profilePhotoUrl,
         driverProfile: user.driverProfile,
         employerProfile: user.employerProfile
       }
@@ -308,9 +311,46 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Mettre à jour le rôle de l'utilisateur (pour Google OAuth)
+const updateRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    const userId = req.user.sub;
+
+    // Validation du rôle
+    if (!role || !['driver', 'employer'].includes(role)) {
+      return res.status(400).json({ 
+        error: 'Rôle invalide. Choisissez "driver" ou "employer"' 
+      });
+    }
+
+    // Mettre à jour le rôle et supprimer le flag needsRoleSelection
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { 
+        role,
+        needsRoleSelection: false
+      },
+      { new: true }
+    ).select('-passwordHash');
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    console.log(`✅ Rôle mis à jour pour ${user.email}: ${role}`);
+
+    res.json(user);
+  } catch (error) {
+    console.error('❌ Erreur lors de la mise à jour du rôle:', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
+
 module.exports = {
   register,
   login,
   getProfile,
-  updateProfile
+  updateProfile,
+  updateRole
 };

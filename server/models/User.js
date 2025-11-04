@@ -10,7 +10,24 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Format d\'email invalide']
     },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, required: false },
+    googleId: { 
+      type: String, 
+      unique: true, 
+      sparse: true 
+    },
+    authProvider: { 
+      type: String, 
+      enum: ['local', 'google'], 
+      default: 'local' 
+    },
+    profilePhotoUrl: { 
+      type: String 
+    },
+    needsRoleSelection: {
+      type: Boolean,
+      default: false
+    },
     role: { 
       type: String, 
       enum: ['client', 'driver', 'employer', 'admin'], 

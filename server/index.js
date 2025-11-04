@@ -1,7 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-require('dotenv').config();
+const passport = require('./config/passport');
 
 const authRoutes = require('./routes/auth');
 const driverRoutes = require('./routes/drivers');
@@ -74,6 +75,9 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' })); // Augmenter la limite pour les images en base64
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(morgan('dev'));
+
+// Initialiser Passport
+app.use(passport.initialize());
 
 app.get('/health', (req, res) => {
   res.json({ 
